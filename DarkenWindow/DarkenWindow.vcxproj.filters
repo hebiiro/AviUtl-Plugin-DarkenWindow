@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="..\Common\MyMSXML.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\MyTracer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="DarkenWindow.h" />
+    <ClInclude Include="MyDraw.h" />
+    <ClInclude Include="ClassicHook.h" />
+    <ClInclude Include="ThemeHook.h" />
+    <ClInclude Include="resource.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="DarkenWindow.cpp" />
+    <ClCompile Include="Menu.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="MyDraw.cpp" />
+    <ClCompile Include="Button.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ScrollBar.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Dialog.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ClassicHook.cpp" />
+    <ClCompile Include="ThemeHook.cpp" />
+    <ClCompile Include="AviUtl.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="AviUtlButton.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Edit.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Static.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ComboBox.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Exedit.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ListBox.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Spin.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolTip.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackBar.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DarkenWindow.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{177f322b-85e3-40d8-98e7-bca29a16eb22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Controls">
+      <UniqueIdentifier>{0e00a2b1-f998-4a0a-bf29-bce1401c76ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{e292d573-19b5-4295-9d39-a04b2289c653}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ICON_AL.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_AR.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_CA0.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_CA1.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_CH.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_CL.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_CL0.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_CL1.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_LL.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_MA.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_MN.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_OP.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_PL.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_RR.ico">
+      <Filter>Resource</Filter>
+    </Image>
+    <Image Include="ICON_SP.ico">
+      <Filter>Resource</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DarkenWindow.rc">
+      <Filter>Resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
