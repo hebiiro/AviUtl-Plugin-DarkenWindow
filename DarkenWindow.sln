@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DarkenWindow", "DarkenWindow\DarkenWindow.vcxproj", "{772BC0B9-7CA2-4EF5-9439-91D4F823156E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{77E9C1D4-FC85-44BA-981A-77402A637511}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{772BC0B9-7CA2-4EF5-9439-91D4F823156E}.Debug|x64.ActiveCfg = Debug|x64
+		{772BC0B9-7CA2-4EF5-9439-91D4F823156E}.Debug|x64.Build.0 = Debug|x64
+		{772BC0B9-7CA2-4EF5-9439-91D4F823156E}.Debug|x86.ActiveCfg = Debug|Win32
+		{772BC0B9-7CA2-4EF5-9439-91D4F823156E}.Debug|x86.Build.0 = Debug|Win32
+		{772BC0B9-7CA2-4EF5-9439-91D4F823156E}.Release|x64.ActiveCfg = Release|x64
+		{772BC0B9-7CA2-4EF5-9439-91D4F823156E}.Release|x64.Build.0 = Release|x64
+		{772BC0B9-7CA2-4EF5-9439-91D4F823156E}.Release|x86.ActiveCfg = Release|Win32
+		{772BC0B9-7CA2-4EF5-9439-91D4F823156E}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {04F73712-35B3-45DC-891D-A4ADC727C31E}
+	EndGlobalSection
+EndGlobal
