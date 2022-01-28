@@ -7,7 +7,29 @@
 LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("ExeditRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
+#if 0
+	switch (message)
+	{
+	case WM_COMMAND:
+		{
+			UINT code = HIWORD(wParam);
+			UINT id = LOWORD(wParam);
+			HWND sender = (HWND)lParam;
 
+			MY_TRACE(_T("WM_COMMAND, 0x%04X, 0x%04X, 0x%08X)\n"), code, id, sender);
+
+			break;
+		}
+	case WM_NOTIFY:
+		{
+			NMHDR* nm = (NMHDR*)lParam;
+
+			MY_TRACE(_T("WM_NOTIFY, 0x%08X, 0x%08X, %d\n"), nm->hwndFrom, nm->idFrom, nm->code);
+
+			break;
+		}
+	}
+#endif
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }
 

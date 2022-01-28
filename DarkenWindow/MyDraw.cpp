@@ -285,19 +285,34 @@ void drawShadowText(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, C
 	::SetTextColor(dc, oldTextColor);
 }
 
+void drawShadowText2(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF textForeColor, COLORREF textBackColor)
+{
+	RECT rc2 = *rc;
+	int oldTextColor = ::SetTextColor(dc, textBackColor);
+	::OffsetRect(&rc2, +1, +1);
+	::DrawTextW(dc, text, length, &rc2, format);
+	::OffsetRect(&rc2, -1, -1);
+	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
+	::SetTextColor(dc, textForeColor);
+	::DrawTextW(dc, text, length, &rc2, format);
+	::SetBkMode(dc, oldBkMode);
+	::SetTextColor(dc, oldTextColor);
+}
+
 void shadowTextOut(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx, COLORREF textForeColor, COLORREF textBackColor)
 {
 	RECT rc2 = {};
 	if (rc) rc2 = *rc;
 	true_ExtTextOutW(dc, x, y, options, &rc2, L"", 0, dx);
 	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
+	int oldTextColor = ::SetTextColor(dc, textBackColor);
 	x += 1, y += 1; ::OffsetRect(&rc2, +1, +1);
-	::SetTextColor(dc, textBackColor);
 	true_ExtTextOutW(dc, x, y, options & ~ETO_OPAQUE, &rc2, text, c, dx);
-	x -= 1, y -= 1; ::OffsetRect(&rc2, -1, -1);
 	::SetTextColor(dc, textForeColor);
+	x -= 1, y -= 1; ::OffsetRect(&rc2, -1, -1);
 	true_ExtTextOutW(dc, x, y, options & ~ETO_OPAQUE, &rc2, text, c, dx);
 	::SetBkMode(dc, oldBkMode);
+	::SetTextColor(dc, oldTextColor);
 }
 
 struct DrawIconMetrics
@@ -498,9 +513,19 @@ void fillRect_Dialog(HDC dc, LPCRECT rc)
 	fillRect(dc, rc, getFillColor_Dialog());
 }
 
+void fillRect_Dialog_Selected(HDC dc, LPCRECT rc)
+{
+	fillRect(dc, rc, getFillColor_Dialog_Selected());
+}
+
 void fillRect_Window(HDC dc, LPCRECT rc)
 {
 	fillRect(dc, rc, getFillColor_Window());
+}
+
+void fillRect_Window_Selected(HDC dc, LPCRECT rc)
+{
+	fillRect(dc, rc, getFillColor_Window_Selected());
 }
 
 void fillRect_Gutter(HDC dc, LPCRECT rc)

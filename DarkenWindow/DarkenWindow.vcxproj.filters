@@ -64,6 +64,18 @@
     <ClCompile Include="TrackBar.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
+    <ClCompile Include="Header.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ListView.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeView.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolBar.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DarkenWindow.def" />

@@ -194,7 +194,9 @@
     <ClCompile Include="Edit.cpp" />
     <ClCompile Include="Exedit.cpp" />
     <ClCompile Include="DarkenWindow.cpp" />
+    <ClCompile Include="Header.cpp" />
     <ClCompile Include="ListBox.cpp" />
+    <ClCompile Include="ListView.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="MyDraw.cpp" />
     <ClCompile Include="pch.cpp">
@@ -207,8 +209,10 @@
     <ClCompile Include="Spin.cpp" />
     <ClCompile Include="Static.cpp" />
     <ClCompile Include="ThemeHook.cpp" />
+    <ClCompile Include="ToolBar.cpp" />
     <ClCompile Include="ToolTip.cpp" />
     <ClCompile Include="TrackBar.cpp" />
+    <ClCompile Include="TreeView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DarkenWindow.def" />

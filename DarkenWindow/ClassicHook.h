@@ -14,6 +14,7 @@ class Renderer
 {
 public:
 	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) = 0;
+	virtual LRESULT CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 	virtual int FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
 	virtual BOOL DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type);
 	virtual BOOL DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state);
@@ -195,6 +196,54 @@ class SpinRenderer : public Renderer
 {
 public:
 	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual int FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type);
+	virtual BOOL DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state);
+	virtual BOOL FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags);
+	virtual BOOL DrawFocusRect(State* currentState, HDC dc, LPCRECT rc);
+	virtual BOOL DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTATEPROC cb, LPARAM lData, WPARAM wData, int x, int y, int cx, int cy, UINT flags);
+	virtual BOOL ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
+	virtual BOOL PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop);
+};
+
+class ListViewRenderer : public Renderer
+{
+public:
+	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual int FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type);
+	virtual BOOL DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state);
+	virtual BOOL FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags);
+	virtual BOOL DrawFocusRect(State* currentState, HDC dc, LPCRECT rc);
+	virtual BOOL DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTATEPROC cb, LPARAM lData, WPARAM wData, int x, int y, int cx, int cy, UINT flags);
+	virtual BOOL ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
+	virtual BOOL PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop);
+};
+
+class TreeViewRenderer : public Renderer
+{
+public:
+	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual int FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type);
+	virtual BOOL DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state);
+	virtual BOOL FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags);
+	virtual BOOL DrawFocusRect(State* currentState, HDC dc, LPCRECT rc);
+	virtual BOOL DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTATEPROC cb, LPARAM lData, WPARAM wData, int x, int y, int cx, int cy, UINT flags);
+	virtual BOOL ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
+	virtual BOOL PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop);
+};
+
+class ToolBarRenderer : public Renderer
+{
+public:
+	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 	virtual int FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
 	virtual BOOL DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type);
 	virtual BOOL DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state);

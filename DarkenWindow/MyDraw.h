@@ -18,12 +18,17 @@ void drawTripleEdge(HDC dc, LPCRECT rc, COLORREF innerTopLeftColor, COLORREF inn
 void drawFocusRect(HDC dc, LPCRECT rc, COLORREF lineColor, UINT lineStyle);
 void drawText(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF textColor);
 void drawShadowText(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF textForeColor, COLORREF textBackColor);
+void drawShadowText2(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF textForeColor, COLORREF textBackColor);
 void drawIcon(HDC dc, LPCRECT rc, WCHAR icon, COLORREF iconColor, int iconWidth);
 void drawShadowIcon(HDC dc, LPCRECT rc, WCHAR icon, UINT format, COLORREF iconForeColor, COLORREF iconBackColor, int iconWidth);
 
 COLORREF getFillColor_Dialog();
 COLORREF getFillColor_Dialog_Selected();
 COLORREF getForeTextColor_Dialog();
+COLORREF getForeTextColor_Dialog_Disabled();
+COLORREF getForeTextColor_Dialog_Selected();
+COLORREF getForeTextColor_Dialog_Hot();
+COLORREF getForeTextColor_Dialog_Focus();
 COLORREF getBackTextColor_Dialog();
 
 COLORREF getFillColor_Window();
@@ -32,7 +37,9 @@ COLORREF getForeTextColor_Window();
 COLORREF getBackTextColor_Window();
 
 void fillRect_Dialog(HDC dc, LPCRECT rc);
+void fillRect_Dialog_Selected(HDC dc, LPCRECT rc);
 void fillRect_Window(HDC dc, LPCRECT rc);
+void fillRect_Window_Selected(HDC dc, LPCRECT rc);
 void fillRect_Gutter(HDC dc, LPCRECT rc);
 void fillRect_Separator(HDC dc, LPCRECT rc);
 void fillRect_TrackBar_Thumb(HDC dc, LPCRECT rc);

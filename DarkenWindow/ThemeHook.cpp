@@ -30,29 +30,6 @@ void registerRendererNC(HWND hwnd, LPCWSTR vsclass, ThemeRenderer* renderer)
 	registerRenderer(theme, renderer);
 }
 
-WNDPROC getWndProc(HINSTANCE instance, LPCSTR className)
-{
-	WNDCLASSEXA wc = { sizeof(wc) };
-	::GetClassInfoExA(instance, className, &wc);
-	return wc.lpfnWndProc;
-}
-
-WNDPROC getWndProc(HINSTANCE instance, LPCWSTR className)
-{
-	WNDCLASSEXW wc = { sizeof(wc) };
-	::GetClassInfoExW(instance, className, &wc);
-	return wc.lpfnWndProc;
-}
-
-#define ATTACH_WND_HOOK_PROC(instance, className, procName) \
-do \
-{ \
-	true_##procName = getWndProc(instance, className); \
-	MY_TRACE_HEX(true_##procName); \
-	ATTACH_HOOK_PROC(procName); \
-} \
-while (0)
-
 //---------------------------------------------------------------------
 
 void initThemeHook(HWND hwnd)
@@ -69,6 +46,10 @@ void initThemeHook(HWND hwnd)
 	static ToolTipThemeRenderer g_tooltip;
 	static TrackBarThemeRenderer g_trackbar;
 	static SpinThemeRenderer g_spin;
+	static HeaderThemeRenderer g_header;
+	static ListViewThemeRenderer g_listview;
+	static TreeViewThemeRenderer g_treeview;
+	static ToolBarThemeRenderer g_toolbar;
 
 	registerRendererNC(hwnd, VSCLASS_MENU, &g_menu);
 	registerRenderer(hwnd, VSCLASS_SCROLLBAR, &g_scrollbar);
@@ -80,6 +61,26 @@ void initThemeHook(HWND hwnd)
 	registerRenderer(hwnd, VSCLASS_TOOLTIP, &g_tooltip);
 	registerRenderer(hwnd, VSCLASS_TRACKBAR, &g_trackbar);
 	registerRenderer(hwnd, VSCLASS_SPIN, &g_spin);
+	registerRenderer(hwnd, VSCLASS_HEADER, &g_header);
+	registerRenderer(hwnd, VSCLASS_LISTVIEW, &g_listview);
+	registerRenderer(hwnd, VSCLASS_TREEVIEW, &g_treeview);
+	registerRenderer(hwnd, VSCLASS_TOOLBAR, &g_toolbar);
+
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_SCROLLBAR, &g_scrollbar);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_BUTTON, &g_button);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_LISTBOX, &g_listbox);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_COMBOBOX, &g_combobox);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_HEADER, &g_header);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_LISTVIEW, &g_listview);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_TREEVIEW, &g_treeview);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_TOOLBAR, &g_toolbar);
+
+//	registerRenderer(hwnd, L"CFD::" VSCLASS_EDIT, &g_edit);
+//	registerRenderer(hwnd, L"Combobox::" VSCLASS_LISTBOX, &g_listbox);
+	registerRenderer(hwnd, L"CFD::" VSCLASS_COMBOBOX, &g_combobox);
+//	registerRenderer(hwnd, L"Combobox::" VSCLASS_COMBOBOX, &g_combobox);
+	registerRenderer(hwnd, L"Placesbar::" VSCLASS_TOOLBAR, &g_toolbar);
+	registerRenderer(hwnd, L"AddressComposited::" VSCLASS_COMBOBOX, &g_combobox);
 }
 
 //---------------------------------------------------------------------
@@ -88,8 +89,8 @@ IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, DrawThemeParentBackground, (HWND hwnd, HDC 
 {
 #if 1
 	DWORD from = *((DWORD*)&hwnd - 1);
-	MY_TRACE(_T("0x%08X => DrawThemeParentBackground(0x%08X, 0x%08X, 0x%08X, (%d, %d, %d, %d))\n"),
-		from, hwnd, dc, rc->left, rc->top, rc->right, rc->bottom);
+//	MY_TRACE(_T("0x%08X => DrawThemeParentBackground(0x%08X, 0x%08X, 0x%08X)\n"), hwnd, dc, rc);
+//	if (rc) MY_TRACE_RECT(*rc);
 #endif
 	return true_DrawThemeParentBackground(hwnd, dc, rc);
 }
@@ -103,10 +104,22 @@ IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, DrawThemeBackground, (HTHEME theme, HDC dc,
 	DWORD from = *((DWORD*)&theme - 1);
 	MY_TRACE(_T("0x%08X => DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 		from, theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
-	if (rcClip)
-		MY_TRACE(_T("%d, %d, %d, %d\n"), rcClip->left, rcClip->top, rcClip->right, rcClip->bottom);
+	if (rcClip) MY_TRACE_RECT(*rcClip);
 #endif
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
+}
+
+IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, DrawThemeBackgroundEx, (HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options))
+{
+	auto it = g_themeRenderers.find(theme);
+	if (it != g_themeRenderers.end())
+		return it->second->DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
+#if 1
+	DWORD from = *((DWORD*)&theme - 1);
+	MY_TRACE(_T("0x%08X => DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		from, theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+#endif
+	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
 }
 
 IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, DrawThemeText, (HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc))
@@ -119,6 +132,18 @@ IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, DrawThemeText, (HTHEME theme, HDC dc, int p
 	MY_TRACE(_T("0x%08X => DrawThemeText(0x%08X, %d, %d)\n"), from, theme, partId, stateId);
 #endif
 	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
+}
+
+IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, DrawThemeTextEx, (HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options))
+{
+	auto it = g_themeRenderers.find(theme);
+	if (it != g_themeRenderers.end())
+		return it->second->DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
+#if 1
+	DWORD from = *((DWORD*)&theme - 1);
+	MY_TRACE(_T("0x%08X => DrawThemeTextEx(0x%08X, %d, %d)\n"), from, theme, partId, stateId);
+#endif
+	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
 
 IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, DrawThemeIcon, (HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int imageIndex))
@@ -162,12 +187,28 @@ HRESULT ThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
 }
 
+HRESULT ThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
+{
+//	MY_TRACE(_T("ThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+
+	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
+}
+
 HRESULT ThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
 {
 //	MY_TRACE(_T("ThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
 	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
+}
+
+HRESULT ThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
+{
+	MY_TRACE(_T("ThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+
+	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
 
 HRESULT ThemeRenderer::DrawThemeIcon(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int imageIndex)

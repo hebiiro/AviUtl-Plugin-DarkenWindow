@@ -8,6 +8,11 @@ DWORD g_tls = 0;
 
 //---------------------------------------------------------------------
 
+LRESULT Renderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+}
+
 int Renderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
 	return true_FillRect(dc, rc, brush);
@@ -191,6 +196,9 @@ ListBoxRenderer g_listboxRenderer;
 ToolTipRenderer g_tooltipRenderer;
 TrackBarRenderer g_trackbarRenderer;
 SpinRenderer g_spinRenderer;
+ListViewRenderer g_listviewRenderer;
+TreeViewRenderer g_treeviewRenderer;
+ToolBarRenderer g_toolbarRenderer;
 AviUtlRenderer g_aviutlRenderer;
 AviUtlButtonRenderer g_aviutlButtonRenderer;
 ExeditRenderer g_exeditRenderer;
@@ -213,6 +221,9 @@ void initRenderer(HWND hwnd)
 	else if (::lstrcmpi(className, TOOLTIPS_CLASS) == 0) renderer = &g_tooltipRenderer;
 	else if (::lstrcmpi(className, TRACKBAR_CLASS) == 0) renderer = &g_trackbarRenderer;
 	else if (::lstrcmpi(className, UPDOWN_CLASS) == 0) renderer = &g_spinRenderer;
+	else if (::lstrcmpi(className, WC_LISTVIEW) == 0) renderer = &g_listviewRenderer;
+	else if (::lstrcmpi(className, WC_TREEVIEW) == 0) renderer = &g_treeviewRenderer;
+	else if (::lstrcmpi(className, TOOLBARCLASSNAME) == 0) renderer = &g_toolbarRenderer;
 	else if (::lstrcmpi(className, _T("AviUtl")) == 0) renderer = &g_aviutlRenderer;
 	else if (::lstrcmpi(className, _T("AviUtlButton")) == 0) renderer = &g_aviutlButtonRenderer;
 	else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0) renderer = &g_exeditRenderer;

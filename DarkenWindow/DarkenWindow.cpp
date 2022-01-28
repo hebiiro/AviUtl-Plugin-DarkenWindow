@@ -15,6 +15,7 @@ void ___outputLog(LPCTSTR text, LPCTSTR output)
 //---------------------------------------------------------------------
 
 HINSTANCE g_instance = 0;
+HWND g_exeditObjectDialog = 0;
 
 //---------------------------------------------------------------------
 #if 1
@@ -54,7 +55,9 @@ void initHook()
 
 //	ATTACH_HOOK_PROC(DrawThemeParentBackground);
 	ATTACH_HOOK_PROC(DrawThemeBackground);
+	ATTACH_HOOK_PROC(DrawThemeBackgroundEx);
 	ATTACH_HOOK_PROC(DrawThemeText);
+	ATTACH_HOOK_PROC(DrawThemeTextEx);
 //	ATTACH_HOOK_PROC(DrawThemeIcon);
 //	ATTACH_HOOK_PROC(DrawThemeEdge);
 
@@ -75,6 +78,11 @@ void initHook()
 	ATTACH_HOOK_PROC(LoadImageA);
 //	ATTACH_HOOK_PROC(LoadImageW);
 	ATTACH_HOOK_PROC(DialogBoxParamA);
+
+	ATTACH_HOOK_PROC(OpenThemeData);
+	ATTACH_HOOK_PROC(OpenThemeDataForDpi);
+	ATTACH_HOOK_PROC(OpenThemeDataEx);
+	ATTACH_HOOK_PROC(SetWindowTheme);
 
 	if (DetourTransactionCommit() == NO_ERROR)
 	{
@@ -139,6 +147,9 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 	DWORD from = *((DWORD*)&wndProc - 1);
 	MY_TRACE(_T("0x%08X => CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), from, hwnd, message, wParam, lParam);
 #endif
+//	if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
+//		return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+
 	switch (message)
 	{
 	case WM_NCCREATE:
@@ -168,7 +179,32 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 					initThemeHook(hwnd);
 				}
 			}
+#if 1
+			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
+			{
+				MY_TRACE(_T("拡張編集をフックします\n"));
 
+				g_exeditObjectDialog = hwnd;
+				HMODULE exedit_auf = ::GetModuleHandle(_T("exedit.auf"));
+				true_exedit_00030500 = (Type_exedit_00030500)((DWORD)exedit_auf + 0x00030500);
+				true_exedit_000305E0 = (Type_exedit_000305E0)((DWORD)exedit_auf + 0x000305E0);
+
+				DetourTransactionBegin();
+				DetourUpdateThread(::GetCurrentThread());
+
+				ATTACH_HOOK_PROC(exedit_00030500);
+				ATTACH_HOOK_PROC(exedit_000305E0);
+
+				if (DetourTransactionCommit() == NO_ERROR)
+				{
+					MY_TRACE(_T("API フックに成功しました\n"));
+				}
+				else
+				{
+					MY_TRACE(_T("API フックに失敗しました\n"));
+				}
+			}
+#endif
 			break;
 		}
 	case WM_CTLCOLORDLG:
@@ -226,6 +262,31 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				return (LRESULT)g_brush;
 			}
 		}
+	case WM_NOTIFY:
+		{
+			if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
+				break;
+
+			NMHDR* nm = (NMHDR*)lParam;
+
+			switch (nm->code)
+			{
+			case NM_CUSTOMDRAW:
+				{
+					TCHAR className[MAX_PATH] = {};
+					::GetClassName(hwnd, className, MAX_PATH);
+//					MY_TRACE_TSTR(className);
+
+					Renderer* renderer = getRenderer(nm->hwndFrom);
+					if (renderer)
+						return renderer->CustomDraw(wndProc, hwnd, message, wParam, lParam);
+
+					break;
+				}
+			}
+
+			break;
+		}
 	}
 
 	LRESULT result = 0;
@@ -271,10 +332,10 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name
 	}
 	else
 	{
-		MY_TRACE(_T("LoadImageA(0x%08X, %hs)\n"), instance, name);
+//		MY_TRACE(_T("LoadImageA(0x%08X, %hs)\n"), instance, name);
 		if (instance == ::GetModuleHandle(_T("exedit.auf")) && ::StrStrIA(name, "ICON_"))
 		{
-			MY_TRACE(_T("アイコンを置き換えます\n"));
+//			MY_TRACE(_T("アイコンを置き換えます\n"));
 			instance = g_instance;
 		}
 	}
@@ -319,6 +380,82 @@ IMPLEMENT_HOOK_PROC_NULL(INT_PTR, WINAPI, DialogBoxParamW, (HINSTANCE instance, 
 		MY_TRACE(_T("DialogBoxParamW(0x%08X, %ws)\n"), instance, templateName);
 
 	return true_DialogBoxParamW(instance, templateName, parent, dialogFunc, initParam);
+}
+
+//---------------------------------------------------------------------
+
+IMPLEMENT_HOOK_PROC(HTHEME, WINAPI, OpenThemeData, (HWND hwnd, LPCWSTR classList))
+{
+	HTHEME theme = true_OpenThemeData(hwnd, classList);
+	MY_TRACE(_T("OpenThemeData(0x%08X, %ws) => 0x%08X\n"), hwnd, classList, theme);
+	return theme;
+}
+
+IMPLEMENT_HOOK_PROC(HTHEME, WINAPI, OpenThemeDataForDpi, (HWND hwnd, LPCWSTR classList, UINT dpi))
+{
+	HTHEME theme = true_OpenThemeDataForDpi(hwnd, classList, dpi);
+	MY_TRACE(_T("OpenThemeDataForDpi(0x%08X, %ws, %d) => 0x%08X\n"), hwnd, classList, dpi, theme);
+	return theme;
+}
+
+IMPLEMENT_HOOK_PROC(HTHEME, WINAPI, OpenThemeDataEx, (HWND hwnd, LPCWSTR classList, DWORD flags))
+{
+	HTHEME theme = true_OpenThemeDataEx(hwnd, classList, flags);
+	MY_TRACE(_T("OpenThemeDataEx(0x%08X, %ws, 0x%08X) => 0x%08X\n"), hwnd, classList, flags, theme);
+	return theme;
+}
+
+IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppName, LPCWSTR subIdList))
+{
+	MY_TRACE(_T("SetWindowTheme(0x%08X, %ws, %ws)\n"), hwnd, subAppName, subIdList);
+	return true_SetWindowTheme(hwnd, subAppName, subIdList);
+}
+
+//---------------------------------------------------------------------
+
+IMPLEMENT_HOOK_PROC_NULL(void, CDECL, exedit_00030500, ())
+{
+	MY_TRACE(_T("exedit_00030500()\n"));
+
+	true_exedit_00030500();
+}
+
+HWND getComboBox()
+{
+	for (UINT i = 8200; i >= 8100; i--)
+	{
+		// ウィンドウハンドルを取得する。
+		HWND hwnd = ::GetDlgItem(g_exeditObjectDialog, i);
+
+		// コンボボックスかどうかクラス名で調べる。
+		TCHAR className[MAX_PATH] = {};
+		::GetClassName(hwnd, className, MAX_PATH);
+		if (::lstrcmpi(className, WC_COMBOBOX) != 0) continue;
+
+		if (::IsWindowVisible(hwnd)) // ウィンドウが可視なら
+		{
+			// ID - 2 のウィンドウを返す。
+			return ::GetDlgItem(g_exeditObjectDialog, i - 2);
+		}
+	}
+
+	return 0;
+}
+
+IMPLEMENT_HOOK_PROC_NULL(BOOL, CDECL, exedit_000305E0, (int objectIndex))
+{
+	MY_TRACE(_T("exedit_000305E0(0x%08X)\n"), objectIndex);
+
+//	::SendMessage(g_exeditObjectDialog, WM_SETREDRAW, FALSE, 0);
+	BOOL result = true_exedit_000305E0(objectIndex);
+//	::SendMessage(g_exeditObjectDialog, WM_SETREDRAW, TRUE, 0);
+//	::RedrawWindow(g_exeditObjectDialog, NULL, NULL, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
+
+	HWND combobox = getComboBox();
+	MY_TRACE_HEX(combobox);
+	::SendMessage(g_exeditObjectDialog, WM_CTLCOLOREDIT, 0, (LPARAM)combobox);
+
+	return result;
 }
 
 //---------------------------------------------------------------------

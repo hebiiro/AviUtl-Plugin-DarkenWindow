@@ -3,78 +3,30 @@
 #include "ClassicHook.h"
 #include "MyDraw.h"
 
-WNDPROC g_dialogWndProc = 0;
-LRESULT my_dialogWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	DWORD from = *((DWORD*)&hwnd - 1);
-//	MY_TRACE(_T("my_dialogWndProc(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
-
-	switch (message)
-	{
-	case WM_CTLCOLORDLG:
-	case WM_CTLCOLORMSGBOX:
-	case WM_CTLCOLORBTN:
-	case WM_CTLCOLORSCROLLBAR:
-	case WM_CTLCOLORSTATIC:
-	case WM_CTLCOLOREDIT:
-	case WM_CTLCOLORLISTBOX:
-		{
-			MY_TRACE(_T("0x%08X => WM_CTLCOLOR, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), from, hwnd, message, wParam, lParam);
-
-			HDC dc = (HDC)wParam;
-
-			HBRUSH brush = (HBRUSH)::CallWindowProc(g_dialogWndProc, hwnd, message, wParam, lParam);
-			COLORREF bkColor = ::GetBkColor(dc);
-			MY_TRACE(_T("brush = 0x%08X, bkColor = 0x%08X\n"), brush, bkColor);
-
-//			if (brush == (HBRUSH)(COLOR_BTNFACE + 1))
-			if (bkColor == ::GetSysColor(COLOR_BTNFACE))
-			{
-				static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Dialog());
-				::SetTextColor(dc, my::getForeTextColor_Dialog());
-				::SetBkColor(dc, my::getFillColor_Dialog());
-				return (LRESULT)g_brush;
-			}
-
-			return (LRESULT)brush;
-		}
-	}
-
-	return ::CallWindowProc(g_dialogWndProc, hwnd, message, wParam, lParam);
-}
-
 LRESULT DialogRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("DialogRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), wndProc, hwnd, message, wParam, lParam);
-#if 0
-	switch (message)
-	{
-	case WM_CREATE:
-		{
-/*
-			::CreateWindowEx(
-				0,
-				WC_EDIT,
-				_T("DarkenWindow"),
-				WS_VISIBLE | WS_CHILD,
-				0, 0, 0, 0,
-				hwnd,
-				(HMENU)10000, 0, 0);
-*/
-			//::RedrawWindow(hwnd, 0, 0, RDW_ERASE | RDW_FRAME | RDW_INTERNALPAINT | RDW_INVALIDATE);
-			//::SetWindowTheme(hwnd, L"explorer", 0);
-			g_dialogWndProc = (WNDPROC)::SetWindowLong(hwnd, GWL_WNDPROC, (LONG)my_dialogWndProc);
 
-			break;
-		}
-	}
-#endif
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }
 
 int DialogRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-	MY_TRACE(_T("DialogRenderer::FillRect()\n"));
+	MY_TRACE(_T("DialogRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
+
+	HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
+	if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
+	{
+		COLORREF color = my::getBrushColor(brush);
+		MY_TRACE_HEX(color);
+		if (color == ::GetSysColor(COLOR_WINDOW))
+			color = my::getFillColor_Dialog();
+		else
+			color = my::getFillColor_Dialog_Selected();
+		my::fillRect(dc, rc, color);
+		return TRUE;
+	}
+
 
 	return true_FillRect(dc, rc, brush);
 }
@@ -123,7 +75,25 @@ BOOL DialogRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWST
 
 BOOL DialogRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-	MY_TRACE(_T("DialogRenderer::ExtTextOutW()\n"));
+	MY_TRACE(_T("DialogRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
+
+	HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
+	if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
+//	if (0)
+	{
+		if (options == ETO_OPAQUE)
+		{
+			COLORREF bkColor = ::GetBkColor(dc);
+			MY_TRACE_HEX(bkColor);
+			if (bkColor == RGB(0xff, 0xff, 0xff))
+				::SetBkColor(dc, my::getFillColor_Dialog());
+			else
+				::SetBkColor(dc, my::getFillColor_Window_Selected());
+			my::shadowTextOut_Dialog(dc, x, y, options, rc, text, c, dx);
+			::SetBkColor(dc, bkColor);
+			return TRUE;
+		}
+	}
 
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }
