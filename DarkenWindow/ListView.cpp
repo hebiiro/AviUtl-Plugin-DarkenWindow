@@ -8,12 +8,24 @@
 
 HRESULT ListViewThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
 {
-//	MY_TRACE(_T("ListViewThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+	MY_TRACE(_T("ListViewThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+
+	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
+}
+
+HRESULT ListViewThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
+{
+	MY_TRACE(_T("ListViewThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
 
 	RECT rc2 = *rc;
+#if 0
+	::SetTextColor(dc, RGB(0xff, 0x00, 0x00));
 
-//	my::fillRect_Window(dc, &rc2);
+	my::fillRect_Window(dc, &rc2);
+	return S_OK;
+#endif
 #if 0
 	switch (partId)
 	{
@@ -36,7 +48,7 @@ HRESULT ListViewThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int par
 		}
 	}
 #endif
-	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
+	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
 }
 
 HRESULT ListViewThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
@@ -98,8 +110,9 @@ LRESULT ListViewRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UIN
 
 LRESULT ListViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+#if 0
 	NMLVCUSTOMDRAW* cd = (NMLVCUSTOMDRAW*)lParam;
-/*
+
 	switch (cd->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
@@ -108,18 +121,18 @@ LRESULT ListViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, W
 		}
 	case CDDS_ITEMPREPAINT:
 		{
-			cd->clrText = RGB(0xff, 0xff, 0xff);
+			cd->clrText = my::getForeTextColor_Window();
 			cd->clrTextBk = my::getFillColor_Window();
 			return CDRF_NEWFONT;
 		}
 	}
-*/
+#endif
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }
 
 int ListViewRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-//	MY_TRACE(_T("ListViewRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
+	MY_TRACE(_T("ListViewRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
 
 	COLORREF color = my::getBrushColor(brush);
 
@@ -181,15 +194,21 @@ BOOL ListViewRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAW
 
 BOOL ListViewRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("ListViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
+	MY_TRACE(_T("ListViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 
 	if (options & ETO_OPAQUE)
-		::SetBkColor(dc, my::getFillColor_Window());
-
+		::SetBkColor(dc, my::getFillColor_Gutter());
+#if 0
 	if (text)
 	{
 		my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
 		return TRUE;
+	}
+#endif
+	if (text)
+	{
+		::SetTextColor(dc, my::getForeTextColor_Window());
+		::SetBkColor(dc, my::getFillColor_Window());
 	}
 
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);

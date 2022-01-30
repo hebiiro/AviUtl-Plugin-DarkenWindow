@@ -79,6 +79,11 @@ void initThemeHook(HWND hwnd)
 //	registerRenderer(hwnd, L"Combobox::" VSCLASS_LISTBOX, &g_listbox);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_COMBOBOX, &g_combobox);
 //	registerRenderer(hwnd, L"Combobox::" VSCLASS_COMBOBOX, &g_combobox);
+	registerRenderer(hwnd, L"CFD::" VSCLASS_HEADER, &g_header);
+	registerRenderer(hwnd, L"CFD::" VSCLASS_LISTVIEW, &g_listview);
+	registerRenderer(hwnd, L"CFD::" VSCLASS_TREEVIEW, &g_treeview);
+	registerRendererNC(hwnd, L"ItemsView::" VSCLASS_HEADER, &g_header);
+	registerRendererNC(hwnd, L"ItemsView::" VSCLASS_LISTVIEW, &g_listview);
 	registerRenderer(hwnd, L"Placesbar::" VSCLASS_TOOLBAR, &g_toolbar);
 	registerRenderer(hwnd, L"AddressComposited::" VSCLASS_COMBOBOX, &g_combobox);
 }

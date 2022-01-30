@@ -34,7 +34,11 @@ COLORREF getBackTextColor_Dialog();
 COLORREF getFillColor_Window();
 COLORREF getFillColor_Window_Selected();
 COLORREF getForeTextColor_Window();
+COLORREF getForeTextColor_Window_Disabled();
 COLORREF getBackTextColor_Window();
+
+COLORREF getFillColor_Gutter();
+COLORREF getFillColor_Separator();
 
 void fillRect_Dialog(HDC dc, LPCRECT rc);
 void fillRect_Dialog_Selected(HDC dc, LPCRECT rc);
@@ -57,11 +61,6 @@ void drawDoubleEdge_Raised(HDC dc, LPCRECT rc);
 void drawDoubleEdge_Sunken(HDC dc, LPCRECT rc);
 void drawDoubleEdge_Etched(HDC dc, LPCRECT rc);
 void drawDoubleEdge_Bump(HDC dc, LPCRECT rc);
-void drawTripleEdge_Raised(HDC dc, LPCRECT rc);
-void drawTripleEdge_Sunken(HDC dc, LPCRECT rc);
-void drawTripleEdge_Etched(HDC dc, LPCRECT rc);
-void drawTripleEdge_Bump(HDC dc, LPCRECT rc);
-void drawFocusRect_Button(HDC dc, LPCRECT rc);
 
 void drawShadowText_Dialog(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format);
 void drawShadowText_Dialog_Disabled(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format);
@@ -71,7 +70,9 @@ void drawShadowText_Dialog_Focus(HDC dc, LPCWSTR text, int length, LPCRECT rc, U
 void drawShadowText_Window(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format);
 
 void shadowTextOut_Dialog(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
+void shadowTextOut_Dialog_Disabled(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
 void shadowTextOut_Window(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
+void shadowTextOut_Window_Disabled(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
 
 void drawShadowIcon_Dialog(HDC dc, LPCRECT rc, WCHAR icon, UINT format);
 void drawShadowIcon_Dialog_Disabled(HDC dc, LPCRECT rc, WCHAR icon, UINT format);

@@ -78,12 +78,12 @@ void initHook()
 	ATTACH_HOOK_PROC(LoadImageA);
 //	ATTACH_HOOK_PROC(LoadImageW);
 	ATTACH_HOOK_PROC(DialogBoxParamA);
-
+#if 0
 	ATTACH_HOOK_PROC(OpenThemeData);
 	ATTACH_HOOK_PROC(OpenThemeDataForDpi);
 	ATTACH_HOOK_PROC(OpenThemeDataEx);
 	ATTACH_HOOK_PROC(SetWindowTheme);
-
+#endif
 	if (DetourTransactionCommit() == NO_ERROR)
 	{
 		MY_TRACE(_T("API フックに成功しました\n"));
@@ -176,10 +176,12 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				if (!isInited)
 				{
 					isInited = TRUE;
+
+					// 最初の AviUtl ウィンドウ作成時にテーマフックをセットする。
 					initThemeHook(hwnd);
 				}
 			}
-#if 1
+#if 0
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
 			{
 				MY_TRACE(_T("拡張編集をフックします\n"));
@@ -210,7 +212,6 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 	case WM_CTLCOLORDLG:
 	case WM_CTLCOLORMSGBOX:
 	case WM_CTLCOLORBTN:
-	case WM_CTLCOLORSCROLLBAR:
 	case WM_CTLCOLORSTATIC:
 		{
 			//MY_TRACE(_T("WM_CTLCOLOR, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
@@ -245,22 +246,33 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 
 			HBRUSH brush = (HBRUSH)true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 //			COLORREF bkColor = ::GetBkColor(dc);
+			BOOL enable = ::IsWindowEnabled((HWND)lParam);
 
 			if (brush == (HBRUSH)(COLOR_BTNFACE + 1))
 //			if (bkColor == ::GetSysColor(COLOR_BTNFACE))
 			{
 				static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Dialog());
-				::SetTextColor(dc, my::getForeTextColor_Dialog());
+				::SetTextColor(dc, enable ? my::getForeTextColor_Dialog() : my::getForeTextColor_Dialog_Disabled());
 				::SetBkColor(dc, my::getFillColor_Dialog());
 				return (LRESULT)g_brush;
 			}
 			else
 			{
 				static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Window());
-				::SetTextColor(dc, my::getForeTextColor_Window());
+				::SetTextColor(dc, enable ? my::getForeTextColor_Window() : my::getForeTextColor_Window_Disabled());
 				::SetBkColor(dc, my::getFillColor_Window());
 				return (LRESULT)g_brush;
 			}
+		}
+	case WM_CTLCOLORSCROLLBAR:
+		{
+			//MY_TRACE(_T("WM_CTLCOLORSCROLLBAR, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
+
+			HDC dc = (HDC)wParam;
+			HWND control = (HWND)lParam;
+
+			static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Separator());
+			return (LRESULT)g_brush;
 		}
 	case WM_NOTIFY:
 		{
@@ -273,10 +285,11 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			{
 			case NM_CUSTOMDRAW:
 				{
+#if 0
 					TCHAR className[MAX_PATH] = {};
-					::GetClassName(hwnd, className, MAX_PATH);
-//					MY_TRACE_TSTR(className);
-
+					::GetClassName(nm->hwndFrom, className, MAX_PATH);
+					MY_TRACE_TSTR(className);
+#endif
 					Renderer* renderer = getRenderer(nm->hwndFrom);
 					if (renderer)
 						return renderer->CustomDraw(wndProc, hwnd, message, wParam, lParam);

@@ -102,8 +102,8 @@ HRESULT TreeViewThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, i
 
 HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
 {
-//	MY_TRACE(_T("TreeViewThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+	MY_TRACE(_T("TreeViewThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
 #if 1
 	RECT rc2 = *rc;
 	UINT format = textFlags | DT_NOCLIP;
@@ -112,19 +112,6 @@ HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId,
 	{
 	case TVP_TREEITEM: // = 1,
 		{
-			DTTOPTS op = { sizeof(op) };
-//			op.dwFlags = DTT_TEXTCOLOR | DTT_BORDERCOLOR | DTT_SHADOWCOLOR | DTT_SHADOWTYPE | DTT_SHADOWOFFSET | DTT_BORDERSIZE | DTT_APPLYOVERLAY | DTT_GLOWSIZE;
-			op.crText = my::getForeTextColor_Dialog();
-			op.crBorder = RGB(0x00, 0x00, 0x00);
-			op.crShadow = my::getBackTextColor_Dialog();
-			op.iTextShadowType = TST_SINGLE;
-			op.iTextShadowType = TST_CONTINUOUS;
-			op.ptShadowOffset.x = 1;
-			op.ptShadowOffset.y = 1;
-			op.iBorderSize = 1;
-			op.fApplyOverlay = TRUE;
-			op.iGlowSize = 1;
-
 			int bkMode = ::SetBkMode(dc, OPAQUE);
 			int bkColor = ::SetBkColor(dc, my::getFillColor_Dialog());
 
@@ -169,8 +156,6 @@ HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId,
 			::SetBkColor(dc, bkColor);
 
 			return S_OK;
-//			return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
-//			return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, &op);
 		}
 	case TVP_GLYPH: // = 2,
 	case TVP_BRANCH: // = 3,
@@ -179,6 +164,27 @@ HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId,
 			break;
 		}
 	}
+#endif
+#if 0
+	DTTOPTS op = { sizeof(op) };
+	op.dwFlags = DTT_TEXTCOLOR |
+//		DTT_BORDERCOLOR | DTT_BORDERSIZE |
+		DTT_SHADOWCOLOR | DTT_SHADOWTYPE | DTT_SHADOWOFFSET |
+		DTT_APPLYOVERLAY | DTT_GLOWSIZE;
+	op.crText = my::getForeTextColor_Dialog();
+	op.crBorder = RGB(0x00, 0x0, 0x00);
+	op.crShadow = RGB(0x00, 0x00, 0xff);
+	op.iTextShadowType = TST_SINGLE;
+//	op.iTextShadowType = TST_CONTINUOUS;
+	op.ptShadowOffset.x = 1;
+	op.ptShadowOffset.y = 1;
+	op.iBorderSize = 2;
+	op.fApplyOverlay = TRUE;
+	op.iGlowSize = 0;
+
+	RECT rc2 = *rc;
+	DrawTextW(dc, text, c, &rc2, textFlags | DT_CALCRECT);
+	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, &rc2, &op);
 #endif
 	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
@@ -204,9 +210,10 @@ HRESULT TreeViewThemeRenderer::DrawThemeEdge(HTHEME theme, HDC dc, int partId, i
 LRESULT TreeViewRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("TreeViewRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
-#if 0
+#if 1
 	switch (message)
 	{
+#if 0
 	case WM_ERASEBKGND:
 		{
 			HDC dc = (HDC)wParam;
@@ -214,6 +221,8 @@ LRESULT TreeViewRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UIN
 			my::fillRect(dc, &rc, my::getFillColor_Dialog());
 			return TRUE;
 		}
+#endif
+#if 1
 	case WM_PAINT:
 		{
 			LRESULT result = true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
@@ -232,6 +241,7 @@ LRESULT TreeViewRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UIN
 			::ReleaseDC(hwnd, dc);
 			return result;
 		}
+#endif
 	}
 #endif
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
@@ -250,7 +260,7 @@ LRESULT TreeViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, W
 		}
 	case CDDS_ITEMPREPAINT:
 		{
-			cd->clrText = RGB(0xff, 0xff, 0xff);
+			cd->clrText = my::getForeTextColor_Dialog();
 			cd->clrTextBk = my::getFillColor_Dialog();
 			return CDRF_NEWFONT;
 		}
@@ -312,7 +322,7 @@ BOOL TreeViewRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAW
 
 BOOL TreeViewRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("TreeViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
+	MY_TRACE(_T("TreeViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }

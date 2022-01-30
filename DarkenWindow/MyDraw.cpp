@@ -503,9 +503,24 @@ COLORREF getForeTextColor_Window()
 	return RGB(0xff, 0xff, 0xff);
 }
 
+COLORREF getForeTextColor_Window_Disabled()
+{
+	return RGB(0x99, 0x99, 0x99);
+}
+
 COLORREF getBackTextColor_Window()
 {
 	return RGB(0x33, 0x33, 0x33);
+}
+
+COLORREF getFillColor_Gutter()
+{
+	return RGB(0x40, 0x40, 0x40);
+}
+
+COLORREF getFillColor_Separator()
+{
+	return RGB(0x66, 0x66, 0x66);
 }
 
 void fillRect_Dialog(HDC dc, LPCRECT rc)
@@ -530,12 +545,12 @@ void fillRect_Window_Selected(HDC dc, LPCRECT rc)
 
 void fillRect_Gutter(HDC dc, LPCRECT rc)
 {
-	fillRect(dc, rc, RGB(0x40, 0x40, 0x40));
+	fillRect(dc, rc, getFillColor_Gutter());
 }
 
 void fillRect_Separator(HDC dc, LPCRECT rc)
 {
-	fillRect(dc, rc, RGB(0x66, 0x66, 0x66));
+	fillRect(dc, rc, getFillColor_Separator());
 }
 
 void fillRect_TrackBar_Thumb(HDC dc, LPCRECT rc)
@@ -573,8 +588,6 @@ void drawSingleEdge_Raised(HDC dc, LPCRECT rc)
 void drawSingleEdge_Sunken(HDC dc, LPCRECT rc)
 {
 	drawSingleEdge(dc, rc,
-//		RGB(0x22, 0x22, 0x22),
-//		RGB(0x44, 0x44, 0x44));
 		RGB(0x11, 0x11, 0x11),
 		RGB(0x55, 0x55, 0x55));
 }
@@ -622,22 +635,6 @@ void drawDoubleEdge_Etched(HDC dc, LPCRECT rc)
 		RGB(0x55, 0x55, 0x55));
 }
 
-void drawTripleEdge_Etched(HDC dc, LPCRECT rc)
-{
-	drawTripleEdge(dc, rc,
-		RGB(0x55, 0x55, 0x55),
-		RGB(0x00, 0x00, 0x00),
-		RGB(0x00, 0x00, 0x00),
-		RGB(0x00, 0x00, 0x00),
-		RGB(0x00, 0x00, 0x00),
-		RGB(0x55, 0x55, 0x55));
-}
-
-void drawFocusRect_Button(HDC dc, LPCRECT rc)
-{
-	drawFocusRect(dc, rc, RGB(0x00, 0x99, 0x00), PS_DOT);
-}
-
 void drawShadowText_Dialog(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format)
 {
 	drawShadowText(dc, text, length, rc, format, getForeTextColor_Dialog(), getBackTextColor_Dialog());
@@ -673,9 +670,19 @@ void shadowTextOut_Dialog(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWST
 	shadowTextOut(dc, x, y, options, rc, text, c, dx, getForeTextColor_Dialog(), getBackTextColor_Dialog());
 }
 
+void shadowTextOut_Dialog_Disabled(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
+{
+	shadowTextOut(dc, x, y, options, rc, text, c, dx, getForeTextColor_Dialog_Disabled(), getBackTextColor_Dialog());
+}
+
 void shadowTextOut_Window(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
 	shadowTextOut(dc, x, y, options, rc, text, c, dx, getForeTextColor_Window(), getBackTextColor_Window());
+}
+
+void shadowTextOut_Window_Disabled(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
+{
+	shadowTextOut(dc, x, y, options, rc, text, c, dx, getForeTextColor_Window_Disabled(), getBackTextColor_Window());
 }
 
 void drawShadowIcon_Dialog(HDC dc, LPCRECT rc, WCHAR icon, UINT format)

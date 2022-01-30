@@ -121,22 +121,30 @@ BOOL EditRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTAT
 
 BOOL EditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("EditRenderer::ExtTextOutW()\n"));
-	if (options & ETO_OPAQUE)
-	{
-		COLORREF color = ::GetBkColor(dc);
-		if (color != my::getFillColor_Window())
-		{
-			::SetBkColor(dc, my::getFillColor_Window_Selected());
-			::SetTextColor(dc, my::getForeTextColor_Window());
-		}
-	}
+//	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
 #if 1
-	my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
-	return TRUE;
-#else
-	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+	if (options & (ETO_GLYPH_INDEX | ETO_IGNORELANGUAGE))
+	{
+		if (options & ETO_OPAQUE)
+		{
+			COLORREF color = ::GetBkColor(dc);
+			if (color == ::GetSysColor(COLOR_HIGHLIGHT))
+			{
+				::SetBkColor(dc, my::getFillColor_Window_Selected());
+				::SetTextColor(dc, my::getForeTextColor_Window());
+			}
+		}
+		if (::IsWindowEnabled(currentState->m_hwnd))
+			my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
+		else
+			my::shadowTextOut_Window_Disabled(dc, x, y, options, rc, text, c, dx);
+		return TRUE;
+	}
 #endif
+	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) Begin\n"), dc, x, y, options);
+	BOOL result = true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) End\n"), dc, x, y, options);
+	return result;
 }
 
 BOOL EditRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)

@@ -117,25 +117,27 @@ BOOL ListBoxRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWS
 BOOL ListBoxRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
 //	MY_TRACE(_T("ListBoxRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
-	if (currentState->m_message != WM_NCPAINT)
+#if 1
+	if (options & (ETO_GLYPH_INDEX | ETO_IGNORELANGUAGE))
 	{
+		if (currentState->m_message != WM_NCPAINT)
 		if (options & ETO_OPAQUE)
 		{
-			COLORREF bkColor = ::GetBkColor(dc);
-//			if (bkColor != my::getFillColor_Window())
-			if (bkColor == ::GetSysColor(COLOR_HIGHLIGHT))
+			COLORREF color = ::GetBkColor(dc);
+			if (color == ::GetSysColor(COLOR_HIGHLIGHT))
 			{
 				::SetBkColor(dc, my::getFillColor_Window_Selected());
 				::SetTextColor(dc, my::getForeTextColor_Window());
 			}
 		}
+		if (::IsWindowEnabled(currentState->m_hwnd))
+			my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
+		else
+			my::shadowTextOut_Window_Disabled(dc, x, y, options, rc, text, c, dx);
+		return TRUE;
 	}
-#if 1
-	my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
-	return TRUE;
-#else
-	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 #endif
+	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }
 
 BOOL ListBoxRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)

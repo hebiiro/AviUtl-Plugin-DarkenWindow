@@ -218,6 +218,7 @@ void initRenderer(HWND hwnd)
 	else if (::lstrcmpi(className, WC_EDIT) == 0) renderer = &g_editRenderer;
 	else if (::lstrcmpi(className, WC_COMBOBOX) == 0) renderer = &g_comboboxRenderer;
 	else if (::lstrcmpi(className, WC_LISTBOX) == 0) renderer = &g_listboxRenderer;
+	else if (::lstrcmpi(className, _T("ComboLBox")) == 0) renderer = &g_listboxRenderer;
 	else if (::lstrcmpi(className, TOOLTIPS_CLASS) == 0) renderer = &g_tooltipRenderer;
 	else if (::lstrcmpi(className, TRACKBAR_CLASS) == 0) renderer = &g_trackbarRenderer;
 	else if (::lstrcmpi(className, UPDOWN_CLASS) == 0) renderer = &g_spinRenderer;
