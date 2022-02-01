@@ -223,6 +223,7 @@ void initRenderer(HWND hwnd)
 	else if (::lstrcmpi(className, TRACKBAR_CLASS) == 0) renderer = &g_trackbarRenderer;
 	else if (::lstrcmpi(className, UPDOWN_CLASS) == 0) renderer = &g_spinRenderer;
 	else if (::lstrcmpi(className, WC_LISTVIEW) == 0) renderer = &g_listviewRenderer;
+	else if (::lstrcmpi(className, _T("DirectUIHWND")) == 0) renderer = &g_listviewRenderer;
 	else if (::lstrcmpi(className, WC_TREEVIEW) == 0) renderer = &g_treeviewRenderer;
 	else if (::lstrcmpi(className, TOOLBARCLASSNAME) == 0) renderer = &g_toolbarRenderer;
 	else if (::lstrcmpi(className, _T("AviUtl")) == 0) renderer = &g_aviutlRenderer;

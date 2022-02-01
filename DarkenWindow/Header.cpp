@@ -6,11 +6,8 @@
 
 //--------------------------------------------------------------------
 
-HRESULT HeaderThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
+HRESULT HeaderThemeRenderer::onDrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc)
 {
-//	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
-
 	RECT rc2 = *rc;
 	int ix = -1, iy = -1;
 	int ox = 1, oy = 1;
@@ -60,29 +57,46 @@ HRESULT HeaderThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partI
 		}
 	case HP_HEADERITEMLEFT: // = 2,
 	case HP_HEADERITEMRIGHT: // = 3,
-	case HP_HEADERSORTARROW: // = 4,
 	case HP_HEADERDROPDOWN: // = 5,
 	case HP_HEADERDROPDOWNFILTER: // = 6,
 		{
-			::InflateRect(&rc2, 2, 2); rc2.bottom += 2;
-			UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
 			WCHAR text = L'\x0036';
 
 			switch (stateId)
 			{
 			case HDDFS_NORMAL: // = 1,
 				{
-					my::drawShadowIcon_Dialog(dc, &rc2, L'\x0036', format);
+					my::drawShadowIcon_Dialog(dc, &rc2, text, format);
 					return S_OK;
 				}
 			case HDDFS_SOFTHOT: // = 2,
 				{
-					my::drawShadowIcon_Dialog(dc, &rc2, L'\x0035', format);
+					my::drawShadowIcon_Dialog(dc, &rc2, text, format);
 					return S_OK;
 				}
 			case HDDFS_HOT: // = 3,
 				{
-					my::drawShadowIcon_Dialog_Hot(dc, &rc2, L'\x0035', format);
+					my::drawShadowIcon_Dialog_Hot(dc, &rc2, text, format);
+					return S_OK;
+				}
+			}
+
+			break;
+		}
+	case HP_HEADERSORTARROW: // = 4,
+		{
+			::InflateRect(&rc2, 2, 2); rc2.bottom += 2;
+
+			switch (stateId)
+			{
+			case HSAS_SORTEDUP: // = 1,
+				{
+					my::drawShadowIcon_Dialog(dc, &rc2, L'\x0036', format);
+					return S_OK;
+				}
+			case HSAS_SORTEDDOWN: // = 2,
+				{
+					my::drawShadowIcon_Dialog(dc, &rc2, L'\x0035', format);
 					return S_OK;
 				}
 			}
@@ -95,21 +109,43 @@ HRESULT HeaderThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partI
 		}
 	}
 
+	return S_FALSE;
+}
+
+HRESULT HeaderThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
+{
+	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+
+	if (S_OK == onDrawThemeBackground(theme, dc, partId, stateId, rc))
+		return S_OK;
+
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
+}
+
+HRESULT HeaderThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
+{
+	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+
+	if (S_OK == onDrawThemeBackground(theme, dc, partId, stateId, rc))
+		return S_OK;
+
+	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
 }
 
 HRESULT HeaderThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
 {
-//	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
-//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
+	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
 	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
 }
 
 HRESULT HeaderThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
 {
-//	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
 
 	RECT rc2 = *rc;
 	int ix = -1, iy = -1;

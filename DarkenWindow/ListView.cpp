@@ -20,16 +20,31 @@ HRESULT ListViewThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int p
 		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
 
 	RECT rc2 = *rc;
-#if 0
-	::SetTextColor(dc, RGB(0xff, 0x00, 0x00));
 
-	my::fillRect_Window(dc, &rc2);
-	return S_OK;
-#endif
-#if 0
 	switch (partId)
 	{
 	case LVP_LISTITEM: // = 1,
+		{
+			switch (stateId)
+			{
+			case LISS_NORMAL: // = 1,
+			case LISS_DISABLED: // = 4,
+				{
+					my::fillRect_Dialog(dc, &rc2);
+					return S_OK;
+				}
+			case LISS_HOT: // = 2,
+			case LISS_SELECTED: // = 3,
+			case LISS_SELECTEDNOTFOCUS: // = 5,
+			case LISS_HOTSELECTED: // = 6,
+				{
+					my::fillRect_Window_Selected(dc, &rc2);
+					return S_OK;
+				}
+			}
+
+			break;
+		}
 	case LVP_LISTGROUP: // = 2,
 	case LVP_LISTDETAIL: // = 3,
 	case LVP_LISTSORTEDDETAIL: // = 4,
@@ -40,14 +55,10 @@ HRESULT ListViewThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int p
 	case LVP_COLLAPSEBUTTON: // = 9,
 	case LVP_COLUMNDETAIL: // = 10,
 		{
-			switch (stateId)
-			{
-			}
-
 			break;
 		}
 	}
-#endif
+
 	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
 }
 
@@ -132,7 +143,7 @@ LRESULT ListViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, W
 
 int ListViewRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-	MY_TRACE(_T("ListViewRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
+	MY_TRACE(_T("ListViewRenderer::FillRect(%d, %d, %d, %d, 0x%08X)\n"), rc->left, rc->top, rc->right, rc->bottom, brush);
 
 	COLORREF color = my::getBrushColor(brush);
 
@@ -194,7 +205,7 @@ BOOL ListViewRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAW
 
 BOOL ListViewRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-	MY_TRACE(_T("ListViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
+//	MY_TRACE(_T("ListViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 
 	if (options & ETO_OPAQUE)
 		::SetBkColor(dc, my::getFillColor_Gutter());
@@ -207,8 +218,8 @@ BOOL ListViewRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UI
 #endif
 	if (text)
 	{
-		::SetTextColor(dc, my::getForeTextColor_Window());
-		::SetBkColor(dc, my::getFillColor_Window());
+		::SetTextColor(dc, my::getForeTextColor_Dialog());
+		::SetBkColor(dc, my::getFillColor_Dialog());
 	}
 
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
