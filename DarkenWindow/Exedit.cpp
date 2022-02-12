@@ -4,19 +4,79 @@
 #include "ClassicHook.h"
 #include "MyDraw.h"
 
+HWND getComboBox(HWND exeditObjectDialog)
+{
+	for (UINT i = 8200; i >= 8100; i--)
+	{
+		// ウィンドウハンドルを取得する。
+		HWND hwnd = ::GetDlgItem(exeditObjectDialog, i);
+
+		// コンボボックスかどうかクラス名で調べる。
+		TCHAR className[MAX_PATH] = {};
+		::GetClassName(hwnd, className, MAX_PATH);
+		if (::lstrcmpi(className, WC_COMBOBOX) != 0) continue;
+
+		if (::IsWindowVisible(hwnd)) // ウィンドウが可視なら
+		{
+			// ID - 2 のウィンドウを返す。
+			return ::GetDlgItem(exeditObjectDialog, i - 2);
+		}
+	}
+
+	return 0;
+}
+
 LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("ExeditRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
-#if 0
+#if 1
+	if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
+		return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+
 	switch (message)
 	{
+	case WM_PAINT:
+		{
+			MY_TRACE(_T("WM_PAINT, 0x%08X, 0x%08X)\n"), wParam, lParam);
+
+			HDC dc = ::GetDC(hwnd);
+			RECT rc; ::GetClientRect(hwnd, &rc);
+			my::fillRect_Dialog(dc, &rc);
+			::ReleaseDC(hwnd, dc);
+
+			break;
+		}
+	case WM_ERASEBKGND:
+		{
+//			MY_TRACE(_T("WM_ERASEBKGND, 0x%08X, 0x%08X)\n"), wParam, lParam);
+
+			HDC dc = (HDC)wParam;
+			RECT rc; ::GetClientRect(hwnd, &rc);
+			my::fillRect_Dialog(dc, &rc);
+
+			return TRUE;
+		}
 	case WM_COMMAND:
 		{
 			UINT code = HIWORD(wParam);
 			UINT id = LOWORD(wParam);
 			HWND sender = (HWND)lParam;
 
-			MY_TRACE(_T("WM_COMMAND, 0x%04X, 0x%04X, 0x%08X)\n"), code, id, sender);
+//			MY_TRACE(_T("WM_COMMAND, 0x%04X, 0x%04X, 0x%08X)\n"), code, id, sender);
+
+			if (id == 2079)
+			{
+				MY_TRACE(_T("アニメーション効果が追加されました\n"));
+
+				if (wndProc == (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
+				{
+					LRESULT result = true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+					HWND combobox = getComboBox(hwnd);
+					MY_TRACE_HEX(combobox);
+					::SendMessage(hwnd, WM_CTLCOLOREDIT, 0, (LPARAM)combobox);
+					return result;
+				}
+			}
 
 			break;
 		}
@@ -24,7 +84,7 @@ LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 		{
 			NMHDR* nm = (NMHDR*)lParam;
 
-			MY_TRACE(_T("WM_NOTIFY, 0x%08X, 0x%08X, %d\n"), nm->hwndFrom, nm->idFrom, nm->code);
+//			MY_TRACE(_T("WM_NOTIFY, 0x%08X, 0x%08X, %d\n"), nm->hwndFrom, nm->idFrom, nm->code);
 
 			break;
 		}
@@ -35,7 +95,7 @@ LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 
 int ExeditRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-//	MY_TRACE(_T("ExeditRenderer::FillRect(0x%08X)\n"), brush);
+	MY_TRACE(_T("ExeditRenderer::FillRect(0x%08X)\n"), brush);
 
 	if (brush == (HBRUSH)(COLOR_BTNFACE + 1))
 	{

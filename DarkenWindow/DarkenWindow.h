@@ -63,4 +63,32 @@ DECLARE_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppNam
 DECLARE_HOOK_PROC(void, CDECL, exedit_00030500, ());
 DECLARE_HOOK_PROC(BOOL, CDECL, exedit_000305E0, (int objectIndex));
 
+void drawTimelineLongGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+void drawTimelineShortGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+
+//---------------------------------------------------------------------
+// Function
+
+// CALL を書き換える
+template<class T>
+void hookCall(DWORD address, T hookProc)
+{
+	BYTE code[5];
+	code[0] = 0xE8; // CALL
+	*(DWORD*)&code[1] = (DWORD)hookProc - (address + 5);
+
+	// CALL を書き換える。そのあと命令キャッシュをフラッシュする。
+	::WriteProcessMemory(::GetCurrentProcess(), (LPVOID)address, code, sizeof(code), NULL);
+	::FlushInstructionCache(::GetCurrentProcess(), (LPVOID)address, sizeof(code));
+}
+
+// 絶対アドレスを書き換える
+template<class T>
+void writeAbsoluteAddress(DWORD address, const T* x)
+{
+	// 絶対アドレスを書き換える。そのあと命令キャッシュをフラッシュする。
+	::WriteProcessMemory(::GetCurrentProcess(), (LPVOID)address, &x, sizeof(x), NULL);
+	::FlushInstructionCache(::GetCurrentProcess(), (LPVOID)address, sizeof(x));
+}
+
 //---------------------------------------------------------------------

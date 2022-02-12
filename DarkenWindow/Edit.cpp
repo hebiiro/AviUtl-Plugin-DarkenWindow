@@ -141,9 +141,9 @@ BOOL EditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT o
 		return TRUE;
 	}
 #endif
-	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) Begin\n"), dc, x, y, options);
+//	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) Begin\n"), dc, x, y, options);
 	BOOL result = true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
-	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) End\n"), dc, x, y, options);
+//	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) End\n"), dc, x, y, options);
 	return result;
 }
 

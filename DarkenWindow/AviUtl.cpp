@@ -140,7 +140,7 @@ BOOL AviUtlRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT
 
 BOOL AviUtlRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)
 {
-	MY_TRACE(_T("AviUtlRenderer::PatBlt()\n"));
+//	MY_TRACE(_T("AviUtlRenderer::PatBlt()\n"));
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }

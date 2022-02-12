@@ -166,6 +166,9 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		}
 	case WM_CREATE:
 		{
+			if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
+				break;
+
 			TCHAR className[MAX_PATH] = {};
 			::GetClassName(hwnd, className, MAX_PATH);
 			//MY_TRACE_TSTR(className);
@@ -177,11 +180,13 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				{
 					isInited = TRUE;
 
+					MY_TRACE(_T("AviUtl をフックします\n"));
+
 					// 最初の AviUtl ウィンドウ作成時にテーマフックをセットする。
 					initThemeHook(hwnd);
 				}
 			}
-#if 0
+#if 1
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
 			{
 				MY_TRACE(_T("拡張編集をフックします\n"));
@@ -191,11 +196,14 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				true_exedit_00030500 = (Type_exedit_00030500)((DWORD)exedit_auf + 0x00030500);
 				true_exedit_000305E0 = (Type_exedit_000305E0)((DWORD)exedit_auf + 0x000305E0);
 
+				hookCall((DWORD)exedit_auf + 0x000380DF, drawTimelineLongGuage);
+				hookCall((DWORD)exedit_auf + 0x000381D7, drawTimelineShortGuage);
+
 				DetourTransactionBegin();
 				DetourUpdateThread(::GetCurrentThread());
 
-				ATTACH_HOOK_PROC(exedit_00030500);
-				ATTACH_HOOK_PROC(exedit_000305E0);
+//				ATTACH_HOOK_PROC(exedit_00030500);
+//				ATTACH_HOOK_PROC(exedit_000305E0);
 
 				if (DetourTransactionCommit() == NO_ERROR)
 				{
@@ -214,7 +222,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 	case WM_CTLCOLORBTN:
 	case WM_CTLCOLORSTATIC:
 		{
-			//MY_TRACE(_T("WM_CTLCOLOR, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
+//			MY_TRACE(_T("WM_CTLCOLOR, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
 
 			HDC dc = (HDC)wParam;
 			HWND control = (HWND)lParam;
@@ -242,11 +250,18 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		{
 //			MY_TRACE(_T("WM_CTLCOLOREDIT\n"));
 
+			if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC) &&
+				wndProc != ::DefDlgProcA)
+			{
+				break;
+			}
+
 			HDC dc = (HDC)wParam;
 
 			HBRUSH brush = (HBRUSH)true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 //			COLORREF bkColor = ::GetBkColor(dc);
 			BOOL enable = ::IsWindowEnabled((HWND)lParam);
+//			MY_TRACE(_T("0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), wndProc, (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC), brush, bkColor);
 
 			if (brush == (HBRUSH)(COLOR_BTNFACE + 1))
 //			if (bkColor == ::GetSysColor(COLOR_BTNFACE))
@@ -263,6 +278,8 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				::SetBkColor(dc, my::getFillColor_Window());
 				return (LRESULT)g_brush;
 			}
+
+			break;
 		}
 	case WM_CTLCOLORSCROLLBAR:
 		{
@@ -433,42 +450,29 @@ IMPLEMENT_HOOK_PROC_NULL(void, CDECL, exedit_00030500, ())
 	true_exedit_00030500();
 }
 
-HWND getComboBox()
-{
-	for (UINT i = 8200; i >= 8100; i--)
-	{
-		// ウィンドウハンドルを取得する。
-		HWND hwnd = ::GetDlgItem(g_exeditObjectDialog, i);
-
-		// コンボボックスかどうかクラス名で調べる。
-		TCHAR className[MAX_PATH] = {};
-		::GetClassName(hwnd, className, MAX_PATH);
-		if (::lstrcmpi(className, WC_COMBOBOX) != 0) continue;
-
-		if (::IsWindowVisible(hwnd)) // ウィンドウが可視なら
-		{
-			// ID - 2 のウィンドウを返す。
-			return ::GetDlgItem(g_exeditObjectDialog, i - 2);
-		}
-	}
-
-	return 0;
-}
-
 IMPLEMENT_HOOK_PROC_NULL(BOOL, CDECL, exedit_000305E0, (int objectIndex))
 {
-	MY_TRACE(_T("exedit_000305E0(0x%08X)\n"), objectIndex);
+	MY_TRACE(_T("exedit_000305E0(%d)\n"), objectIndex);
 
-//	::SendMessage(g_exeditObjectDialog, WM_SETREDRAW, FALSE, 0);
 	BOOL result = true_exedit_000305E0(objectIndex);
-//	::SendMessage(g_exeditObjectDialog, WM_SETREDRAW, TRUE, 0);
-//	::RedrawWindow(g_exeditObjectDialog, NULL, NULL, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
-
-	HWND combobox = getComboBox();
-	MY_TRACE_HEX(combobox);
-	::SendMessage(g_exeditObjectDialog, WM_CTLCOLOREDIT, 0, (LPARAM)combobox);
 
 	return result;
+}
+
+void drawTimelineLongGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
+{
+//	MY_TRACE(_T("drawTimelineLongGuage(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
+
+	RECT rc = { mx, my, mx + 1, ly };
+	my::fillRect(dc, &rc, my::getForeTextColor_Dialog());
+}
+
+void drawTimelineShortGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
+{
+//	MY_TRACE(_T("drawTimelineShortGuage(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
+
+	RECT rc = { mx, my, mx + 1, ly };
+	my::fillRect(dc, &rc, my::getForeTextColor_Dialog());
 }
 
 //---------------------------------------------------------------------

@@ -102,8 +102,8 @@ HRESULT TreeViewThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, i
 
 HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
 {
-	MY_TRACE(_T("TreeViewThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+//	MY_TRACE(_T("TreeViewThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
 #if 1
 	RECT rc2 = *rc;
 	UINT format = textFlags | DT_NOCLIP;
@@ -271,7 +271,7 @@ LRESULT TreeViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, W
 
 int TreeViewRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-	MY_TRACE(_T("TreeViewRenderer::FillRect()\n"));
+//	MY_TRACE(_T("TreeViewRenderer::FillRect()\n"));
 
 	my::fillRect_Dialog(dc, rc);
 	return TRUE;
@@ -322,7 +322,7 @@ BOOL TreeViewRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAW
 
 BOOL TreeViewRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-	MY_TRACE(_T("TreeViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
+//	MY_TRACE(_T("TreeViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }

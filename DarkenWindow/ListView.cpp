@@ -143,7 +143,7 @@ LRESULT ListViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, W
 
 int ListViewRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-	MY_TRACE(_T("ListViewRenderer::FillRect(%d, %d, %d, %d, 0x%08X)\n"), rc->left, rc->top, rc->right, rc->bottom, brush);
+//	MY_TRACE(_T("ListViewRenderer::FillRect(%d, %d, %d, %d, 0x%08X)\n"), rc->left, rc->top, rc->right, rc->bottom, brush);
 
 	COLORREF color = my::getBrushColor(brush);
 

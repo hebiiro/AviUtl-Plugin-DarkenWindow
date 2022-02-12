@@ -114,8 +114,8 @@ HRESULT HeaderThemeRenderer::onDrawThemeBackground(HTHEME theme, HDC dc, int par
 
 HRESULT HeaderThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
 {
-	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+//	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
 	if (S_OK == onDrawThemeBackground(theme, dc, partId, stateId, rc))
 		return S_OK;
@@ -125,8 +125,8 @@ HRESULT HeaderThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partI
 
 HRESULT HeaderThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
 {
-	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+//	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
 
 	if (S_OK == onDrawThemeBackground(theme, dc, partId, stateId, rc))
 		return S_OK;
@@ -144,8 +144,8 @@ HRESULT HeaderThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int
 
 HRESULT HeaderThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
 {
-	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+//	MY_TRACE(_T("HeaderThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
 
 	RECT rc2 = *rc;
 	int ix = -1, iy = -1;

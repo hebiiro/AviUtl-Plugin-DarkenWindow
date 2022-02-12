@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#define ISOLATION_AWARE_ENABLED 1
+//#define ISOLATION_AWARE_ENABLED 1
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <windowsx.h>
@@ -30,7 +30,7 @@ typedef const BYTE* LPCBYTE;
 #pragma comment(lib, "../Detours.4.0.1/detours.lib")
 
 //---------------------------------------------------------------------
-#if 1
+#if 0
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")

@@ -2,6 +2,7 @@
 
 # AviUtl プラグイン - 黒窓
 
+* version 1.1.3 by 蛇色 - 2022/02/12 タイムラインの目盛りの色に対応
 * version 1.1.2 by 蛇色 - 2022/02/01 ファイル選択ダイアログのリストビューに対応
 * version 1.1.1 by 蛇色 - 2022/01/30 eclipse_fast と競合していた問題などを修正
 * version 1.1.0 by 蛇色 - 2022/01/28 リストビューとツリービューに対応
@@ -30,5 +31,5 @@ AviUtl の見た目をダークモードにします。
 ## 動作確認
 
 * (必須) AviUtl 1.10 & 拡張編集 0.92 http://spring-fragrance.mints.ne.jp/aviutl/
-* (共存確認) patch.aul r10 https://www.nicovideo.jp/watch/sm39491708
+* (共存確認) patch.aul r11 https://www.nicovideo.jp/watch/sm40027189
 * (共存確認) eclipse_fast 1.00 https://www.nicovideo.jp/watch/sm39756003
