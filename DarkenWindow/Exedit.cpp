@@ -35,17 +35,6 @@ LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 
 	switch (message)
 	{
-	case WM_PAINT:
-		{
-			MY_TRACE(_T("WM_PAINT, 0x%08X, 0x%08X)\n"), wParam, lParam);
-
-			HDC dc = ::GetDC(hwnd);
-			RECT rc; ::GetClientRect(hwnd, &rc);
-			my::fillRect_Dialog(dc, &rc);
-			::ReleaseDC(hwnd, dc);
-
-			break;
-		}
 	case WM_ERASEBKGND:
 		{
 //			MY_TRACE(_T("WM_ERASEBKGND, 0x%08X, 0x%08X)\n"), wParam, lParam);
