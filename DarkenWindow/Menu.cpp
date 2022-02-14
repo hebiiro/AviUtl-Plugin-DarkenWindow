@@ -27,8 +27,8 @@ public:
 
 HRESULT MenuThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
 {
-	MY_TRACE(_T("MenuThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+//	MY_TRACE(_T("MenuThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
 	RECT rc2 = *rc;
 
@@ -284,8 +284,8 @@ HRESULT MenuThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId,
 
 HRESULT MenuThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
 {
-	MY_TRACE(_T("MenuThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
+//	MY_TRACE(_T("MenuThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
 	RECT rc2 = *rc;
 

@@ -13,6 +13,7 @@
 #include <vssym32.h>
 #include <uxtheme.h>
 #pragma comment(lib, "uxtheme.lib")
+#include <comdef.h>
 
 #include <tchar.h>
 #include <crtdbg.h>

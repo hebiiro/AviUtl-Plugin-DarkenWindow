@@ -196,8 +196,21 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				true_exedit_00030500 = (Type_exedit_00030500)((DWORD)exedit_auf + 0x00030500);
 				true_exedit_000305E0 = (Type_exedit_000305E0)((DWORD)exedit_auf + 0x000305E0);
 
-				hookCall((DWORD)exedit_auf + 0x000380DF, drawTimelineLongGuage);
-				hookCall((DWORD)exedit_auf + 0x000381D7, drawTimelineShortGuage);
+				Exedit::g_font = (HFONT*)((DWORD)exedit_auf + 0x00167D84);
+
+				hookAbsoluteCall((DWORD)exedit_auf + 0x0003833E, Exedit::drawRootText);
+				hookAbsoluteCall((DWORD)exedit_auf + 0x0003836A, Exedit::drawRootEdge);
+
+				hookAbsoluteCall((DWORD)exedit_auf + 0x00037CFF, Exedit::drawLayerText);
+				hookAbsoluteCall((DWORD)exedit_auf + 0x00037D46, Exedit::drawLayerEdge);
+
+				hookCall((DWORD)exedit_auf + 0x000380DF, Exedit::drawTimelineLongGuage);
+				hookCall((DWORD)exedit_auf + 0x000381D7, Exedit::drawTimelineShortGuage);
+				hookCall((DWORD)exedit_auf + 0x000381A2, Exedit::drawTimelineTime);
+
+				hookAbsoluteCall((DWORD)exedit_auf + 0x00038538, Exedit::fillLayerBackground);
+				hookAbsoluteCall((DWORD)exedit_auf + 0x0003860E, Exedit::fillLayerBackground);
+				hookAbsoluteCall((DWORD)exedit_auf + 0x000386E4, Exedit::fillGroupBackground);
 
 				DetourTransactionBegin();
 				DetourUpdateThread(::GetCurrentThread());
@@ -250,18 +263,31 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		{
 //			MY_TRACE(_T("WM_CTLCOLOREDIT\n"));
 
-			if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC) &&
-				wndProc != ::DefDlgProcA)
+			HDC dc = (HDC)wParam;
+			HWND control = (HWND)lParam;
+
+//			MY_TRACE_HEX(wndProc);
+//			MY_TRACE_HEX(::DefDlgProcA);
+//			MY_TRACE_HEX(::DefDlgProcW);
+//			MY_TRACE_HEX(::GetClassLongA(hwnd, GCL_WNDPROC));
+//			MY_TRACE_HEX(::GetClassLongW(hwnd, GCL_WNDPROC));
+//			MY_TRACE_HEX(::GetWindowLongA(hwnd, GWL_WNDPROC));
+//			MY_TRACE_HEX(::GetWindowLongW(hwnd, GWL_WNDPROC));
+
+			if (wndProc != (WNDPROC)::GetClassLongA(hwnd, GCL_WNDPROC) &&
+				wndProc != (WNDPROC)::GetClassLongW(hwnd, GCL_WNDPROC) &&
+				wndProc != ::DefDlgProcA &&
+				wndProc != ::DefDlgProcW)
 			{
 				break;
 			}
 
-			HDC dc = (HDC)wParam;
-
 			HBRUSH brush = (HBRUSH)true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
-//			COLORREF bkColor = ::GetBkColor(dc);
+//			MY_TRACE_HEX(brush);
+			COLORREF bkColor = ::GetBkColor(dc);
+//			MY_TRACE_HEX(bkColor);
 			BOOL enable = ::IsWindowEnabled((HWND)lParam);
-//			MY_TRACE(_T("0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), wndProc, (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC), brush, bkColor);
+//			MY_TRACE_INT(enable);
 
 			if (brush == (HBRUSH)(COLOR_BTNFACE + 1))
 //			if (bkColor == ::GetSysColor(COLOR_BTNFACE))
@@ -459,6 +485,53 @@ IMPLEMENT_HOOK_PROC_NULL(BOOL, CDECL, exedit_000305E0, (int objectIndex))
 	return result;
 }
 
+//---------------------------------------------------------------------
+namespace Exedit {
+//---------------------------------------------------------------------
+
+HFONT* g_font = 0;
+
+BOOL WINAPI drawRootText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR text, UINT c, CONST INT* dx)
+{
+//	MY_TRACE(_T("drawRootText(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
+
+	::SetBkColor(dc, my::getFillColor_Window_Selected());
+	my::shadowTextOut_Dialog(dc, x, y, options, rc, (_bstr_t)text, c, dx);
+	return TRUE;
+}
+
+BOOL WINAPI drawRootEdge(HDC dc, LPRECT rc, UINT edge, UINT flags)
+{
+//	MY_TRACE(_T("drawRootEdge(0x%08X, 0x%08X, 0x%08X)\n"), dc, edge, flags);
+
+//	my::frameRect(dc, rc, my::getFillColor_Window(), 2);
+	return TRUE;
+}
+
+BOOL WINAPI drawLayerText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR text, UINT c, CONST INT* dx)
+{
+//	MY_TRACE(_T("drawLayerText(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
+
+	COLORREF bkColor = ::GetBkColor(dc);
+//	MY_TRACE_HEX(bkColor);
+	switch (bkColor)
+	{
+	case 0x00F0F0F0: ::SetBkColor(dc, my::getFillColor_Gutter()); break;
+	case 0x00CCCCCC: ::SetBkColor(dc, my::getFillColor_Window()); break;
+	}
+
+	my::shadowTextOut_Dialog(dc, x, y, options, rc, (_bstr_t)text, c, dx);
+	return TRUE;
+}
+
+BOOL WINAPI drawLayerEdge(HDC dc, LPRECT rc, UINT edge, UINT flags)
+{
+//	MY_TRACE(_T("drawLayerEdge(0x%08X, 0x%08X, 0x%08X)\n"), dc, edge, flags);
+
+	my::frameRect(dc, rc, my::getFillColor_Window(), 1);
+	return TRUE;
+}
+
 void drawTimelineLongGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 {
 //	MY_TRACE(_T("drawTimelineLongGuage(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
@@ -475,4 +548,73 @@ void drawTimelineShortGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 	my::fillRect(dc, &rc, my::getForeTextColor_Dialog());
 }
 
+void drawTimelineTime(HDC dc, LPCSTR text, int x, int y, int w, int h, int scroll_x)
+{
+//	MY_TRACE(_T("drawTimelineTime(0x%08X, %hs, %d, %d, %d, %d, %d)\n"), dc, text, x, y, w, h, scroll_x);
+
+	::SelectObject(dc, *g_font);
+
+	TEXTMETRIC tm = {};
+	::GetTextMetrics(dc, &tm);
+
+	RECT rc = { x, y, x + w, y + h };
+	::OffsetRect(&rc, tm.tmHeight / 4 + scroll_x, 0);
+	my::drawShadowText_Dialog(dc, (_bstr_t)text, -1, &rc, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOCLIP);
+}
+
+int WINAPI fillLayerBackground(HDC dc, LPCRECT rc, HBRUSH brush)
+{
+//	MY_TRACE(_T("fillLayerBackground(0x%08X, 0x%08X)\n"), dc, brush);
+
+	COLORREF color = my::getBrushColor(brush);
+//	MY_TRACE_HEX(color);
+	switch (color)
+	{
+	case 0x00CCCCCC:
+		{
+			::SetDCBrushColor(dc, RGB(0x00, 0x00, 0x00));
+			break;
+		}
+	default:
+		{
+			::SetDCBrushColor(dc, my::getFillColor_Dialog());
+			break;
+		}
+	}
+
+	return true_FillRect(dc, rc, (HBRUSH)::GetStockObject(DC_BRUSH));
+}
+
+int WINAPI fillGroupBackground(HDC dc, LPCRECT rc, HBRUSH brush)
+{
+//	MY_TRACE(_T("fillGroupBackground(0x%08X, 0x%08X)\n"), dc, brush);
+
+	COLORREF color = ::GetDCBrushColor(dc);
+//	MY_TRACE_HEX(color);
+	switch (color)
+	{
+	case 0x00DEDEDE: ::SetDCBrushColor(dc, RGB(0x44, 0x44, 0x44)); break;
+	case 0x00CCCCCC: ::SetDCBrushColor(dc, RGB(0x55, 0x55, 0x55)); break;
+	case 0x00BABABA: ::SetDCBrushColor(dc, RGB(0x66, 0x66, 0x66)); break;
+
+	case 0x00BEBEBE: ::SetDCBrushColor(dc, RGB(0x22, 0x22, 0x22)); break;
+	case 0x00B1B1B1: ::SetDCBrushColor(dc, RGB(0x33, 0x33, 0x33)); break;
+	case 0x00A3A3A3: ::SetDCBrushColor(dc, RGB(0x44, 0x44, 0x44)); break;
+/*
+	case 0x00DEDEDE: ::SetDCBrushColor(dc, RGB(0x28, 0x28, 0x28)); break;
+	case 0x00CCCCCC: ::SetDCBrushColor(dc, RGB(0x20, 0x20, 0x20)); break;
+	case 0x00BABABA: ::SetDCBrushColor(dc, RGB(0x18, 0x18, 0x18)); break;
+
+	case 0x00BEBEBE: ::SetDCBrushColor(dc, RGB(0x20, 0x20, 0x20)); break;
+	case 0x00B1B1B1: ::SetDCBrushColor(dc, RGB(0x18, 0x18, 0x18)); break;
+	case 0x00A3A3A3: ::SetDCBrushColor(dc, RGB(0x10, 0x10, 0x10)); break;
+*/
+	}
+
+	return true_FillRect(dc, rc, brush);
+//	return true_FillRect(dc, rc, (HBRUSH)::GetStockObject(DC_BRUSH));
+}
+
+//---------------------------------------------------------------------
+} // namespace Exedit
 //---------------------------------------------------------------------

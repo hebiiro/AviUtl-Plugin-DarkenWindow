@@ -4,8 +4,8 @@
 #define MY_TRACE			(CMyTracer(_T(__FILE__), __LINE__)).output
 #define MY_TRACE_BINARY		(CMyTracer(_T(__FILE__), __LINE__)).outputBinary
 #else
-#define MY_TRACE			(void)sizeof
-#define MY_TRACE_BINARY		(void)sizeof
+#define MY_TRACE			(void)
+#define MY_TRACE_BINARY		(void)
 #endif
 
 #define MY_TRACE_STR(xxx)	MY_TRACE(_T(#xxx) _T(" = %hs\n"), xxx)

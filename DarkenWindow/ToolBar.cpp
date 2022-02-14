@@ -16,8 +16,8 @@ HRESULT ToolBarThemeRenderer::DrawThemeParentBackground(HWND hwnd, HDC dc, LPCRE
 
 HRESULT ToolBarThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
 {
-	MY_TRACE(_T("ToolBarThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+//	MY_TRACE(_T("ToolBarThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
 	RECT rc2 = *rc;
 
@@ -97,8 +97,8 @@ HRESULT ToolBarThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int pa
 
 HRESULT ToolBarThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
 {
-	MY_TRACE(_T("ToolBarThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
+//	MY_TRACE(_T("ToolBarThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
 	RECT rc2 = *rc;
 
@@ -241,7 +241,7 @@ LRESULT ToolBarRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WP
 
 int ToolBarRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-	MY_TRACE(_T("ToolBarRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
+//	MY_TRACE(_T("ToolBarRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
 
 	return true_FillRect(dc, rc, brush);
 }
@@ -290,14 +290,14 @@ BOOL ToolBarRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWS
 
 BOOL ToolBarRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-	MY_TRACE(_T("ToolBarRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
+//	MY_TRACE(_T("ToolBarRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }
 
 BOOL ToolBarRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)
 {
-	MY_TRACE(_T("ToolBarRenderer::PatBlt()\n"));
+//	MY_TRACE(_T("ToolBarRenderer::PatBlt()\n"));
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }

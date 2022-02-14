@@ -21,14 +21,6 @@ int AviUtlRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 		return TRUE;
 	}
 
-	COLORREF color = my::getBrushColor(brush);
-
-	if (color == RGB(0xcc, 0xcc, 0xcc))
-	{
-		static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Window());
-		brush = g_brush;
-	}
-
 	return true_FillRect(dc, rc, brush);
 }
 
@@ -115,27 +107,9 @@ BOOL AviUtlRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWST
 
 BOOL AviUtlRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-#if 1
-	if (options & ETO_OPAQUE)
-	{
-		COLORREF bkColor = ::GetBkColor(dc);
-//		MY_TRACE(_T("AviUtlRenderer::ExtTextOutW(%d, %d, 0x%08X), 0x%08X\n"), x, y, options, bkColor);
+//	MY_TRACE(_T("AviUtlRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 
-		if (bkColor == ::GetSysColor(COLOR_BTNFACE))
-		{
-			::SetBkColor(dc, my::getFillColor_Dialog());
-		}
-		else if (bkColor == RGB(0xcc, 0xcc, 0xcc))
-		{
-			::SetBkColor(dc, my::getFillColor_Window());
-		}
-	}
-
-	my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
-	return TRUE;
-#else
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
-#endif
 }
 
 BOOL AviUtlRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)

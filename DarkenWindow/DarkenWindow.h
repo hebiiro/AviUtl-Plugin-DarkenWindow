@@ -63,9 +63,24 @@ DECLARE_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppNam
 DECLARE_HOOK_PROC(void, CDECL, exedit_00030500, ());
 DECLARE_HOOK_PROC(BOOL, CDECL, exedit_000305E0, (int objectIndex));
 
+//---------------------------------------------------------------------
+namespace Exedit {
+//---------------------------------------------------------------------
+
+extern HFONT* g_font;
+
+BOOL WINAPI drawRootText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR text, UINT c, CONST INT* dx);
+BOOL WINAPI drawRootEdge(HDC dc, LPRECT rc, UINT edge, UINT flags);
+BOOL WINAPI drawLayerText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR text, UINT c, CONST INT* dx);
+BOOL WINAPI drawLayerEdge(HDC dc, LPRECT rc, UINT edge, UINT flags);
 void drawTimelineLongGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
 void drawTimelineShortGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+void drawTimelineTime(HDC dc, LPCSTR text, int x, int y, int w, int h, int scroll_x);
+int WINAPI fillLayerBackground(HDC dc, LPCRECT rc, HBRUSH brush);
+int WINAPI fillGroupBackground(HDC dc, LPCRECT rc, HBRUSH brush);
 
+//---------------------------------------------------------------------
+} // namespace Exedit
 //---------------------------------------------------------------------
 // Function
 
@@ -76,6 +91,20 @@ void hookCall(DWORD address, T hookProc)
 	BYTE code[5];
 	code[0] = 0xE8; // CALL
 	*(DWORD*)&code[1] = (DWORD)hookProc - (address + 5);
+
+	// CALL を書き換える。そのあと命令キャッシュをフラッシュする。
+	::WriteProcessMemory(::GetCurrentProcess(), (LPVOID)address, code, sizeof(code), NULL);
+	::FlushInstructionCache(::GetCurrentProcess(), (LPVOID)address, sizeof(code));
+}
+
+// CALL を書き換える
+template<class T>
+void hookAbsoluteCall(DWORD address, T& hookProc)
+{
+	BYTE code[6];
+	code[0] = 0xE8; // CALL
+	*(DWORD*)&code[1] = (DWORD)hookProc - (address + 5);
+	code[5] = 0x90; // NOP
 
 	// CALL を書き換える。そのあと命令キャッシュをフラッシュする。
 	::WriteProcessMemory(::GetCurrentProcess(), (LPVOID)address, code, sizeof(code), NULL);

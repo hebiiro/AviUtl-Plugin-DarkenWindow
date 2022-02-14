@@ -233,7 +233,7 @@ LRESULT TreeViewRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UIN
 			while (ti)
 			{
 				RECT rc; TreeView_GetItemRect(hwnd, ti, &rc, FALSE);
-				::ExtFloodFill(dc, rc.left, rc.top, RGB(0xff, 0xff, 0xff), FLOODFILLSURFACE);
+				::ExtFloodFill(dc, rc.left, rc.top + 6, RGB(0xff, 0xff, 0xff), FLOODFILLSURFACE);
 				ti = TreeView_GetNextVisible(hwnd, ti);
 			}
 			::SelectObject(dc, oldBrush);

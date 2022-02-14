@@ -52,6 +52,7 @@ void initThemeHook(HWND hwnd)
 	static ToolBarThemeRenderer g_toolbar;
 
 	registerRendererNC(hwnd, VSCLASS_MENU, &g_menu);
+	registerRenderer(hwnd, VSCLASS_MENU, &g_menu);
 	registerRenderer(hwnd, VSCLASS_SCROLLBAR, &g_scrollbar);
 	registerRenderer(hwnd, VSCLASS_STATIC, &g_static);
 	registerRenderer(hwnd, VSCLASS_BUTTON, &g_button);
@@ -66,6 +67,8 @@ void initThemeHook(HWND hwnd)
 	registerRenderer(hwnd, VSCLASS_TREEVIEW, &g_treeview);
 	registerRenderer(hwnd, VSCLASS_TOOLBAR, &g_toolbar);
 
+	registerRendererNC(hwnd, L"Explorer::" VSCLASS_MENU, &g_menu);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_MENU, &g_menu);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_SCROLLBAR, &g_scrollbar);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_BUTTON, &g_button);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_LISTBOX, &g_listbox);
