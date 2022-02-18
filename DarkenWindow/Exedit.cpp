@@ -139,8 +139,17 @@ BOOL ExeditRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWST
 
 BOOL ExeditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("ExeditRenderer::ExtTextOutW()\n"));
+	// 「設定ダイアログ画面サイズ固定化プラグイン」が
+	// FillSolidRect() を使用しているため以下の処理が必要。
+	UINT flags = ETO_GLYPH_INDEX | ETO_OPAQUE;
+	if ((options & flags) == flags)
+	{
+		COLORREF color = ::GetBkColor(dc);
+		MY_TRACE(_T("ExeditRenderer::ExtTextOutW(%d, %d, 0x%08X), 0x%08X\n"), x, y, options, color);
 
+		if (color == ::GetSysColor(COLOR_BTNFACE))
+			::SetBkColor(dc, my::getFillColor_Dialog());
+	}
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }
 
