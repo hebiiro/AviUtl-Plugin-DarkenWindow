@@ -186,7 +186,6 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 					initThemeHook(hwnd);
 				}
 			}
-#if 1
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
 			{
 				MY_TRACE(_T("拡張編集をフックします\n"));
@@ -202,7 +201,9 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				hookAbsoluteCall((DWORD)exedit_auf + 0x0003836A, Exedit::drawRootEdge);
 
 				hookAbsoluteCall((DWORD)exedit_auf + 0x00037CFF, Exedit::drawLayerText);
-				hookAbsoluteCall((DWORD)exedit_auf + 0x00037D46, Exedit::drawLayerEdge);
+//				hookAbsoluteCall((DWORD)exedit_auf + 0x00037D46, Exedit::drawLayerEdge);
+//				static DWORD g_Exedit_drawLayerEdge = (DWORD)Exedit::drawLayerEdge;
+//				writeAbsoluteAddress((DWORD)exedit_auf + 0x00037D46 + 2, &g_Exedit_drawLayerEdge);
 
 				hookCall((DWORD)exedit_auf + 0x000380DF, Exedit::drawTimelineLongGuage);
 				hookCall((DWORD)exedit_auf + 0x000381D7, Exedit::drawTimelineShortGuage);
@@ -211,7 +212,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				hookAbsoluteCall((DWORD)exedit_auf + 0x00038538, Exedit::fillLayerBackground);
 				hookAbsoluteCall((DWORD)exedit_auf + 0x0003860E, Exedit::fillLayerBackground);
 				hookAbsoluteCall((DWORD)exedit_auf + 0x000386E4, Exedit::fillGroupBackground);
-
+#if 0
 				DetourTransactionBegin();
 				DetourUpdateThread(::GetCurrentThread());
 
@@ -226,8 +227,9 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				{
 					MY_TRACE(_T("API フックに失敗しました\n"));
 				}
-			}
 #endif
+			}
+
 			break;
 		}
 	case WM_CTLCOLORDLG:

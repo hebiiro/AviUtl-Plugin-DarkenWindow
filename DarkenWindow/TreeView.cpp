@@ -105,6 +105,9 @@ HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId,
 //	MY_TRACE(_T("TreeViewThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
 #if 1
+	if (textFlags & DT_CALCRECT)
+		return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
+
 	RECT rc2 = *rc;
 	UINT format = textFlags | DT_NOCLIP;
 
@@ -133,20 +136,20 @@ HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId,
 			case TREIS_SELECTED: // = 3,
 			case TREIS_SELECTEDNOTFOCUS: // = 5,
 				{
-					my::drawShadowText2(dc, text, c, rc, format,
+					my::drawShadowText2(dc, text, c, &rc2, format,
 						my::getForeTextColor_Dialog(), my::getBackTextColor_Dialog());
 					break;
 				}
 			case TREIS_HOT: // = 2,
 			case TREIS_HOTSELECTED: // = 6,
 				{
-					my::drawShadowText2(dc, text, c, rc, format,
+					my::drawShadowText2(dc, text, c, &rc2, format,
 						my::getForeTextColor_Dialog_Hot(), my::getBackTextColor_Dialog());
 					break;
 				}
 			case TREIS_DISABLED: // = 4,
 				{
-					my::drawShadowText2(dc, text, c, rc, format,
+					my::drawShadowText2(dc, text, c, &rc2, format,
 						my::getForeTextColor_Dialog_Disabled(), my::getBackTextColor_Dialog());
 					break;
 				}
@@ -164,27 +167,6 @@ HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId,
 			break;
 		}
 	}
-#endif
-#if 0
-	DTTOPTS op = { sizeof(op) };
-	op.dwFlags = DTT_TEXTCOLOR |
-//		DTT_BORDERCOLOR | DTT_BORDERSIZE |
-		DTT_SHADOWCOLOR | DTT_SHADOWTYPE | DTT_SHADOWOFFSET |
-		DTT_APPLYOVERLAY | DTT_GLOWSIZE;
-	op.crText = my::getForeTextColor_Dialog();
-	op.crBorder = RGB(0x00, 0x0, 0x00);
-	op.crShadow = RGB(0x00, 0x00, 0xff);
-	op.iTextShadowType = TST_SINGLE;
-//	op.iTextShadowType = TST_CONTINUOUS;
-	op.ptShadowOffset.x = 1;
-	op.ptShadowOffset.y = 1;
-	op.iBorderSize = 2;
-	op.fApplyOverlay = TRUE;
-	op.iGlowSize = 0;
-
-	RECT rc2 = *rc;
-	DrawTextW(dc, text, c, &rc2, textFlags | DT_CALCRECT);
-	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, &rc2, &op);
 #endif
 	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
@@ -232,7 +214,7 @@ LRESULT TreeViewRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UIN
 			HTREEITEM ti = TreeView_GetFirstVisible(hwnd);
 			while (ti)
 			{
-				RECT rc; TreeView_GetItemRect(hwnd, ti, &rc, FALSE);
+				RECT rc; TreeView_GetItemRect(hwnd, ti, &rc, TRUE);
 				::ExtFloodFill(dc, rc.left, rc.top + 6, RGB(0xff, 0xff, 0xff), FLOODFILLSURFACE);
 				ti = TreeView_GetNextVisible(hwnd, ti);
 			}
