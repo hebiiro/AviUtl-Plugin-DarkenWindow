@@ -99,9 +99,6 @@ LRESULT SpinRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT me
 	{
 	case WM_ERASEBKGND:
 		{
-			HDC dc = (HDC)wParam;
-			RECT rc; ::GetClientRect(hwnd, &rc);
-			my::fillRect_Dialog(dc, &rc);
 			return TRUE;
 		}
 	}

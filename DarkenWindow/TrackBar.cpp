@@ -124,22 +124,26 @@ LRESULT TrackBarRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UIN
 {
 //	MY_TRACE(_T("TrackBarRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
 
-	LRESULT result = true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
-
 	switch (message)
 	{
+	case WM_ERASEBKGND:
+		{
+			return TRUE;
+		}
 	case WM_LBUTTONDOWN:
 		{
+			LRESULT result = true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+
 			// コモンコントロールをバージョン 6 にすると、WM_LBUTTONDOWN で
 			// SB_THUMBTRACK が送られてこないので手動で送る。
 			int pos = ::SendMessage(hwnd, TBM_GETPOS, 0, 0);
 			::SendMessage(::GetParent(hwnd), WM_HSCROLL, MAKEWPARAM(SB_THUMBTRACK, pos), (LPARAM)hwnd);
 
-			break;
+			return result;
 		}
 	}
 
-	return result;
+	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }
 
 int TrackBarRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
