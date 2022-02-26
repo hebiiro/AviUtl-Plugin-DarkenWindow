@@ -47,6 +47,9 @@ void initHook()
 
 	// 2B = 7671339B - 76713370
 	DWORD address1 = ::CallWindowProcW(getCallWindowProcInternal, 0, 0, 0, 0) - 0x2B;
+	BYTE code[1] = {};
+	::ReadProcessMemory(::GetCurrentProcess(), (LPCVOID)address1, code, sizeof(code), 0);
+	if (code[0] == 0xCC) address1 += 0x01;
 	DWORD address2 = (DWORD)user32 + 0x00043370;
 	true_CallWindowProcInternal = (Type_CallWindowProcInternal)address1;
 
@@ -77,7 +80,9 @@ void initHook()
 //	ATTACH_HOOK_PROC(LoadIconW);
 	ATTACH_HOOK_PROC(LoadImageA);
 //	ATTACH_HOOK_PROC(LoadImageW);
+#if 0
 	ATTACH_HOOK_PROC(DialogBoxParamA);
+#endif
 #if 0
 	ATTACH_HOOK_PROC(OpenThemeData);
 	ATTACH_HOOK_PROC(OpenThemeDataForDpi);

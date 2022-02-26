@@ -57,6 +57,7 @@ HRESULT MenuThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId,
 //			MY_TRACE(_T("MENU_POPUPBACKGROUND, %d, %d, %d, %d\n"), rc->left, rc->top, rc->right, rc->bottom);
 
 			Clipper clipper(dc, rcClip);
+			::InflateRect(&rc2, 3, 3);
 			my::fillRect_Dialog(dc, &rc2);
 			return S_OK;
 		}
@@ -68,6 +69,8 @@ HRESULT MenuThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId,
 		}
 	case MENU_POPUPGUTTER: // = 13, // テキスト左のアイコンの背景
 		{
+			MY_TRACE_RECT2(rc2);
+			rc2.left = 0;
 			my::fillRect_Gutter(dc, &rc2);
 			return S_OK;
 		}
@@ -149,6 +152,10 @@ HRESULT MenuThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId,
 		{
 //			MY_TRACE(_T("MENU_POPUPITEM\n"));
 
+			RECT rc3 = *rc;
+			rc3.left += 28;
+			my::fillRect_Dialog(dc, &rc3);
+
 			switch (stateId)
 			{
 			case MPI_NORMAL:
@@ -168,7 +175,7 @@ HRESULT MenuThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId,
 		}
 	case MENU_POPUPSEPARATOR: // = 15,
 		{
-			::InflateRect(&rc2, -2, -2);
+			::InflateRect(&rc2, 0, -2);
 			my::fillRect_Separator(dc, &rc2);
 			return S_OK;
 		}
@@ -282,6 +289,14 @@ HRESULT MenuThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId,
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
 }
 
+HRESULT MenuThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
+{
+	MY_TRACE(_T("MenuThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+
+	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
+}
+
 HRESULT MenuThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
 {
 //	MY_TRACE(_T("MenuThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
@@ -360,6 +375,14 @@ HRESULT MenuThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int s
 	}
 
 	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
+}
+
+HRESULT MenuThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
+{
+	MY_TRACE(_T("MenuThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+
+	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
 
 HRESULT MenuThemeRenderer::DrawThemeIcon(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int imageIndex)
