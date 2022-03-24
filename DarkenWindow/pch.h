@@ -22,11 +22,17 @@
 
 #include <string>
 #include <memory>
+#include <vector>
+#include <list>
 #include <map>
+
+#import <msxml3.dll>
 
 typedef const BYTE* LPCBYTE;
 #include "../AviUtl/aulslib/exedit.h"
 #include "../Common/MyTracer.h"
+#include "../Common/MyMSXML.h"
+#include "../Common/FileUpdateChecker.h"
 #include "../Detours.4.0.1/detours.h"
 #pragma comment(lib, "../Detours.4.0.1/detours.lib")
 

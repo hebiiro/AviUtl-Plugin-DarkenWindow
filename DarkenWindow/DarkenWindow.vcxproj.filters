@@ -15,6 +15,10 @@
     <ClInclude Include="resource.h">
       <Filter>Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Skin.h" />
+    <ClInclude Include="..\Common\FileUpdateChecker.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -74,6 +78,13 @@
       <Filter>Controls</Filter>
     </ClCompile>
     <ClCompile Include="ToolBar.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Skin.cpp" />
+    <ClCompile Include="..\Common\FileUpdateChecker.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandModule.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
   </ItemGroup>

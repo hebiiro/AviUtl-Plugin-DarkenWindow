@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
@@ -11,189 +12,9 @@ HRESULT ButtonThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partI
 //	MY_TRACE(_T("ButtonThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
-	RECT rc2 = *rc;
-
-	switch (partId)
 	{
-/*
-	case BP_USERBUTTON: // = 5,
-	case BP_COMMANDLINK: // = 6,
-	case BP_COMMANDLINKGLYPH: // = 7,
-	case BP_RADIOBUTTON_HCDISABLED: // = 8,
-	case BP_CHECKBOX_HCDISABLED: // = 9,
-	case BP_GROUPBOX_HCDISABLED: // = 10,
-	case BP_PUSHBUTTONDROPDOWN: // = 11,
-*/
-	case BP_PUSHBUTTON: // = 1,
-		{
-			my::fillRect_Dialog(dc, &rc2);
-
-			switch (stateId)
-			{
-			case PBS_NORMAL: // = 1,
-			case PBS_DISABLED: // = 4,
-			case PBS_DEFAULTED: // = 5,
-			case PBS_DEFAULTED_ANIMATING: // = 6,
-				{
-					return S_OK;
-				}
-			case PBS_HOT: // = 2,
-				{
-					my::drawDoubleEdge_Etched(dc, &rc2);
-					return S_OK;
-				}
-			case PBS_PRESSED: // = 3,
-				{
-					my::frameRect_Button(dc, &rc2);
-//					my::drawDoubleEdge_Sunken(dc, &rc2);
-					return S_OK;
-				}
-			}
-
-			break;
-		}
-	case BP_RADIOBUTTON: // = 2,
-		{
-			UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
-
-			switch (stateId)
-			{
-			case RBS_UNCHECKEDNORMAL: // = 1,
-				{
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					return S_OK;
-				}
-			case RBS_CHECKEDNORMAL: // = 5,
-				{
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					my::drawShadowIcon_Dialog_Hot(dc, &rc2, _T('\x61'), format);
-					return S_OK;
-				}
-			case RBS_UNCHECKEDHOT: // = 2,
-				{
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					return S_OK;
-				}
-			case RBS_CHECKEDHOT: // = 6,
-				{
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					my::drawShadowIcon_Dialog_Hot(dc, &rc2, _T('\x61'), format);
-					return S_OK;
-				}
-			case RBS_UNCHECKEDPRESSED: // = 3,
-				{
-					::OffsetRect(&rc2, 1, 1);
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					return S_OK;
-				}
-			case RBS_CHECKEDPRESSED: // = 7,
-				{
-					::OffsetRect(&rc2, 1, 1);
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					my::drawShadowIcon_Dialog_Hot(dc, &rc2, _T('\x61'), format);
-					return S_OK;
-				}
-			case RBS_UNCHECKEDDISABLED: // = 4,
-				{
-					my::drawShadowIcon_Dialog_Disabled(dc, &rc2, _T('\x63'), format);
-					return S_OK;
-				}
-			case RBS_CHECKEDDISABLED: // = 8,
-				{
-					my::drawShadowIcon_Dialog_Disabled(dc, &rc2, _T('\x63'), format);
-					my::drawShadowIcon_Dialog_Disabled(dc, &rc2, _T('\x61'), format);
-					return S_OK;
-				}
-			}
-
-			break;
-		}
-	case BP_CHECKBOX: // = 3,
-		{
-			UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
-
-			switch (stateId)
-			{
-			case CBS_UNCHECKEDNORMAL: // = 1,
-				{
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					return S_OK;
-				}
-			case CBS_CHECKEDNORMAL: // = 5,
-				{
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					my::drawShadowIcon_Dialog_Hot(dc, &rc2, _T('\x61'), format);
-					return S_OK;
-				}
-			case CBS_MIXEDNORMAL: // = 9,
-			case CBS_IMPLICITNORMAL: // = 13,
-			case CBS_EXCLUDEDNORMAL: // = 17,
-				break;
-			case CBS_UNCHECKEDHOT: // = 2,
-				{
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					return S_OK;
-				}
-			case CBS_CHECKEDHOT: // = 6,
-				{
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					my::drawShadowIcon_Dialog_Hot(dc, &rc2, _T('\x61'), format);
-					return S_OK;
-				}
-			case CBS_MIXEDHOT: // = 10,
-			case CBS_IMPLICITHOT: // = 14,
-			case CBS_EXCLUDEDHOT: // = 18,
-				break;
-			case CBS_UNCHECKEDPRESSED: // = 3,
-				{
-					::OffsetRect(&rc2, 1, 1);
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					return S_OK;
-				}
-			case CBS_CHECKEDPRESSED: // = 7,
-				{
-					::OffsetRect(&rc2, 1, 1);
-					my::drawShadowIcon_Dialog(dc, &rc2, _T('\x63'), format);
-					my::drawShadowIcon_Dialog_Hot(dc, &rc2, _T('\x61'), format);
-					return S_OK;
-				}
-			case CBS_MIXEDPRESSED: // = 11,
-			case CBS_IMPLICITPRESSED: // = 15,
-			case CBS_EXCLUDEDPRESSED: // = 19,
-				break;
-			case CBS_UNCHECKEDDISABLED: // = 4,
-				{
-					my::drawShadowIcon_Dialog_Disabled(dc, &rc2, _T('\x63'), format);
-					return S_OK;
-				}
-			case CBS_CHECKEDDISABLED: // = 8,
-				{
-					my::drawShadowIcon_Dialog_Disabled(dc, &rc2, _T('\x63'), format);
-					my::drawShadowIcon_Dialog_Disabled(dc, &rc2, _T('\x61'), format);
-					return S_OK;
-				}
-			case CBS_MIXEDDISABLED: // = 12,
-			case CBS_IMPLICITDISABLED: // = 16,
-			case CBS_EXCLUDEDDISABLED: // = 20,
-				break;
-			}
-
-			break;
-		}
-	case BP_GROUPBOX: // = 4,
-		{
-			switch (stateId)
-			{
-			case GBS_NORMAL:
-			case GBS_DISABLED:
-				{
-					my::drawDoubleEdge_Etched(dc, &rc2);
-					return S_OK;
-				}
-			}
-
-			break;
-		}
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
+			return S_OK;
 	}
 
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
@@ -204,145 +25,9 @@ HRESULT ButtonThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int
 //	MY_TRACE(_T("ButtonThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
-	RECT rc2 = *rc;
-
-	switch (partId)
 	{
-/*
-	case BP_USERBUTTON: // = 5,
-	case BP_COMMANDLINK: // = 6,
-	case BP_COMMANDLINKGLYPH: // = 7,
-	case BP_RADIOBUTTON_HCDISABLED: // = 8,
-	case BP_CHECKBOX_HCDISABLED: // = 9,
-	case BP_GROUPBOX_HCDISABLED: // = 10,
-	case BP_PUSHBUTTONDROPDOWN: // = 11,
-*/
-	case BP_PUSHBUTTON: // = 1,
-		{
-			switch (stateId)
-			{
-			case PBS_NORMAL: // = 1,
-			case PBS_DEFAULTED: // = 5,
-			case PBS_DEFAULTED_ANIMATING: // = 6,
-				{
-					my::drawShadowText_Dialog(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case PBS_DISABLED: // = 4,
-				{
-					my::drawShadowText_Dialog_Disabled(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case PBS_PRESSED: // = 3,
-				{
-					::OffsetRect(&rc2, 1, 1);
-					my::drawShadowText_Dialog_Hot(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case PBS_HOT: // = 2,
-				{
-					my::drawShadowText_Dialog_Hot(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			}
-
-			break;
-		}
-	case BP_RADIOBUTTON: // = 2,
-		{
-			my::fillRect_Dialog(dc, &rc2);
-
-			switch (stateId)
-			{
-			case RBS_UNCHECKEDNORMAL: // = 1,
-			case RBS_CHECKEDNORMAL: // = 5,
-				{
-					my::drawShadowText_Dialog(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case RBS_UNCHECKEDHOT: // = 2,
-			case RBS_CHECKEDHOT: // = 6,
-				{
-					my::drawShadowText_Dialog_Hot(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case RBS_UNCHECKEDPRESSED: // = 3,
-			case RBS_CHECKEDPRESSED: // = 7,
-				{
-					::OffsetRect(&rc2, 1, 1);
-					my::drawShadowText_Dialog_Hot(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case RBS_UNCHECKEDDISABLED: // = 4,
-			case RBS_CHECKEDDISABLED: // = 8,
-				{
-					my::drawShadowText_Dialog_Disabled(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			}
-
-			break;
-		}
-	case BP_CHECKBOX: // = 3,
-		{
-			my::fillRect_Dialog(dc, &rc2);
-
-			switch (stateId)
-			{
-			case CBS_UNCHECKEDNORMAL: // = 1,
-			case CBS_CHECKEDNORMAL: // = 5,
-			case CBS_MIXEDNORMAL: // = 9,
-			case CBS_IMPLICITNORMAL: // = 13,
-			case CBS_EXCLUDEDNORMAL: // = 17,
-				{
-					my::drawShadowText_Dialog(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case CBS_UNCHECKEDHOT: // = 2,
-			case CBS_CHECKEDHOT: // = 6,
-			case CBS_MIXEDHOT: // = 10,
-			case CBS_IMPLICITHOT: // = 14,
-			case CBS_EXCLUDEDHOT: // = 18,
-				{
-					my::drawShadowText_Dialog_Hot(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case CBS_UNCHECKEDPRESSED: // = 3,
-			case CBS_CHECKEDPRESSED: // = 7,
-			case CBS_MIXEDPRESSED: // = 11,
-			case CBS_IMPLICITPRESSED: // = 15,
-			case CBS_EXCLUDEDPRESSED: // = 19,
-				{
-					::OffsetRect(&rc2, 1, 1);
-					my::drawShadowText_Dialog_Hot(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case CBS_UNCHECKEDDISABLED: // = 4,
-			case CBS_CHECKEDDISABLED: // = 8,
-			case CBS_MIXEDDISABLED: // = 12,
-			case CBS_IMPLICITDISABLED: // = 16,
-			case CBS_EXCLUDEDDISABLED: // = 20,
-				{
-					my::drawShadowText_Dialog_Disabled(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			}
-
-			break;
-		}
-	case BP_GROUPBOX: // = 4,
-		{
-			switch (stateId)
-			{
-			case GBS_NORMAL:
-			case GBS_DISABLED:
-				{
-					break;
-				}
-			}
-
-			break;
-		}
+		if (g_skin.onDrawThemeText(theme, dc, partId, stateId, text, c, textFlags, rc))
+			return S_OK;
 	}
 
 	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
@@ -371,7 +56,7 @@ LRESULT ButtonRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 //	MY_TRACE(_T("ButtonRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
 
 	{
-		LRESULT result = my::onNcPaint(wndProc, hwnd, message, wParam, lParam);
+		LRESULT result = onNcPaint(wndProc, hwnd, message, wParam, lParam);
 		if (!result) return result;
 	}
 

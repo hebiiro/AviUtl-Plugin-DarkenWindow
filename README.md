@@ -1,5 +1,6 @@
 # AviUtl プラグイン - 黒窓
 
+* version 3.0.0 by 蛇色 - 2022/03/24 スキンを変更できるように修正
 * version 2.0.4 by 蛇色 - 2022/02/26 Win11 でも動作するように修正
 * version 2.0.3 by 蛇色 - 2022/02/21 トラックバーとスピンボタンのチラツキを軽減
 * version 2.0.2 by 蛇色 - 2022/02/20 ごちゃまぜドロップスでエラーが出る問題を修正
@@ -20,8 +21,9 @@ AviUtl の見た目をダークモードにします。
 
 1. 以下のファイルを AviUtl のフォルダに配置します。
 	* aviutl_dark.exe.manifest
-2. 以下のファイルを AviUtl の Plugins フォルダに配置します。
+2. 以下のファイルとフォルダを AviUtl の Plugins フォルダに配置します。
 	* DarkenWindow.aul
+	* DarkenWindow (フォルダ)
 3. aviutl.exe をリソースエディタ (RisohEditor など) で開きます。
 4. マニフェスト (RT_MANIFEST のような名前の項目) を削除します。
 5. ファイル名を aviutl_dark.exe にして保存します。
@@ -32,10 +34,9 @@ AviUtl の見た目をダークモードにします。
 
 ## 設定
 
-今のところありません。
+DarkenWindow フォルダ内の xml ファイルをテキストエディタで編集します。AviUtl 起動中でも編集が反映されます。
 
 ## 動作確認
 
 * (必須) AviUtl 1.10 & 拡張編集 0.92 http://spring-fragrance.mints.ne.jp/aviutl/
-* (共存確認) patch.aul r11 https://www.nicovideo.jp/watch/sm40027189
-* (共存確認) eclipse_fast 1.00 https://www.nicovideo.jp/watch/sm39756003
+* (共存確認) patch.aul r14 https://www.nicovideo.jp/watch/sm40087155

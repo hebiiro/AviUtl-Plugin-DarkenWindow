@@ -81,7 +81,9 @@ class ComboBoxThemeRenderer : public ThemeRenderer
 {
 public:
 	virtual HRESULT DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip);
+	virtual HRESULT DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options);
 	virtual HRESULT DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc);
+	virtual HRESULT DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options);
 	virtual HRESULT DrawThemeIcon(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int iImageIndex);
 	virtual HRESULT DrawThemeEdge(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT destRect, UINT edge, UINT flags, LPRECT contentRect);
 };
@@ -90,7 +92,9 @@ class ListBoxThemeRenderer : public ThemeRenderer
 {
 public:
 	virtual HRESULT DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip);
+	virtual HRESULT DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options);
 	virtual HRESULT DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc);
+	virtual HRESULT DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options);
 	virtual HRESULT DrawThemeIcon(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int iImageIndex);
 	virtual HRESULT DrawThemeEdge(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT destRect, UINT edge, UINT flags, LPRECT contentRect);
 };
@@ -159,6 +163,18 @@ public:
 };
 
 class ToolBarThemeRenderer : public ThemeRenderer
+{
+public:
+	virtual HRESULT DrawThemeParentBackground(HWND hwnd, HDC dc, LPCRECT rc);
+	virtual HRESULT DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip);
+	virtual HRESULT DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options);
+	virtual HRESULT DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc);
+	virtual HRESULT DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options);
+	virtual HRESULT DrawThemeIcon(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int iImageIndex);
+	virtual HRESULT DrawThemeEdge(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT destRect, UINT edge, UINT flags, LPRECT contentRect);
+};
+
+class CommandModuleThemeRenderer : public ThemeRenderer
 {
 public:
 	virtual HRESULT DrawThemeParentBackground(HWND hwnd, HDC dc, LPCRECT rc);

@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
@@ -11,11 +12,7 @@ HRESULT EditThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId,
 //	MY_TRACE(_T("EditThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
-	// 非クライアント領域のクライアントエッジ。
-	my::fillRect_Dialog(dc, rc);
-	my::drawDoubleEdge_Sunken(dc, rc);
-	return S_OK;
-//	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
+	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
 }
 
 HRESULT EditThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
@@ -49,7 +46,7 @@ LRESULT EditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT me
 //	MY_TRACE(_T("EditRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
 
 	{
-		LRESULT result = my::onNcPaint(wndProc, hwnd, message, wParam, lParam);
+		LRESULT result = onNcPaint(wndProc, hwnd, message, wParam, lParam);
 		if (!result) return result;
 	}
 
@@ -59,14 +56,7 @@ LRESULT EditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT me
 int EditRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
 //	MY_TRACE(_T("EditRenderer::FillRect()\n"));
-#if 0
-	if (renderer->m_currentState.m_message == WM_NCPAINT)
-	{
-		// 非クライアント領域の背景
-		my::fillRect_Dialog(dc, rc);
-		return TRUE;
-	}
-#endif
+
 	return true_FillRect(dc, rc, brush);
 }
 
@@ -94,14 +84,7 @@ BOOL EditRenderer::FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 BOOL EditRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags)
 {
 //	MY_TRACE(_T("EditRenderer::DrawEdge()\n"));
-#if 0
-	if (renderer->m_currentState.m_message == WM_NCPAINT)
-	{
-		// 非クライアント領域のクライアントエッジ
-		my::drawDoubleEdge_Sunken(dc, rc);
-		return TRUE;
-	}
-#endif
+
 	return true_DrawEdge(dc, rc, edge, flags);
 }
 
@@ -123,22 +106,39 @@ BOOL EditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT o
 {
 //	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
 #if 1
-	if (options & (ETO_GLYPH_INDEX | ETO_IGNORELANGUAGE))
+	if (!(options & ETO_IGNORELANGUAGE))
 	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_EDIT);
+
 		if (options & ETO_OPAQUE)
 		{
 			COLORREF color = ::GetBkColor(dc);
 			if (color == ::GetSysColor(COLOR_HIGHLIGHT))
 			{
-				::SetBkColor(dc, my::getFillColor_Window_Selected());
-				::SetTextColor(dc, my::getForeTextColor_Window());
+				if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_SELECTED, x, y, options, rc, text, c, dx))
+					return TRUE;
 			}
 		}
+
 		if (::IsWindowEnabled(currentState->m_hwnd))
-			my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
+		{
+			DWORD style = GetWindowStyle(currentState->m_hwnd);
+			if (style & ES_READONLY)
+			{
+				if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_READONLY, x, y, options, rc, text, c, dx))
+					return TRUE;
+			}
+			else
+			{
+				if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_NORMAL, x, y, options, rc, text, c, dx))
+					return TRUE;
+			}
+		}
 		else
-			my::shadowTextOut_Window_Disabled(dc, x, y, options, rc, text, c, dx);
-		return TRUE;
+		{
+			if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_DISABLED, x, y, options, rc, text, c, dx))
+				return TRUE;
+		}
 	}
 #endif
 //	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) Begin\n"), dc, x, y, options);
@@ -153,3 +153,5 @@ BOOL EditRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int 
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }
+
+//--------------------------------------------------------------------

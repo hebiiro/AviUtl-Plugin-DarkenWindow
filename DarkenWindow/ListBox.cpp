@@ -3,20 +3,24 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
 HRESULT ListBoxThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
 {
-	MY_TRACE(_T("ListBoxThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
-
-	// 非クライアント領域のクライアントエッジ。
-	my::fillRect_Dialog(dc, rc);
-	my::drawDoubleEdge_Sunken(dc, rc);
-	return S_OK;
+//	MY_TRACE(_T("ListBoxThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
+}
+
+HRESULT ListBoxThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
+{
+	MY_TRACE(_T("ListBoxThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+
+	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
 }
 
 HRESULT ListBoxThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
@@ -25,6 +29,14 @@ HRESULT ListBoxThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, in
 		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
 	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
+}
+
+HRESULT ListBoxThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
+{
+	MY_TRACE(_T("ListBoxThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+
+	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
 
 HRESULT ListBoxThemeRenderer::DrawThemeIcon(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int imageIndex)
@@ -50,7 +62,7 @@ LRESULT ListBoxRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT
 //	MY_TRACE(_T("ListBoxRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
 
 	{
-		LRESULT result = my::onNcPaint(wndProc, hwnd, message, wParam, lParam);
+		LRESULT result = onNcPaint(wndProc, hwnd, message, wParam, lParam);
 		if (!result) return result;
 	}
 
@@ -88,15 +100,7 @@ BOOL ListBoxRenderer::FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH 
 BOOL ListBoxRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags)
 {
 	MY_TRACE(_T("ListBoxRenderer::DrawEdge(0x%08X, 0x%08X), 0x%08X\n"), edge, flags, currentState->m_message);
-#if 0
-	if (edge == EDGE_SUNKEN)
-	{
-		// 非クライアント領域のクライアントエッジ。
-		my::drawDoubleEdge_Sunken(dc, rc);
-		if (flags & BF_ADJUST) ::InflateRect(rc, -2, -2);
-		return TRUE;
-	}
-#endif
+
 	return true_DrawEdge(dc, rc, edge, flags);
 }
 
@@ -118,23 +122,30 @@ BOOL ListBoxRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UIN
 {
 //	MY_TRACE(_T("ListBoxRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 #if 1
-	if (options & (ETO_GLYPH_INDEX | ETO_IGNORELANGUAGE))
+	if (!(options & ETO_IGNORELANGUAGE))
 	{
-		if (currentState->m_message != WM_NCPAINT)
+		HTHEME theme = g_skin.getTheme(Dark::THEME_LISTBOX);
+
 		if (options & ETO_OPAQUE)
 		{
 			COLORREF color = ::GetBkColor(dc);
 			if (color == ::GetSysColor(COLOR_HIGHLIGHT))
 			{
-				::SetBkColor(dc, my::getFillColor_Window_Selected());
-				::SetTextColor(dc, my::getForeTextColor_Window());
+				if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_SELECTED, x, y, options, rc, text, c, dx))
+					return TRUE;
 			}
 		}
+
 		if (::IsWindowEnabled(currentState->m_hwnd))
-			my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
+		{
+			if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_NORMAL, x, y, options, rc, text, c, dx))
+				return TRUE;
+		}
 		else
-			my::shadowTextOut_Window_Disabled(dc, x, y, options, rc, text, c, dx);
-		return TRUE;
+		{
+			if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_DISABLED, x, y, options, rc, text, c, dx))
+				return TRUE;
+		}
 	}
 #endif
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);

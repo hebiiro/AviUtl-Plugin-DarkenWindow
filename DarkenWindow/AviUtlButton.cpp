@@ -3,6 +3,9 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
+
+//--------------------------------------------------------------------
 
 LRESULT AviUtlButtonRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -50,21 +53,24 @@ BOOL AviUtlButtonRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT
 	int w = rc->right - rc->left;
 	int h = rc->bottom - rc->top;
 
-	int ix = x, iy = x;
-	if (edge == EDGE_SUNKEN) ix += 1, iy += 1;
+	HTHEME theme = g_skin.getTheme(Dark::THEME_BUTTON);
+	int partId = BP_PUSHBUTTON;
+	int stateId = PBS_NORMAL;
 
-	my::fillRect_Dialog(dc, rc);
-	::BitBlt(dc, x, y, w, h, 0, 0, 0, DSTINVERT);
-//	int rop2 = ::SetROP2(dc, R2_NOTCOPYPEN);
-	::DrawIconEx(dc, ix, iy, icon, w, h, 0, NULL, DI_NORMAL);
-//	::SetROP2(dc, rop2);
-	::BitBlt(dc, x, y, w, h, 0, 0, 0, DSTINVERT);
 	if (edge == EDGE_SUNKEN)
-		my::drawDoubleEdge_Sunken(dc, rc);
-//	else
-//		my::drawDoubleEdge_Raised(dc, rc);
+	{
+		x += 1;
+		y += 1;
+		stateId = PBS_PRESSED;
+	}
+
+	RECT rc2 = *rc;
+	g_skin.onDrawThemeBackground(theme, dc, partId, stateId, &rc2);
+	::InvertRect(dc, rc);
+	::DrawIconEx(dc, x, y, icon, w, h, 0, NULL, DI_NORMAL);
+	::InvertRect(dc, rc);
+
 	return TRUE;
-//	return true_DrawEdge(dc, rc, edge, flags);
 }
 
 BOOL AviUtlButtonRenderer::DrawFocusRect(State* currentState, HDC dc, LPCRECT rc)
@@ -90,7 +96,9 @@ BOOL AviUtlButtonRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y
 
 BOOL AviUtlButtonRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)
 {
-	MY_TRACE(_T("AviUtlButtonRenderer::PatBlt()\n"));
+//	MY_TRACE(_T("AviUtlButtonRenderer::PatBlt()\n"));
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }
+
+//--------------------------------------------------------------------

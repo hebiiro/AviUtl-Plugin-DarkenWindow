@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
@@ -45,7 +46,7 @@ LRESULT StaticRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 //	MY_TRACE(_T("StaticRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
 
 	{
-		LRESULT result = my::onNcPaint(wndProc, hwnd, message, wParam, lParam);
+		LRESULT result = onNcPaint(wndProc, hwnd, message, wParam, lParam);
 		if (!result) return result;
 	}
 
@@ -86,8 +87,8 @@ BOOL StaticRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge,
 
 	if (edge == EDGE_ETCHED && flags == BF_RECT)
 	{
-		my::drawDoubleEdge_Etched(dc, rc);
-		return TRUE;
+		if (g_skin.onDrawThemeBackground(g_skin.getTheme(Dark::THEME_STATIC), dc, STAT_ETCHEDEDGE, 0, rc))
+			return TRUE;
 	}
 
 	return true_DrawEdge(dc, rc, edge, flags);
@@ -113,8 +114,10 @@ BOOL StaticRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT
 
 	if (!(options & ETO_IGNORELANGUAGE))
 	{
-		my::shadowTextOut_Dialog(dc, x, y, options, rc, text, c, dx);
-		return TRUE;
+		HTHEME theme = g_skin.getTheme(Dark::THEME_STATIC);
+
+		if (g_skin.onExtTextOut(theme, dc, STAT_TEXT, 0, x, y, options, rc, text, c, dx))
+			return TRUE;
 	}
 
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);

@@ -3,60 +3,35 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
 HRESULT ListViewThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
 {
-	MY_TRACE(_T("ListViewThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+//	MY_TRACE(_T("ListViewThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+
+	// ここではホットアイテムの背景色しか描画できない。(コモンダイアログの場合)
+
+	{
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
+			return S_OK;
+	}
 
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
 }
 
 HRESULT ListViewThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
 {
-	MY_TRACE(_T("ListViewThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+//	MY_TRACE(_T("ListViewThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
 
-	RECT rc2 = *rc;
+	// ここではホットアイテムの背景色しか描画できない。(コモンダイアログの場合)
 
-	switch (partId)
 	{
-	case LVP_LISTITEM: // = 1,
-		{
-			switch (stateId)
-			{
-			case LISS_NORMAL: // = 1,
-			case LISS_DISABLED: // = 4,
-				{
-					my::fillRect_Dialog(dc, &rc2);
-					return S_OK;
-				}
-			case LISS_HOT: // = 2,
-			case LISS_SELECTED: // = 3,
-			case LISS_SELECTEDNOTFOCUS: // = 5,
-			case LISS_HOTSELECTED: // = 6,
-				{
-					my::fillRect_Window_Selected(dc, &rc2);
-					return S_OK;
-				}
-			}
-
-			break;
-		}
-	case LVP_LISTGROUP: // = 2,
-	case LVP_LISTDETAIL: // = 3,
-	case LVP_LISTSORTEDDETAIL: // = 4,
-	case LVP_EMPTYTEXT: // = 5,
-	case LVP_GROUPHEADER: // = 6,
-	case LVP_GROUPHEADERLINE: // = 7,
-	case LVP_EXPANDBUTTON: // = 8,
-	case LVP_COLLAPSEBUTTON: // = 9,
-	case LVP_COLUMNDETAIL: // = 10,
-		{
-			break;
-		}
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
+			return S_OK;
 	}
 
 	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
@@ -74,11 +49,6 @@ HRESULT ListViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId,
 {
 	MY_TRACE(_T("ListViewThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
-
-	RECT rc2 = *rc;
-	int ix = -1, iy = -1;
-	int ox = 1, oy = 1;
-	UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
 
 	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
@@ -104,23 +74,13 @@ HRESULT ListViewThemeRenderer::DrawThemeEdge(HTHEME theme, HDC dc, int partId, i
 LRESULT ListViewRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("ListViewRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
-#if 0
-	switch (message)
-	{
-	case WM_ERASEBKGND:
-		{
-			HDC dc = (HDC)wParam;
-			RECT rc; ::GetClientRect(hwnd, &rc);
-			my::fillRect_Dialog(dc, &rc);
-			return TRUE;
-		}
-	}
-#endif
+
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }
 
 LRESULT ListViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+//	MY_TRACE(_T("ListViewRenderer::CustomDraw()\n"));
 #if 0
 	NMLVCUSTOMDRAW* cd = (NMLVCUSTOMDRAW*)lParam;
 
@@ -143,19 +103,22 @@ LRESULT ListViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, W
 
 int ListViewRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-//	MY_TRACE(_T("ListViewRenderer::FillRect(%d, %d, %d, %d, 0x%08X)\n"), rc->left, rc->top, rc->right, rc->bottom, brush);
-
 	COLORREF color = my::getBrushColor(brush);
+//	MY_TRACE(_T("ListViewRenderer::FillRect(%d, %d, %d, %d, 0x%08X, 0x%08X)\n"), rc->left, rc->top, rc->right, rc->bottom, brush, color);
+
+	// 背景色を描画する。
+
+	HTHEME theme = g_skin.getTheme(Dark::THEME_LISTVIEW);
 
 	if (color == ::GetSysColor(COLOR_HIGHLIGHT))
 	{
-		my::fillRect_Window_Selected(dc, rc);
-		return TRUE;
+		if (g_skin.onDrawThemeBackground(theme, dc, LVP_LISTITEM, LISS_HOT, rc))
+			return TRUE;
 	}
 	else
 	{
-		my::fillRect_Dialog(dc, rc);
-		return TRUE;
+		if (g_skin.onDrawThemeBackground(theme, dc, LVP_LISTITEM, LISS_NORMAL, rc))
+			return TRUE;
 	}
 
 	return true_FillRect(dc, rc, brush);
@@ -207,19 +170,22 @@ BOOL ListViewRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UI
 {
 //	MY_TRACE(_T("ListViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 
-	if (options & ETO_OPAQUE)
-		::SetBkColor(dc, my::getFillColor_Gutter());
-#if 0
-	if (text)
+	if (!(options & ETO_IGNORELANGUAGE))
 	{
-		my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
-		return TRUE;
-	}
-#endif
-	if (text)
-	{
-		::SetTextColor(dc, my::getForeTextColor_Dialog());
-		::SetBkColor(dc, my::getFillColor_Dialog());
+		HTHEME theme = g_skin.getTheme(Dark::THEME_LISTVIEW);
+
+		if (options & ETO_OPAQUE)
+		{
+			// セパレータのカラーを指定する。
+
+			Dark::StatePtr state = g_skin.getState(theme, LVP_LISTITEM, 0);
+
+			if (state && state->m_fillColor != CLR_NONE)
+				::SetBkColor(dc, state->m_fillColor);
+		}
+
+		if (g_skin.onExtTextOut(theme, dc, LVP_LISTITEM, LISS_NORMAL, x, y, options, rc, text, c, dx))
+			return TRUE;
 	}
 
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);

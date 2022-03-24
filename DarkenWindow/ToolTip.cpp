@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
@@ -10,13 +11,13 @@ HRESULT ToolTipThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int part
 {
 	MY_TRACE(_T("ToolTipThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
-#if 1
-	my::fillRect_Dialog(dc, rc);
-	if (rcClip) my::clipRect(dc, rcClip);
-	return S_OK;
-#else
+
+	{
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
+			return S_OK;
+	}
+
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
-#endif
 }
 
 HRESULT ToolTipThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
@@ -104,12 +105,15 @@ BOOL ToolTipRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWS
 BOOL ToolTipRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
 	MY_TRACE(_T("ToolTipRenderer::ExtTextOutW()\n"));
-#if 1
-	my::shadowTextOut_Window(dc, x, y, options, rc, text, c, dx);
-	return TRUE;
-#else
+
+	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_TOOLTIP);
+
+		if (g_skin.onExtTextOut(theme, dc, TTP_BALLOON, 0, x, y, options, rc, text, c, dx))
+			return TRUE;
+	}
+
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
-#endif
 }
 
 BOOL ToolTipRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)
@@ -118,3 +122,5 @@ BOOL ToolTipRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, i
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }
+
+//--------------------------------------------------------------------

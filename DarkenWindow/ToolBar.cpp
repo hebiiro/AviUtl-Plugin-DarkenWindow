@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
@@ -19,69 +20,9 @@ HRESULT ToolBarThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int part
 //	MY_TRACE(_T("ToolBarThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
-	RECT rc2 = *rc;
-
-	switch (partId)
 	{
-	case 0:
-	case TP_BUTTON: // = 1,
-		{
-			switch (stateId)
-			{
-			case 0:
-			case TS_NORMAL: // = 1,
-			case TS_DISABLED: // = 4,
-				{
-					my::fillRect_Dialog(dc, &rc2);
-					return S_OK;
-				}
-			case TS_HOT: // = 2,
-				{
-					my::fillRect_Dialog(dc, &rc2);
-					my::drawDoubleEdge_Etched(dc, &rc2);
-					return S_OK;
-				}
-			case TS_PRESSED: // = 3,
-				{
-					my::fillRect_Dialog(dc, &rc2);
-					my::drawDoubleEdge_Sunken(dc, &rc2);
-					return S_OK;
-				}
-			case TS_CHECKED: // = 5,
-			case TS_HOTCHECKED: // = 6,
-			case TS_NEARHOT: // = 7,
-			case TS_OTHERSIDEHOT: // = 8,
-				{
-					break;
-				}
-			}
-
-			break;
-		}
-	case TP_DROPDOWNBUTTON: // = 2,
-	case TP_SPLITBUTTON: // = 3,
-	case TP_SPLITBUTTONDROPDOWN: // = 4,
-	case TP_SEPARATOR: // = 5,
-	case TP_SEPARATORVERT: // = 6,
-	case TP_DROPDOWNBUTTONGLYPH: // = 7,
-		{
-			switch (stateId)
-			{
-			case TS_NORMAL: // = 1,
-			case TS_HOT: // = 2,
-			case TS_PRESSED: // = 3,
-			case TS_DISABLED: // = 4,
-			case TS_CHECKED: // = 5,
-			case TS_HOTCHECKED: // = 6,
-			case TS_NEARHOT: // = 7,
-			case TS_OTHERSIDEHOT: // = 8,
-				{
-					break;
-				}
-			}
-
-			break;
-		}
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
+			return S_OK;
 	}
 
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
@@ -100,70 +41,9 @@ HRESULT ToolBarThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, in
 //	MY_TRACE(_T("ToolBarThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
-	RECT rc2 = *rc;
-
-	switch (partId)
 	{
-	case 0:
-	case TP_BUTTON: // = 1,
-		{
-			switch (stateId)
-			{
-			case TS_NORMAL: // = 1,
-				{
-					my::drawShadowText_Dialog(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case TS_HOT: // = 2,
-				{
-					my::drawShadowText_Dialog_Hot(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case TS_PRESSED: // = 3,
-				{
-					my::drawShadowText_Dialog_Selected(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case TS_DISABLED: // = 4,
-				{
-					my::drawShadowText_Dialog_Disabled(dc, text, c, &rc2, textFlags);
-					return S_OK;
-				}
-			case TS_CHECKED: // = 5,
-			case TS_HOTCHECKED: // = 6,
-			case TS_NEARHOT: // = 7,
-			case TS_OTHERSIDEHOT: // = 8,
-				{
-					break;
-				}
-			}
-
-			break;
-		}
-	case TP_DROPDOWNBUTTON: // = 2,
-	case TP_SPLITBUTTON: // = 3,
-	case TP_SPLITBUTTONDROPDOWN: // = 4,
-	case TP_SEPARATOR: // = 5,
-	case TP_SEPARATORVERT: // = 6,
-	case TP_DROPDOWNBUTTONGLYPH: // = 7,
-		{
-			switch (stateId)
-			{
-			case TS_NORMAL: // = 1,
-			case TS_HOT: // = 2,
-			case TS_PRESSED: // = 3,
-			case TS_DISABLED: // = 4,
-			case TS_CHECKED: // = 5,
-			case TS_HOTCHECKED: // = 6,
-			case TS_NEARHOT: // = 7,
-			case TS_OTHERSIDEHOT: // = 8,
-				{
-					break;
-				}
-			}
-
-			break;
-		}
+		if (g_skin.onDrawThemeText(theme, dc, partId, stateId, text, c, textFlags, rc))
+			return S_OK;
 	}
 
 	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
@@ -173,11 +53,6 @@ HRESULT ToolBarThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, 
 {
 	MY_TRACE(_T("ToolBarThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
-
-	RECT rc2 = *rc;
-	int ix = -1, iy = -1;
-	int ox = 1, oy = 1;
-	UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
 
 	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
@@ -203,39 +78,14 @@ HRESULT ToolBarThemeRenderer::DrawThemeEdge(HTHEME theme, HDC dc, int partId, in
 LRESULT ToolBarRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("ToolBarRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
-#if 0
-	switch (message)
-	{
-	case WM_ERASEBKGND:
-		{
-			HDC dc = (HDC)wParam;
-			RECT rc; ::GetClientRect(hwnd, &rc);
-			my::fillRect_Dialog(dc, &rc);
-			return TRUE;
-		}
-	}
-#endif
+
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }
 
 LRESULT ToolBarRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	NMLVCUSTOMDRAW* cd = (NMLVCUSTOMDRAW*)lParam;
-/*
-	switch (cd->nmcd.dwDrawStage)
-	{
-	case CDDS_PREPAINT:
-		{
-			return CDRF_NOTIFYITEMDRAW;
-		}
-	case CDDS_ITEMPREPAINT:
-		{
-			cd->clrText = RGB(0xff, 0xff, 0xff);
-			cd->clrTextBk = my::getFillColor_Window();
-			return CDRF_NEWFONT;
-		}
-	}
-*/
+//	MY_TRACE(_T("ToolBarRenderer::CustomDraw()\n"));
+
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }
 

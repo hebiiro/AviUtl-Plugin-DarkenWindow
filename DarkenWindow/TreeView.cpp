@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
@@ -18,69 +19,12 @@ HRESULT TreeViewThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int par
 {
 //	MY_TRACE(_T("TreeViewThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
-#if 1
-	RECT rc2 = *rc;
 
-	switch (partId)
 	{
-	case TVP_TREEITEM: // = 1,
-		{
-			switch (stateId)
-			{
-			case TREIS_NORMAL: // = 1,
-			case TREIS_HOT: // = 2,
-			case TREIS_DISABLED: // = 4,
-				{
-					my::fillRect_Dialog(dc, &rc2);
-					return S_OK;
-				}
-			case TREIS_SELECTED: // = 3,
-			case TREIS_SELECTEDNOTFOCUS: // = 5,
-			case TREIS_HOTSELECTED: // = 6,
-				{
-					my::fillRect(dc, &rc2, my::getFillColor_Window_Selected());
-					return S_OK;
-				}
-			}
-
-			break;
-		}
-	case TVP_GLYPH: // = 2,
-		{
-			WCHAR text = L'\x0036';
-			UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
-
-			switch (stateId)
-			{
-			case GLPS_CLOSED: text = L'\x0034'; break;
-			case GLPS_OPENED: text = L'\x0036'; break;
-			}
-
-			my::fillRect(dc, &rc2, my::getFillColor_Dialog());
-			my::drawShadowIcon_Dialog(dc, &rc2, text, format);
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
 			return S_OK;
-		}
-	case TVP_HOTGLYPH: // = 4,
-		{
-			WCHAR text = L'\x0036';
-			UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
-
-			switch (stateId)
-			{
-			case HGLPS_CLOSED: text = L'\x0034'; break;
-			case HGLPS_OPENED: text = L'\x0036'; break;
-			}
-
-			my::fillRect(dc, &rc2, my::getFillColor_Dialog());
-			my::drawShadowIcon_Dialog_Hot(dc, &rc2, text, format);
-			return S_OK;
-		}
-	case TVP_BRANCH: // = 3,
-		{
-			break;
-		}
 	}
-#endif
+
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
 }
 
@@ -104,70 +48,15 @@ HRESULT TreeViewThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId,
 {
 //	MY_TRACE(_T("TreeViewThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
-#if 1
+
 	if (textFlags & DT_CALCRECT)
 		return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 
-	RECT rc2 = *rc;
-	UINT format = textFlags | DT_NOCLIP;
-
-	switch (partId)
 	{
-	case TVP_TREEITEM: // = 1,
-		{
-			int bkMode = ::SetBkMode(dc, OPAQUE);
-			int bkColor = ::SetBkColor(dc, my::getFillColor_Dialog());
-
-			switch (stateId)
-			{
-			case TREIS_SELECTED: // = 3,
-			case TREIS_SELECTEDNOTFOCUS: // = 5,
-			case TREIS_HOTSELECTED: // = 6,
-			case TREIS_DISABLED: // = 4,
-				{
-					::SetBkColor(dc, my::getFillColor_Window_Selected());
-					break;
-				}
-			}
-
-			switch (stateId)
-			{
-			case TREIS_NORMAL: // = 1,
-			case TREIS_SELECTED: // = 3,
-			case TREIS_SELECTEDNOTFOCUS: // = 5,
-				{
-					my::drawShadowText2(dc, text, c, &rc2, format,
-						my::getForeTextColor_Dialog(), my::getBackTextColor_Dialog());
-					break;
-				}
-			case TREIS_HOT: // = 2,
-			case TREIS_HOTSELECTED: // = 6,
-				{
-					my::drawShadowText2(dc, text, c, &rc2, format,
-						my::getForeTextColor_Dialog_Hot(), my::getBackTextColor_Dialog());
-					break;
-				}
-			case TREIS_DISABLED: // = 4,
-				{
-					my::drawShadowText2(dc, text, c, &rc2, format,
-						my::getForeTextColor_Dialog_Disabled(), my::getBackTextColor_Dialog());
-					break;
-				}
-			}
-
-			::SetBkMode(dc, bkMode);
-			::SetBkColor(dc, bkColor);
-
+		if (g_skin.onDrawThemeText(theme, dc, partId, stateId, text, c, textFlags, rc))
 			return S_OK;
-		}
-	case TVP_GLYPH: // = 2,
-	case TVP_BRANCH: // = 3,
-	case TVP_HOTGLYPH: // = 4,
-		{
-			break;
-		}
 	}
-#endif
+
 	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
 
@@ -192,46 +81,16 @@ HRESULT TreeViewThemeRenderer::DrawThemeEdge(HTHEME theme, HDC dc, int partId, i
 LRESULT TreeViewRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("TreeViewRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
-#if 1
-	switch (message)
-	{
-#if 0
-	case WM_ERASEBKGND:
-		{
-			HDC dc = (HDC)wParam;
-			RECT rc; ::GetClientRect(hwnd, &rc);
-			my::fillRect(dc, &rc, my::getFillColor_Dialog());
-			return TRUE;
-		}
-#endif
-#if 1
-	case WM_PAINT:
-		{
-			LRESULT result = true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
-			HDC dc = ::GetDC(hwnd);
-			HBRUSH brush = ::CreateSolidBrush(my::getFillColor_Dialog());
-			HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, brush);
-			HTREEITEM ti = TreeView_GetFirstVisible(hwnd);
-			while (ti)
-			{
-				RECT rc; TreeView_GetItemRect(hwnd, ti, &rc, TRUE);
-				::ExtFloodFill(dc, rc.left, rc.top + 6, RGB(0xff, 0xff, 0xff), FLOODFILLSURFACE);
-				ti = TreeView_GetNextVisible(hwnd, ti);
-			}
-			::SelectObject(dc, oldBrush);
-			::DeleteObject(brush);
-			::ReleaseDC(hwnd, dc);
-			return result;
-		}
-#endif
-	}
-#endif
+
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }
 
 LRESULT TreeViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+//	MY_TRACE(_T("TreeViewRenderer::CustomDraw()\n"));
 #if 1
+	// テキストの色と背景色を指定する。(選択アイテム以外)
+
 	NMTVCUSTOMDRAW* cd = (NMTVCUSTOMDRAW*)lParam;
 
 	switch (cd->nmcd.dwDrawStage)
@@ -242,8 +101,14 @@ LRESULT TreeViewRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, W
 		}
 	case CDDS_ITEMPREPAINT:
 		{
-			cd->clrText = my::getForeTextColor_Dialog();
-			cd->clrTextBk = my::getFillColor_Dialog();
+			HTHEME theme = g_skin.getTheme(Dark::THEME_TREEVIEW);
+			Dark::StatePtr state = g_skin.getState(theme, TVP_TREEITEM, TREIS_NORMAL);
+
+			if (state && state->m_fillColor != CLR_NONE)
+				cd->clrTextBk = state->m_fillColor;
+			if (state && state->m_textForeColor != CLR_NONE)
+				cd->clrText = state->m_textForeColor;
+
 			return CDRF_NEWFONT;
 		}
 	}
@@ -255,9 +120,18 @@ int TreeViewRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH b
 {
 //	MY_TRACE(_T("TreeViewRenderer::FillRect()\n"));
 
-	my::fillRect_Dialog(dc, rc);
-	return TRUE;
-//	return true_FillRect(dc, rc, brush);
+	// アイテムがない部分の背景色を描画する。
+
+	HTHEME theme = g_skin.getTheme(Dark::THEME_TREEVIEW);
+	Dark::StatePtr state = g_skin.getState(theme, TVP_TREEITEM, TREIS_NORMAL);
+
+	if (state && state->m_fillColor != CLR_NONE)
+	{
+		my::fillRect(dc, rc, state->m_fillColor);
+		return TRUE;
+	}
+
+	return true_FillRect(dc, rc, brush);
 }
 
 BOOL TreeViewRenderer::DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type)

@@ -3,6 +3,9 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
+
+//--------------------------------------------------------------------
 
 HWND getComboBox(HWND exeditObjectDialog)
 {
@@ -26,6 +29,8 @@ HWND getComboBox(HWND exeditObjectDialog)
 	return 0;
 }
 
+//--------------------------------------------------------------------
+
 LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("ExeditRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
@@ -39,11 +44,16 @@ LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 		{
 //			MY_TRACE(_T("WM_ERASEBKGND, 0x%08X, 0x%08X)\n"), wParam, lParam);
 
+			// 「設定ダイアログ画面サイズ固定化プラグイン」を使用しているときはこの処理が必要。
+
 			HDC dc = (HDC)wParam;
 			RECT rc; ::GetClientRect(hwnd, &rc);
-			my::fillRect_Dialog(dc, &rc);
 
-			return TRUE;
+			HTHEME theme = g_skin.getTheme(Dark::THEME_WINDOW);
+			if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_DIALOGFACE, 0, &rc))
+				return TRUE;
+
+			break;
 		}
 	case WM_COMMAND:
 		{
@@ -52,6 +62,8 @@ LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 			HWND sender = (HWND)lParam;
 
 //			MY_TRACE(_T("WM_COMMAND, 0x%04X, 0x%04X, 0x%08X)\n"), code, id, sender);
+
+			// 「スクリプト並び替えプラグイン」を使用しているときはこの処理が必要。
 
 			if (id == 2079)
 			{
@@ -88,8 +100,9 @@ int ExeditRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 
 	if (brush == (HBRUSH)(COLOR_BTNFACE + 1))
 	{
-		my::fillRect_Dialog(dc, rc);
-		return TRUE;
+		HTHEME theme = g_skin.getTheme(Dark::THEME_WINDOW);
+		if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_DIALOGFACE, 0, rc))
+			return TRUE;
 	}
 
 	return true_FillRect(dc, rc, brush);
@@ -141,6 +154,7 @@ BOOL ExeditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT
 {
 	// 「設定ダイアログ画面サイズ固定化プラグイン」が
 	// FillSolidRect() を使用しているため以下の処理が必要。
+
 	UINT flags = ETO_GLYPH_INDEX | ETO_OPAQUE;
 	if ((options & flags) == flags)
 	{
@@ -148,7 +162,11 @@ BOOL ExeditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT
 		MY_TRACE(_T("ExeditRenderer::ExtTextOutW(%d, %d, 0x%08X), 0x%08X\n"), x, y, options, color);
 
 		if (color == ::GetSysColor(COLOR_BTNFACE))
-			::SetBkColor(dc, my::getFillColor_Dialog());
+		{
+			HTHEME theme = g_skin.getTheme(Dark::THEME_WINDOW);
+			if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_DIALOGFACE, 0, rc))
+				return TRUE;
+		}
 	}
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }
@@ -159,3 +177,5 @@ BOOL ExeditRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, in
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }
+
+//--------------------------------------------------------------------

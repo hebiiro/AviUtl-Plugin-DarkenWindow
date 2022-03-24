@@ -41,8 +41,8 @@ void initThemeHook(HWND hwnd)
 	static StaticThemeRenderer g_static;
 	static ButtonThemeRenderer g_button;
 	static EditThemeRenderer g_edit;
-	static ComboBoxThemeRenderer g_combobox;
 	static ListBoxThemeRenderer g_listbox;
+	static ComboBoxThemeRenderer g_combobox;
 	static ToolTipThemeRenderer g_tooltip;
 	static TrackBarThemeRenderer g_trackbar;
 	static SpinThemeRenderer g_spin;
@@ -50,6 +50,7 @@ void initThemeHook(HWND hwnd)
 	static ListViewThemeRenderer g_listview;
 	static TreeViewThemeRenderer g_treeview;
 	static ToolBarThemeRenderer g_toolbar;
+	static CommandModuleThemeRenderer g_commandModule;
 
 	registerRendererNC(hwnd, VSCLASS_MENU, &g_menu);
 	registerRenderer(hwnd, VSCLASS_MENU, &g_menu);
@@ -70,18 +71,20 @@ void initThemeHook(HWND hwnd)
 	registerRendererNC(hwnd, L"Explorer::" VSCLASS_MENU, &g_menu);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_MENU, &g_menu);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_SCROLLBAR, &g_scrollbar);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_STATIC, &g_static);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_BUTTON, &g_button);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_EDIT, &g_edit);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_LISTBOX, &g_listbox);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_COMBOBOX, &g_combobox);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_TOOLTIP, &g_tooltip);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_TRACKBAR, &g_trackbar);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_SPIN, &g_spin);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_HEADER, &g_header);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_LISTVIEW, &g_listview);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_TREEVIEW, &g_treeview);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_TOOLBAR, &g_toolbar);
 
-//	registerRenderer(hwnd, L"CFD::" VSCLASS_EDIT, &g_edit);
-//	registerRenderer(hwnd, L"Combobox::" VSCLASS_LISTBOX, &g_listbox);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_COMBOBOX, &g_combobox);
-//	registerRenderer(hwnd, L"Combobox::" VSCLASS_COMBOBOX, &g_combobox);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_HEADER, &g_header);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_LISTVIEW, &g_listview);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_TREEVIEW, &g_treeview);
@@ -89,16 +92,17 @@ void initThemeHook(HWND hwnd)
 	registerRendererNC(hwnd, L"ItemsView::" VSCLASS_LISTVIEW, &g_listview);
 	registerRenderer(hwnd, L"Placesbar::" VSCLASS_TOOLBAR, &g_toolbar);
 	registerRenderer(hwnd, L"AddressComposited::" VSCLASS_COMBOBOX, &g_combobox);
+	registerRendererNC(hwnd, L"CommandModule", &g_commandModule);
 }
 
 //---------------------------------------------------------------------
 
 IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, DrawThemeParentBackground, (HWND hwnd, HDC dc, LPCRECT rc))
 {
-#if 1
+#if 0
 	DWORD from = *((DWORD*)&hwnd - 1);
-//	MY_TRACE(_T("0x%08X => DrawThemeParentBackground(0x%08X, 0x%08X, 0x%08X)\n"), hwnd, dc, rc);
-//	if (rc) MY_TRACE_RECT(*rc);
+	MY_TRACE(_T("0x%08X => DrawThemeParentBackground(0x%08X, 0x%08X, 0x%08X)\n"), hwnd, dc, rc);
+	if (rc) MY_TRACE_RECT(*rc);
 #endif
 	return true_DrawThemeParentBackground(hwnd, dc, rc);
 }

@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
@@ -11,55 +12,9 @@ HRESULT SpinThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId,
 //	MY_TRACE(_T("SpinThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
-	RECT rc2 = *rc;
-	int ix = -1, iy = -1;
-	int ox = 1, oy = 1;
-	UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
-	WCHAR text = L'\x0033';
-
-	switch (partId)
 	{
-	case SPNP_UP: text = L'\x0035'; break;
-	case SPNP_DOWN: text = L'\x0036'; break;
-	case SPNP_UPHORZ: text = L'\x0034'; break;
-	case SPNP_DOWNHORZ: text = L'\x0033'; break;
-	}
-
-	switch (stateId)
-	{
-	case UPS_NORMAL:
-		{
-			my::fillRect_Dialog(dc, &rc2);
-//			my::drawDoubleEdge_Raised(dc, &rc2);
-			::InflateRect(&rc2, ix, iy);
-			my::drawShadowIcon_Dialog(dc, &rc2, text, format);
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
 			return S_OK;
-		}
-	case UPS_HOT:
-		{
-			my::fillRect_Dialog(dc, &rc2);
-			my::drawDoubleEdge_Etched(dc, &rc2);
-			::InflateRect(&rc2, ix, iy);
-			my::drawShadowIcon_Dialog_Hot(dc, &rc2, text, format);
-			return S_OK;
-		}
-	case UPS_PRESSED:
-		{
-			my::fillRect_Dialog(dc, &rc2);
-			my::drawDoubleEdge_Sunken(dc, &rc2);
-			::InflateRect(&rc2, ix, iy);
-			::OffsetRect(&rc2, ox, oy);
-			my::drawShadowIcon_Dialog_Selected(dc, &rc2, text, format);
-			return S_OK;
-		}
-	case UPS_DISABLED:
-		{
-			my::fillRect_Dialog(dc, &rc2);
-//			my::drawDoubleEdge_Raised(dc, &rc2);
-			::InflateRect(&rc2, ix, iy);
-			my::drawShadowIcon_Dialog_Disabled(dc, &rc2, text, format);
-			return S_OK;
-		}
 	}
 
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
@@ -99,6 +54,19 @@ LRESULT SpinRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT me
 	{
 	case WM_ERASEBKGND:
 		{
+			HDC dc = (HDC)wParam;
+			RECT rc; ::GetClientRect(hwnd, &rc);
+
+			DWORD style = GetWindowStyle(hwnd);
+			HTHEME theme = g_skin.getTheme(Dark::THEME_WINDOW);
+
+//			if (style & UDS_AUTOBUDDY)
+			{
+//				my::fillRect(dc, &rc, RGB(0, 255, 0));
+				g_skin.drawBackground(dc, theme, Dark::WINDOW_DIALOGFACE, 0, &rc);
+//				g_skin.drawBackground(dc, theme, Dark::WINDOW_CLIENTEDGE, 0, &rc);
+			}
+
 			return TRUE;
 		}
 	}

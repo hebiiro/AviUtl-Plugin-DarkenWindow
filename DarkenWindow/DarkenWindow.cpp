@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //---------------------------------------------------------------------
 
@@ -152,8 +153,6 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 	DWORD from = *((DWORD*)&wndProc - 1);
 	MY_TRACE(_T("0x%08X => CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), from, hwnd, message, wParam, lParam);
 #endif
-//	if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
-//		return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 
 	switch (message)
 	{
@@ -189,6 +188,9 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 
 					// 最初の AviUtl ウィンドウ作成時にテーマフックをセットする。
 					initThemeHook(hwnd);
+
+					g_skin.init(g_instance, hwnd);
+					g_skin.reloadSettings(TRUE);
 				}
 			}
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
@@ -241,94 +243,67 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 	case WM_CTLCOLORMSGBOX:
 	case WM_CTLCOLORBTN:
 	case WM_CTLCOLORSTATIC:
+	case WM_CTLCOLOREDIT:
+	case WM_CTLCOLORLISTBOX:
+	case WM_CTLCOLORSCROLLBAR:
 		{
 //			MY_TRACE(_T("WM_CTLCOLOR, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
 
-			HDC dc = (HDC)wParam;
-			HWND control = (HWND)lParam;
-			//UINT id = ::GetDlgCtrlID(control);
-			//MY_TRACE_HEX(id);
-			DWORD exStyle = ::GetWindowLong(control, GWL_EXSTYLE);
-
-			HBRUSH brush = (HBRUSH)true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
-			COLORREF bkColor = ::GetBkColor(dc);
-			//MY_TRACE(_T("brush = 0x%08X, bkColor = 0x%08X\n"), brush, bkColor);
-
-			// 拡張編集の「色の選択」ダイアログのコントロールを塗りつぶさないようにするため、拡張スタイルをチェックする。
-			if (bkColor == ::GetSysColor(COLOR_BTNFACE) || !(exStyle & (WS_EX_STATICEDGE | WS_EX_CLIENTEDGE)))
+			if (message == WM_CTLCOLOREDIT || message == WM_CTLCOLORLISTBOX)
 			{
-				static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Dialog());
-				::SetTextColor(dc, my::getForeTextColor_Dialog());
-				::SetBkColor(dc, my::getFillColor_Dialog());
-				return (LRESULT)g_brush;
+				if (wndProc != (WNDPROC)::GetClassLongA(hwnd, GCL_WNDPROC) &&
+					wndProc != (WNDPROC)::GetClassLongW(hwnd, GCL_WNDPROC) &&
+					wndProc != ::DefDlgProcA &&
+					wndProc != ::DefDlgProcW)
+				{
+					break;
+				}
 			}
-
-			return (LRESULT)brush;
-		}
-	case WM_CTLCOLOREDIT:
-	case WM_CTLCOLORLISTBOX:
-		{
-//			MY_TRACE(_T("WM_CTLCOLOREDIT\n"));
 
 			HDC dc = (HDC)wParam;
 			HWND control = (HWND)lParam;
-
-//			MY_TRACE_HEX(wndProc);
-//			MY_TRACE_HEX(::DefDlgProcA);
-//			MY_TRACE_HEX(::DefDlgProcW);
-//			MY_TRACE_HEX(::GetClassLongA(hwnd, GCL_WNDPROC));
-//			MY_TRACE_HEX(::GetClassLongW(hwnd, GCL_WNDPROC));
-//			MY_TRACE_HEX(::GetWindowLongA(hwnd, GWL_WNDPROC));
-//			MY_TRACE_HEX(::GetWindowLongW(hwnd, GWL_WNDPROC));
-
-			if (wndProc != (WNDPROC)::GetClassLongA(hwnd, GCL_WNDPROC) &&
-				wndProc != (WNDPROC)::GetClassLongW(hwnd, GCL_WNDPROC) &&
-				wndProc != ::DefDlgProcA &&
-				wndProc != ::DefDlgProcW)
-			{
-				break;
-			}
-
+			BOOL enable = ::IsWindowEnabled(control);
 			HBRUSH brush = (HBRUSH)true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
-//			MY_TRACE_HEX(brush);
 			COLORREF bkColor = ::GetBkColor(dc);
-//			MY_TRACE_HEX(bkColor);
-			BOOL enable = ::IsWindowEnabled((HWND)lParam);
-//			MY_TRACE_INT(enable);
+			COLORREF brushColor = my::getBrushColor(brush);
+//			MY_TRACE(_T("brush = 0x%08X, bkColor = 0x%08X, brushColor = 0x%08X\n"), brush, bkColor, brushColor);
 
-			if (brush == (HBRUSH)(COLOR_BTNFACE + 1))
-//			if (bkColor == ::GetSysColor(COLOR_BTNFACE))
+			HTHEME theme = g_skin.getTheme(Dark::THEME_CTLCOLOR);
+			int partId = g_skin.getCtlColorPartId(message);
+			int stateId = 0;
+			if (!enable)
 			{
-				static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Dialog());
-				::SetTextColor(dc, enable ? my::getForeTextColor_Dialog() : my::getForeTextColor_Dialog_Disabled());
-				::SetBkColor(dc, my::getFillColor_Dialog());
-				return (LRESULT)g_brush;
+				stateId = Dark::CTLCOLOR_DISABLED;
+			}
+			else if (message == WM_CTLCOLOREDIT || message == WM_CTLCOLORLISTBOX)
+			{
+				if (brush == (HBRUSH)(COLOR_BTNFACE + 1) || bkColor == ::GetSysColor(COLOR_BTNFACE))
+				{
+					stateId = Dark::CTLCOLOR_READONLY;
+				}
+				else
+				{
+					stateId = Dark::CTLCOLOR_NORMAL;
+				}
 			}
 			else
 			{
-				static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Window());
-				::SetTextColor(dc, enable ? my::getForeTextColor_Window() : my::getForeTextColor_Window_Disabled());
-				::SetBkColor(dc, my::getFillColor_Window());
-				return (LRESULT)g_brush;
+				if (brush == (HBRUSH)(COLOR_BTNFACE + 1) || bkColor == ::GetSysColor(COLOR_BTNFACE))
+				{
+					stateId = Dark::CTLCOLOR_NORMAL;
+				}
 			}
 
-			break;
-		}
-	case WM_CTLCOLORSCROLLBAR:
-		{
-			//MY_TRACE(_T("WM_CTLCOLORSCROLLBAR, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
+			Dark::StatePtr state = g_skin.getState(theme, partId, stateId);
+			if (!state)
+				return (LRESULT)brush;
 
-			HDC dc = (HDC)wParam;
-			HWND control = (HWND)lParam;
-
-			static HBRUSH g_brush = ::CreateSolidBrush(my::getFillColor_Separator());
-			return (LRESULT)g_brush;
+			::SetTextColor(dc, state->m_textForeColor);
+			::SetBkColor(dc, state->m_textBkColor);
+			return (LRESULT)state->m_fillBrush;
 		}
 	case WM_NOTIFY:
 		{
-			if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
-				break;
-
 			NMHDR* nm = (NMHDR*)lParam;
 
 			switch (nm->code)
@@ -502,8 +477,11 @@ BOOL WINAPI drawRootText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR 
 {
 //	MY_TRACE(_T("drawRootText(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
 
-	::SetBkColor(dc, my::getFillColor_Window_Selected());
-	my::shadowTextOut_Dialog(dc, x, y, options, rc, (_bstr_t)text, c, dx);
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+
+	if (g_skin.onExtTextOut(theme, dc, Dark::EXEDIT_ROOT, 0, x, y, options, rc, (_bstr_t)text, c, dx))
+		return TRUE;
+
 	return TRUE;
 }
 
@@ -511,7 +489,11 @@ BOOL WINAPI drawRootEdge(HDC dc, LPRECT rc, UINT edge, UINT flags)
 {
 //	MY_TRACE(_T("drawRootEdge(0x%08X, 0x%08X, 0x%08X)\n"), dc, edge, flags);
 
-//	my::frameRect(dc, rc, my::getFillColor_Window(), 2);
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+
+	if (g_skin.onDrawThemeBackground(theme, dc, Dark::EXEDIT_ROOT, 0, rc))
+		return TRUE;
+
 	return TRUE;
 }
 
@@ -519,15 +501,21 @@ BOOL WINAPI drawLayerText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR
 {
 //	MY_TRACE(_T("drawLayerText(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
 
+	int stateId = Dark::EXEDIT_LAYER_ACTIVE;
+
 	COLORREF bkColor = ::GetBkColor(dc);
 //	MY_TRACE_HEX(bkColor);
 	switch (bkColor)
 	{
-	case 0x00F0F0F0: ::SetBkColor(dc, my::getFillColor_Gutter()); break;
-	case 0x00CCCCCC: ::SetBkColor(dc, my::getFillColor_Window()); break;
+	case 0x00F0F0F0: stateId = Dark::EXEDIT_LAYER_ACTIVE; break;
+	case 0x00CCCCCC: stateId = Dark::EXEDIT_LAYER_INACTIVE; break;
 	}
 
-	my::shadowTextOut_Dialog(dc, x, y, options, rc, (_bstr_t)text, c, dx);
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+
+	if (g_skin.onExtTextOut(theme, dc, Dark::EXEDIT_LAYER, stateId, x, y, options, rc, (_bstr_t)text, c, dx))
+		return TRUE;
+
 	return TRUE;
 }
 
@@ -535,7 +523,11 @@ BOOL WINAPI drawLayerEdge(HDC dc, LPRECT rc, UINT edge, UINT flags)
 {
 //	MY_TRACE(_T("drawLayerEdge(0x%08X, 0x%08X, 0x%08X)\n"), dc, edge, flags);
 
-	my::frameRect(dc, rc, my::getFillColor_Window(), 1);
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+
+	if (g_skin.onDrawThemeBackground(theme, dc, Dark::EXEDIT_LAYER, 0, rc))
+		return TRUE;
+
 	return TRUE;
 }
 
@@ -543,16 +535,26 @@ void drawTimelineLongGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 {
 //	MY_TRACE(_T("drawTimelineLongGuage(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
 
-	RECT rc = { mx, my, mx + 1, ly };
-	my::fillRect(dc, &rc, my::getForeTextColor_Dialog());
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LONGGUAGE, 0);
+	if (state && state->m_fillColor != CLR_NONE)
+	{
+		RECT rc = { mx, my, mx + 1, ly };
+		my::fillRect(dc, &rc, state->m_fillColor);
+	}
 }
 
 void drawTimelineShortGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 {
 //	MY_TRACE(_T("drawTimelineShortGuage(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
 
-	RECT rc = { mx, my, mx + 1, ly };
-	my::fillRect(dc, &rc, my::getForeTextColor_Dialog());
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_SHORTGUAGE, 0);
+	if (state && state->m_fillColor != CLR_NONE)
+	{
+		RECT rc = { mx, my, mx + 1, ly };
+		my::fillRect(dc, &rc, state->m_fillColor);
+	}
 }
 
 void drawTimelineTime(HDC dc, LPCSTR text, int x, int y, int w, int h, int scroll_x)
@@ -566,28 +568,31 @@ void drawTimelineTime(HDC dc, LPCSTR text, int x, int y, int w, int h, int scrol
 
 	RECT rc = { x, y, x + w, y + h };
 	::OffsetRect(&rc, tm.tmHeight / 4 + scroll_x, 0);
-	my::drawShadowText_Dialog(dc, (_bstr_t)text, -1, &rc, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOCLIP);
+
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+
+	g_skin.onDrawThemeText(theme, dc, Dark::EXEDIT_LONGGUAGE, 0,
+		(_bstr_t)text, -1, DT_LEFT | DT_VCENTER | DT_SINGLELINE, &rc);
 }
 
 int WINAPI fillLayerBackground(HDC dc, LPCRECT rc, HBRUSH brush)
 {
 //	MY_TRACE(_T("fillLayerBackground(0x%08X, 0x%08X)\n"), dc, brush);
 
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	int stateId = 0;
+
 	COLORREF color = my::getBrushColor(brush);
 //	MY_TRACE_HEX(color);
 	switch (color)
 	{
-	case 0x00CCCCCC:
-		{
-			::SetDCBrushColor(dc, RGB(0x00, 0x00, 0x00));
-			break;
-		}
-	default:
-		{
-			::SetDCBrushColor(dc, my::getFillColor_Dialog());
-			break;
-		}
+	case 0x00CCCCCC: stateId = Dark::EXEDIT_LAYERBACKGROUND_INACTIVE; break;
+	default: stateId = Dark::EXEDIT_LAYERBACKGROUND_ACTIVE; break;
 	}
+
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERBACKGROUND, stateId);
+	if (state && state->m_fillColor != CLR_NONE)
+		::SetDCBrushColor(dc, state->m_fillColor);
 
 	return true_FillRect(dc, rc, (HBRUSH)::GetStockObject(DC_BRUSH));
 }
@@ -596,32 +601,104 @@ int WINAPI fillGroupBackground(HDC dc, LPCRECT rc, HBRUSH brush)
 {
 //	MY_TRACE(_T("fillGroupBackground(0x%08X, 0x%08X)\n"), dc, brush);
 
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	int stateId = 0;
+
 	COLORREF color = ::GetDCBrushColor(dc);
 //	MY_TRACE_HEX(color);
 	switch (color)
 	{
-	case 0x00DEDEDE: ::SetDCBrushColor(dc, RGB(0x44, 0x44, 0x44)); break;
-	case 0x00CCCCCC: ::SetDCBrushColor(dc, RGB(0x55, 0x55, 0x55)); break;
-	case 0x00BABABA: ::SetDCBrushColor(dc, RGB(0x66, 0x66, 0x66)); break;
+	case 0x00DEDEDE: stateId = Dark::EXEDIT_GROUPBACKGROUND_ACTIVE_1; break;
+	case 0x00CCCCCC: stateId = Dark::EXEDIT_GROUPBACKGROUND_ACTIVE_2; break;
+	case 0x00BABABA: stateId = Dark::EXEDIT_GROUPBACKGROUND_ACTIVE_3; break;
 
-	case 0x00BEBEBE: ::SetDCBrushColor(dc, RGB(0x22, 0x22, 0x22)); break;
-	case 0x00B1B1B1: ::SetDCBrushColor(dc, RGB(0x33, 0x33, 0x33)); break;
-	case 0x00A3A3A3: ::SetDCBrushColor(dc, RGB(0x44, 0x44, 0x44)); break;
-/*
-	case 0x00DEDEDE: ::SetDCBrushColor(dc, RGB(0x28, 0x28, 0x28)); break;
-	case 0x00CCCCCC: ::SetDCBrushColor(dc, RGB(0x20, 0x20, 0x20)); break;
-	case 0x00BABABA: ::SetDCBrushColor(dc, RGB(0x18, 0x18, 0x18)); break;
-
-	case 0x00BEBEBE: ::SetDCBrushColor(dc, RGB(0x20, 0x20, 0x20)); break;
-	case 0x00B1B1B1: ::SetDCBrushColor(dc, RGB(0x18, 0x18, 0x18)); break;
-	case 0x00A3A3A3: ::SetDCBrushColor(dc, RGB(0x10, 0x10, 0x10)); break;
-*/
+	case 0x00BEBEBE: stateId = Dark::EXEDIT_GROUPBACKGROUND_INACTIVE_1; break;
+	case 0x00B1B1B1: stateId = Dark::EXEDIT_GROUPBACKGROUND_INACTIVE_2; break;
+	case 0x00A3A3A3: stateId = Dark::EXEDIT_GROUPBACKGROUND_INACTIVE_3; break;
 	}
+
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_GROUPBACKGROUND, stateId);
+	if (state && state->m_fillColor != CLR_NONE)
+		::SetDCBrushColor(dc, state->m_fillColor);
 
 	return true_FillRect(dc, rc, brush);
 //	return true_FillRect(dc, rc, (HBRUSH)::GetStockObject(DC_BRUSH));
 }
 
-//---------------------------------------------------------------------
+//--------------------------------------------------------------------
 } // namespace Exedit
+//---------------------------------------------------------------------
+
+LRESULT WINAPI onNcPaint(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_NCPAINT:
+		{
+			true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+
+//			HDC dc = ::GetDCEx(hwnd, 0, DCX_WINDOW | DCX_CLIPSIBLINGS | DCX_CACHE);
+//			HDC dc = ::GetDCEx(hwnd, 0, DCX_WINDOW | DCX_CLIPSIBLINGS | DCX_PARENTCLIP);
+			HDC dc = ::GetWindowDC(hwnd);
+			RECT rc; ::GetWindowRect(hwnd, &rc);
+			POINT origin = { rc.left, rc.top };
+			::OffsetRect(&rc, -origin.x, -origin.y);
+#if 0
+			{
+				HWND buddy = ::GetWindow(hwnd, GW_HWNDNEXT);
+				if (hwnd == (HWND)::SendMessage(buddy, UDM_GETBUDDY, 0, 0))
+				{
+					RECT rc; ::GetWindowRect(buddy, &rc);
+					::OffsetRect(&rc, -origin.x, -origin.y);
+					HRGN rgn = ::CreateRectRgnIndirect(&rc);
+					::ExtSelectClipRgn(dc, rgn, RGN_DIFF);
+					::DeleteObject(rgn);
+				}
+			}
+#endif
+			DWORD style = GetWindowStyle(hwnd);
+			DWORD exStyle = GetWindowExStyle(hwnd);
+			HTHEME theme = g_skin.getTheme(Dark::THEME_WINDOW);
+
+			if (exStyle & WS_EX_WINDOWEDGE)
+			{
+				int partId = Dark::WINDOW_WINDOWEDGE;
+				int stateId = 0;
+				g_skin.drawBackground(dc, theme, partId, stateId, &rc);
+				::InflateRect(&rc, -2, -2);
+			}
+			else if (style & WS_BORDER)
+			{
+				int partId = Dark::WINDOW_BORDER;
+				int stateId = 0;
+				g_skin.drawBackground(dc, theme, partId, stateId, &rc);
+				::InflateRect(&rc, -1, -1);
+			}
+
+			if (exStyle & WS_EX_STATICEDGE)
+			{
+				int partId = Dark::WINDOW_STATICEDGE;
+				int stateId = 0;
+				g_skin.drawBackground(dc, theme, partId, stateId, &rc);
+				::InflateRect(&rc, -1, -1);
+			}
+
+			if (exStyle & WS_EX_CLIENTEDGE)
+			{
+				int partId = Dark::WINDOW_CLIENTEDGE;
+				int stateId = 0;
+				g_skin.drawBackground(dc, theme, partId, stateId, &rc);
+				//my::frameRect(dc, &rc, RGB(255, 0, 0), 2);
+				::InflateRect(&rc, -2, -2);
+			}
+
+			::ReleaseDC(hwnd, dc);
+
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
 //---------------------------------------------------------------------

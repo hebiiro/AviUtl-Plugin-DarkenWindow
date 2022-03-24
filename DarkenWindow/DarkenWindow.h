@@ -121,3 +121,7 @@ void writeAbsoluteAddress(DWORD address, const T* x)
 }
 
 //---------------------------------------------------------------------
+
+LRESULT WINAPI onNcPaint(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+//---------------------------------------------------------------------

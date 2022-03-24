@@ -137,8 +137,6 @@ template<class T>
 inline HRESULT WINAPI getPrivateProfileInt(
 	const MSXML2::IXMLDOMElementPtr& element, LPCWSTR name, T& outValue, int radix = 0)
 {
-	MY_TRACE_WSTR(name);
-
 	return getPrivateProfileInt(element->getAttribute(name), outValue, radix);
 }
 

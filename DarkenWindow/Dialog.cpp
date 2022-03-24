@@ -2,6 +2,9 @@
 #include "DarkenWindow.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
+
+//--------------------------------------------------------------------
 
 LRESULT DialogRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -17,16 +20,21 @@ int DialogRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 	HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
 	if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
 	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_DIALOG);
+
 		COLORREF color = my::getBrushColor(brush);
 		MY_TRACE_HEX(color);
 		if (color == ::GetSysColor(COLOR_WINDOW))
-			color = my::getFillColor_Dialog();
+		{
+			if (g_skin.onDrawThemeBackground(theme, dc, WP_DIALOG, ETS_NORMAL, rc))
+				return TRUE;
+		}
 		else
-			color = my::getFillColor_Dialog_Selected();
-		my::fillRect(dc, rc, color);
-		return TRUE;
+		{
+			if (g_skin.onDrawThemeBackground(theme, dc, WP_DIALOG, ETS_SELECTED, rc))
+				return TRUE;
+		}
 	}
-
 
 	return true_FillRect(dc, rc, brush);
 }
@@ -77,21 +85,25 @@ BOOL DialogRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT
 {
 //	MY_TRACE(_T("DialogRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
 
-	HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
-	if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
-//	if (0)
+	if (options == ETO_OPAQUE)
 	{
-		if (options == ETO_OPAQUE)
+		HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
+		if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
 		{
+			HTHEME theme = g_skin.getTheme(Dark::THEME_DIALOG);
+
 			COLORREF bkColor = ::GetBkColor(dc);
 //			MY_TRACE_HEX(bkColor);
 			if (bkColor == RGB(0xff, 0xff, 0xff))
-				::SetBkColor(dc, my::getFillColor_Dialog());
+			{
+				if (g_skin.onExtTextOut(theme, dc, WP_DIALOG, ETS_NORMAL, x, y, options, rc, text, c, dx))
+					return TRUE;
+			}
 			else
-				::SetBkColor(dc, my::getFillColor_Window_Selected());
-			my::shadowTextOut_Dialog(dc, x, y, options, rc, text, c, dx);
-			::SetBkColor(dc, bkColor);
-			return TRUE;
+			{
+				if (g_skin.onExtTextOut(theme, dc, WP_DIALOG, ETS_SELECTED, x, y, options, rc, text, c, dx))
+					return TRUE;
+			}
 		}
 	}
 
@@ -104,3 +116,5 @@ BOOL DialogRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, in
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }
+
+//--------------------------------------------------------------------

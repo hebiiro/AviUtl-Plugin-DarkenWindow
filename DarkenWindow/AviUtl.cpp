@@ -3,6 +3,9 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
+
+//--------------------------------------------------------------------
 
 LRESULT AviUtlRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -17,8 +20,9 @@ int AviUtlRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 
 	if (brush == (HBRUSH)(COLOR_BTNFACE + 1))
 	{
-		my::fillRect_Dialog(dc, rc);
-		return TRUE;
+		HTHEME theme = g_skin.getTheme(Dark::THEME_WINDOW);
+		if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_DIALOGFACE, 0, rc))
+			return TRUE;
 	}
 
 	return true_FillRect(dc, rc, brush);
@@ -49,42 +53,45 @@ BOOL AviUtlRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge,
 {
 //	MY_TRACE(_T("AviUtlRenderer::DrawEdge()\n"));
 
+	HTHEME theme = g_skin.getTheme(Dark::THEME_WINDOW);
+
 	if (flags & BF_MIDDLE)
 	{
-		my::fillRect_Dialog(dc, rc);
+		if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_DIALOGFACE, 0, rc))
+			return TRUE;
 	}
 
 	switch (edge)
 	{
 	case BDR_RAISEDOUTER:
 		{
-			my::drawSingleEdge_Raised(dc, rc);
-			return TRUE;
+			if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_RAISEDOUTEREDGE, 0, rc))
+				return TRUE;
 		}
 	case BDR_SUNKENOUTER:
 		{
-			my::drawSingleEdge_Sunken(dc, rc);
-			return TRUE;
+			if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_SUNKENOUTEREDGE, 0, rc))
+				return TRUE;
 		}
 	case EDGE_RAISED:
 		{
-			my::drawDoubleEdge_Raised(dc, rc);
-			return TRUE;
+			if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_RAISEDEDGE, 0, rc))
+				return TRUE;
 		}
 	case EDGE_SUNKEN:
 		{
-			my::drawDoubleEdge_Sunken(dc, rc);
-			return TRUE;
+			if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_SUNKENEDGE, 0, rc))
+				return TRUE;
 		}
 	case EDGE_BUMP:
 		{
-			my::drawDoubleEdge_Bump(dc, rc);
-			return TRUE;
+			if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_BUMPEDGE, 0, rc))
+				return TRUE;
 		}
 	case EDGE_ETCHED:
 		{
-			my::drawDoubleEdge_Etched(dc, rc);
-			return TRUE;
+			if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_ETCHEDEDGE, 0, rc))
+				return TRUE;
 		}
 	}
 
@@ -118,3 +125,5 @@ BOOL AviUtlRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, in
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }
+
+//--------------------------------------------------------------------

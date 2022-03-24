@@ -3,6 +3,7 @@
 #include "ThemeHook.h"
 #include "ClassicHook.h"
 #include "MyDraw.h"
+#include "Skin.h"
 
 //--------------------------------------------------------------------
 
@@ -11,84 +12,9 @@ HRESULT TrackBarThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int par
 //	MY_TRACE(_T("TrackBarThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
 //		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
-	RECT rc2 = *rc;
-
-	switch (partId)
 	{
-#if 0
-	case TKP_TRACKVERT: // = 2,
-	case TKP_TICS: // = 9,
-	case TKP_TICSVERT: // = 10,
-#endif
-	case TKP_TRACK: // = 1,
-		{
-			my::fillRect_TrackBar_Channel(dc, &rc2);
-			my::drawDoubleEdge_Sunken(dc, &rc2);
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
 			return S_OK;
-		}
-#if 1
-	case TKP_THUMB: // = 3,
-	case TKP_THUMBBOTTOM: // = 4,
-	case TKP_THUMBTOP: // = 5,
-	case TKP_THUMBVERT: // = 6,
-	case TKP_THUMBLEFT: // = 7,
-	case TKP_THUMBRIGHT: // = 8,
-		{
-#if 0
-			int x = rc2.left;
-			int y = rc2.top;
-			int w = rc2.right - rc2.left;
-			int h = rc2.bottom - rc2.top;
-			int cx = (rc2.left + rc2.right) / 2;
-
-			POINT points[5];
-			points[0].x = rc2.left;
-			points[0].y = rc2.top;
-			points[1].x = rc2.right;
-			points[1].y = rc2.top;
-			points[2].x = rc2.right;
-			points[2].y = rc2.bottom - w / 2;
-			points[3].x = cx;
-			points[3].y = rc2.bottom;
-			points[4].x = rc2.left;
-			points[4].y = rc2.bottom - w / 2;
-#endif
-			COLORREF fillColor = RGB(0x33, 0x33, 0x33);
-			COLORREF edgeColor = RGB(0x00, 0x00, 0x00);
-
-			switch (stateId)
-			{
-			case TUS_NORMAL: // = 1,
-				{
-					fillColor = RGB(0x66, 0x66, 0xff);
-					break;
-				}
-			case TUS_HOT: // = 2,
-				{
-					fillColor = RGB(0x66, 0xff, 0x66);
-					//edgeColor = RGB(0x00, 0xff, 0x00);
-					break;
-				}
-			case TUS_PRESSED: // = 3,
-			case TUS_FOCUSED: // = 4,
-				{
-					fillColor = RGB(0xff, 0x66, 0x66);
-					//edgeColor = RGB(0xff, 0x00, 0x00);
-					break;
-				}
-			case TUS_DISABLED: // = 5,
-				{
-					fillColor = RGB(0x99, 0x99, 0x99);
-					//edgeColor = RGB(0x66, 0x66, 0x66);
-					break;
-				}
-			}
-
-			my::drawRectangle(dc, &rc2, fillColor, edgeColor, 1);
-			//my::drawDoubleEdge_Raised(dc, &rc2);
-			return S_OK;
-		}
-#endif
 	}
 
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
@@ -128,6 +54,7 @@ LRESULT TrackBarRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UIN
 	{
 	case WM_ERASEBKGND:
 		{
+			// チラツキを防止するために何もしない。
 			return TRUE;
 		}
 	case WM_LBUTTONDOWN:
@@ -197,12 +124,15 @@ BOOL TrackBarRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAW
 
 BOOL TrackBarRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-#if 0
 	COLORREF bkColor = ::GetBkColor(dc);
 //	MY_TRACE(_T("TrackBarRenderer::ExtTextOutW(%d, %d, 0x%08X), 0x%08X\n"), x, y, options, bkColor);
+#if 1
 	if (bkColor == ::GetSysColor(COLOR_HIGHLIGHT))
 	{
-		::SetBkColor(dc, my::getFillColor_Dialog_Selected());
+		HTHEME theme = g_skin.getTheme(Dark::THEME_TRACKBAR);
+		Dark::StatePtr state = g_skin.getState(theme, TKP_TRACK, 0);
+		if (state && state->m_fillColor != CLR_NONE)
+			::SetBkColor(dc, state->m_fillColor);
 	}
 #endif
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
