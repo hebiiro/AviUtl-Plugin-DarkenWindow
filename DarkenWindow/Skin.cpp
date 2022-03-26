@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Skin.h"
 #include "MyDraw.h"
+#include "DarkenWindow.h"
 
 //--------------------------------------------------------------------
 
@@ -356,6 +357,35 @@ void TextFigure::textOut(HDC dc, int x, int y, UINT options, LPRECT rc, LPCWSTR 
 
 //--------------------------------------------------------------------
 
+DrawText::DrawText()
+{
+}
+
+DrawText::~DrawText()
+{
+}
+
+void DrawText::load(const MSXML2::IXMLDOMElementPtr& element)
+{
+	TextFigure::load(element);
+}
+
+void DrawText::drawText(HDC dc, LPRECT rc, LPCWSTR text, int c, UINT format)
+{
+	Figure::draw(dc, rc);
+
+	my::drawText(dc, text, c, rc, format, m_fillColor, m_foreColor);
+}
+
+void DrawText::textOut(HDC dc, int x, int y, UINT options, LPRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
+{
+	Figure::draw(dc, rc);
+
+	my::textOut(dc, x, y, options, rc, text, c, dx, m_fillColor, m_foreColor);
+}
+
+//--------------------------------------------------------------------
+
 IconFigure::IconFigure()
 {
 	m_text = L"";
@@ -373,7 +403,7 @@ void IconFigure::load(const MSXML2::IXMLDOMElementPtr& element)
 
 void IconFigure::draw(HDC dc, LPRECT rc)
 {
-	TextFigure::draw(dc, rc);
+	Figure::draw(dc, rc);
 
 	int length = ::lstrlenW(m_text);
 
@@ -386,12 +416,65 @@ void IconFigure::draw(HDC dc, LPRECT rc)
 
 	HFONT font = ::CreateFontW(-size, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, 0, 0, 0, 0, m_fontName);
 	HFONT oldFont = (HFONT)::SelectObject(dc, font);
-	::OffsetRect(&rc2, +1, +1);
-	for (int i = 0; i < length; i++)
-		my::drawText(dc, (BSTR)m_text + i, 1, &rc2, format, m_backColor);
-	::OffsetRect(&rc2, -1, -1);
-	for (int i = 0; i < length; i++)
-		my::drawText(dc, (BSTR)m_text + i, 1, &rc2, format, m_foreColor);
+	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
+	COLORREF oldTextColor = ::GetTextColor(dc);
+
+	if (m_backColor != CLR_NONE)
+	{
+		::OffsetRect(&rc2, +1, +1);
+		::SetTextColor(dc, m_backColor);
+		for (int i = 0; i < length; i++) ::DrawTextW(dc, (BSTR)m_text + i, 1, &rc2, format);
+		::OffsetRect(&rc2, -1, -1);
+	}
+	if (m_foreColor != CLR_NONE)
+	{
+		::SetTextColor(dc, m_foreColor);
+		for (int i = 0; i < length; i++) ::DrawTextW(dc, (BSTR)m_text + i, 1, &rc2, format);
+	}
+
+	::SetTextColor(dc, oldTextColor);
+	::SetBkMode(dc, oldBkMode);
+	::SelectObject(dc, oldFont);
+	::DeleteObject(font);
+}
+
+//--------------------------------------------------------------------
+
+DrawIcon::DrawIcon()
+{
+}
+
+DrawIcon::~DrawIcon()
+{
+}
+
+void DrawIcon::load(const MSXML2::IXMLDOMElementPtr& element)
+{
+	IconFigure::load(element);
+}
+
+void DrawIcon::draw(HDC dc, LPRECT rc)
+{
+	Figure::draw(dc, rc);
+
+	int length = ::lstrlenW(m_text);
+
+	RECT rc2 = *rc;
+	int w = rc2.right - rc2.left;
+	int h = rc2.bottom - rc2.top;
+	int size = yulib::Min(w, h);
+
+	UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
+
+	HFONT font = ::CreateFontW(-size, 0, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, 0, 0, 0, 0, m_fontName);
+	HFONT oldFont = (HFONT)::SelectObject(dc, font);
+	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
+	COLORREF oldTextColor = ::SetTextColor(dc, m_foreColor);
+
+	for (int i = 0; i < length; i++) ::DrawTextW(dc, (BSTR)m_text + i, 1, &rc2, format);
+
+	::SetTextColor(dc, oldTextColor);
+	::SetBkMode(dc, oldBkMode);
 	::SelectObject(dc, oldFont);
 	::DeleteObject(font);
 }
@@ -565,6 +648,8 @@ BOOL Skin::reloadSettings(BOOL force)
 	::PathAppendW(fileName, L"DarkenWindowSettings.xml");
 
 	reloadSettingsInternal(fileName);
+	if (!force)
+		reloadExeditSettings();
 
 	return TRUE;
 }
@@ -614,6 +699,32 @@ void Skin::reloadSettingsInternal(LPCWSTR fileName)
 	catch (_com_error& e)
 	{
 		MY_TRACE(_T("%s\n"), e.ErrorMessage());
+	}
+}
+
+void Skin::reloadExeditSettings()
+{
+	MY_TRACE(_T("Skin::reloadExeditSettings()\n"));
+
+	HMODULE exedit_auf = ::GetModuleHandle(_T("exedit.auf"));
+
+	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+		Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_SELECTION, 0);
+		if (state && state->m_fillColor != CLR_NONE)
+			writeAbsoluteAddress((DWORD)exedit_auf + 0x0003807E, &state->m_fillColor);
+	}
+	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+		Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_SELECTIONEDGE, 0);
+		if (state && state->m_fillColor != CLR_NONE)
+			writeAbsoluteAddress((DWORD)exedit_auf + 0x00038076, &state->m_fillColor);
+	}
+	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+		Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_SELECTIONBK, 0);
+		if (state && state->m_fillColor != CLR_NONE)
+			writeAbsoluteAddress((DWORD)exedit_auf + 0x00038087, &state->m_fillColor);
 	}
 }
 
@@ -772,8 +883,10 @@ void Skin::loadFigures(const MSXML2::IXMLDOMElementPtr& parentElement)
 		loadFigure<DrawDoubleSunkenEdge>(element, L"DrawDoubleSunkenEdge");
 		loadFigure<DrawDoubleBumpEdge>(element, L"DrawDoubleBumpEdge");
 		loadFigure<DrawDoubleEtchedEdge>(element, L"DrawDoubleEtchedEdge");
-		loadTextFigure<TextFigure>(element, L"DrawShadowText");
-		loadIconFigure<IconFigure>(element, L"DrawShadowIcon");
+		loadTextFigure<DrawText>(element, L"DrawText");
+		loadTextFigure<DrawShadowText>(element, L"DrawShadowText");
+		loadIconFigure<DrawIcon>(element, L"DrawIcon");
+		loadIconFigure<DrawShadowIcon>(element, L"DrawShadowIcon");
 	}
 }
 
@@ -1083,6 +1196,14 @@ int Skin::getPartId(LPCWSTR id)
 	IF_RETURN(EXEDIT_SHORTGUAGE);
 	IF_RETURN(EXEDIT_LAYERBACKGROUND);
 	IF_RETURN(EXEDIT_GROUPBACKGROUND);
+	IF_RETURN(EXEDIT_SELECTION);
+	IF_RETURN(EXEDIT_SELECTIONEDGE);
+	IF_RETURN(EXEDIT_SELECTIONBK);
+	IF_RETURN(EXEDIT_LAYERLEFT);
+	IF_RETURN(EXEDIT_LAYERTOP);
+	IF_RETURN(EXEDIT_LAYERRIGHT);
+	IF_RETURN(EXEDIT_LAYERBOTTOM);
+	IF_RETURN(EXEDIT_LAYERSEPARATOR);
 
 	// Menu
 

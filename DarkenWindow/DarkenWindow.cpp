@@ -219,6 +219,12 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				hookAbsoluteCall((DWORD)exedit_auf + 0x00038538, Exedit::fillLayerBackground);
 				hookAbsoluteCall((DWORD)exedit_auf + 0x0003860E, Exedit::fillLayerBackground);
 				hookAbsoluteCall((DWORD)exedit_auf + 0x000386E4, Exedit::fillGroupBackground);
+
+				hookCall((DWORD)exedit_auf + 0x00038845, Exedit::drawLayerLeft);
+				hookCall((DWORD)exedit_auf + 0x000388AA, Exedit::drawLayerRight);
+				hookCall((DWORD)exedit_auf + 0x00038871, Exedit::drawLayerTop);
+				hookCall((DWORD)exedit_auf + 0x000388DA, Exedit::drawLayerBottom);
+				hookCall((DWORD)exedit_auf + 0x00037A1F, Exedit::drawLayerSeparator);
 #if 0
 				DetourTransactionBegin();
 				DetourUpdateThread(::GetCurrentThread());
@@ -235,6 +241,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 					MY_TRACE(_T("API フックに失敗しました\n"));
 				}
 #endif
+				g_skin.reloadExeditSettings();
 			}
 
 			break;
@@ -623,6 +630,86 @@ int WINAPI fillGroupBackground(HDC dc, LPCRECT rc, HBRUSH brush)
 
 	return true_FillRect(dc, rc, brush);
 //	return true_FillRect(dc, rc, (HBRUSH)::GetStockObject(DC_BRUSH));
+}
+
+void drawLayerLeft(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
+{
+//	MY_TRACE(_T("drawLayerLeft(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
+
+	if (pen) ::SelectObject(dc, pen);
+
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERLEFT, 0);
+	if (state && state->m_fillColor != CLR_NONE)
+	{
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		::PatBlt(dc, mx, my, 1, ly - my, PATCOPY);
+		::SelectObject(dc, oldBrush);
+	}
+}
+
+void drawLayerRight(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
+{
+//	MY_TRACE(_T("drawLayerRight(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
+
+	if (pen) ::SelectObject(dc, pen);
+
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERRIGHT, 0);
+	if (state && state->m_fillColor != CLR_NONE)
+	{
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		::PatBlt(dc, mx, my, 1, ly - my, PATCOPY);
+		::SelectObject(dc, oldBrush);
+	}
+}
+
+void drawLayerTop(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
+{
+//	MY_TRACE(_T("drawLayerTop(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
+
+	if (pen) ::SelectObject(dc, pen);
+
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERTOP, 0);
+	if (state && state->m_fillColor != CLR_NONE)
+	{
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		::PatBlt(dc, mx, my, lx - mx, 1, PATCOPY);
+		::SelectObject(dc, oldBrush);
+	}
+}
+
+void drawLayerBottom(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
+{
+//	MY_TRACE(_T("drawLayerBottom(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
+
+	if (pen) ::SelectObject(dc, pen);
+
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERBOTTOM, 0);
+	if (state && state->m_fillColor != CLR_NONE)
+	{
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		::PatBlt(dc, mx, my, lx - mx, 1, PATCOPY);
+		::SelectObject(dc, oldBrush);
+	}
+}
+
+void drawLayerSeparator(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
+{
+//	MY_TRACE(_T("drawLayerSeparator(0x%08X, %d, %d, %d, %d, 0x%08X)\n"), dc, mx, my, lx, ly, pen);
+
+	if (pen) ::SelectObject(dc, pen);
+
+	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
+	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERSEPARATOR, 0);
+	if (state && state->m_fillColor != CLR_NONE)
+	{
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		::PatBlt(dc, mx, my, 1, ly - my, PATCOPY);
+		::SelectObject(dc, oldBrush);
+	}
 }
 
 //--------------------------------------------------------------------

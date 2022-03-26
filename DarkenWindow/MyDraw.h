@@ -15,7 +15,8 @@ void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeCol
 void drawSingleEdge(HDC dc, LPCRECT rc, COLORREF topLeftColor, COLORREF bottomRightColor);
 void drawDoubleEdge(HDC dc, LPCRECT rc, COLORREF innerTopLeftColor, COLORREF innerBottomRightColor, COLORREF outerTopLeftColor, COLORREF outerBottomRightColor);
 void drawFocusRect(HDC dc, LPCRECT rc, COLORREF lineColor, UINT lineStyle);
-void drawText(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF textColor);
+void drawText(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF fillColor, COLORREF textColor);
+void textOut(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx, COLORREF fillColor, COLORREF textForeColor);
 void drawShadowText(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF fillColor, COLORREF textForeColor, COLORREF textBackColor);
 void shadowTextOut(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx, COLORREF fillColor, COLORREF textForeColor, COLORREF textBackColor);
 

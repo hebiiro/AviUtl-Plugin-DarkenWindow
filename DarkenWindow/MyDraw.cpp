@@ -149,13 +149,47 @@ void drawFocusRect(HDC dc, LPCRECT rc, COLORREF lineColor, UINT lineStyle)
 	::DeleteObject(pen);
 }
 
-void drawText(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF textColor)
+void drawText(HDC dc, LPCWSTR text, int length, LPCRECT rc, UINT format, COLORREF fillColor, COLORREF textColor)
 {
-	RECT rc2 = *rc;
-	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
-	int oldTextColor = ::SetTextColor(dc, textColor);
+	int oldBkMode = ::GetBkMode(dc);
+	COLORREF oldBkColor = ::GetBkColor(dc);
+	COLORREF oldTextColor = ::GetTextColor(dc);
+
+	RECT rc2 = {};
+	if (rc) rc2 = *rc;
+
+	if (fillColor != CLR_NONE)
+		::SetBkColor(dc, fillColor);
+	else
+		::SetBkMode(dc, TRANSPARENT);
+
+	::SetTextColor(dc, textColor);
 	::DrawTextW(dc, text, length, &rc2, format);
+
 	::SetBkMode(dc, oldBkMode);
+	::SetBkColor(dc, oldBkColor);
+	::SetTextColor(dc, oldTextColor);
+}
+
+void textOut(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx, COLORREF fillColor, COLORREF textColor)
+{
+	int oldBkMode = ::GetBkMode(dc);
+	COLORREF oldBkColor = ::GetBkColor(dc);
+	COLORREF oldTextColor = ::GetTextColor(dc);
+
+	RECT rc2 = {};
+	if (rc) rc2 = *rc;
+
+	if (fillColor != CLR_NONE)
+		::SetBkColor(dc, fillColor);
+	else
+		::SetBkMode(dc, TRANSPARENT);
+
+	::SetTextColor(dc, textColor);
+	true_ExtTextOutW(dc, x, y, options, &rc2, text, c, dx);
+
+	::SetBkMode(dc, oldBkMode);
+	::SetBkColor(dc, oldBkColor);
 	::SetTextColor(dc, oldTextColor);
 }
 

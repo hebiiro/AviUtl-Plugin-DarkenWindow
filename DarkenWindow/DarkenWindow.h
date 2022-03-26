@@ -79,6 +79,12 @@ void drawTimelineTime(HDC dc, LPCSTR text, int x, int y, int w, int h, int scrol
 int WINAPI fillLayerBackground(HDC dc, LPCRECT rc, HBRUSH brush);
 int WINAPI fillGroupBackground(HDC dc, LPCRECT rc, HBRUSH brush);
 
+void drawLayerLeft(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+void drawLayerRight(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+void drawLayerTop(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+void drawLayerBottom(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+void drawLayerSeparator(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+
 //---------------------------------------------------------------------
 } // namespace Exedit
 //---------------------------------------------------------------------

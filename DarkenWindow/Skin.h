@@ -58,6 +58,14 @@ enum CUSTOM_PARTS {
 	EXEDIT_SHORTGUAGE,
 	EXEDIT_LAYERBACKGROUND,
 	EXEDIT_GROUPBACKGROUND,
+	EXEDIT_SELECTION,
+	EXEDIT_SELECTIONEDGE,
+	EXEDIT_SELECTIONBK,
+	EXEDIT_LAYERLEFT,
+	EXEDIT_LAYERTOP,
+	EXEDIT_LAYERRIGHT,
+	EXEDIT_LAYERBOTTOM,
+	EXEDIT_LAYERSEPARATOR,
 };
 
 enum CTLCOLOR_STATES {
@@ -294,6 +302,25 @@ public:
 
 //--------------------------------------------------------------------
 
+class DrawText : public TextFigure
+{
+public:
+
+	DrawText();
+	virtual ~DrawText();
+	virtual void load(const MSXML2::IXMLDOMElementPtr& element);
+	virtual void drawText(HDC dc, LPRECT rc, LPCWSTR text, int c, UINT format);
+	virtual void textOut(HDC dc, int x, int y, UINT options, LPRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
+};
+
+//--------------------------------------------------------------------
+
+class DrawShadowText : public TextFigure
+{
+};
+
+//--------------------------------------------------------------------
+
 class IconFigure : public TextFigure
 {
 protected:
@@ -306,6 +333,24 @@ public:
 	virtual ~IconFigure();
 	virtual void load(const MSXML2::IXMLDOMElementPtr& element);
 	virtual void draw(HDC dc, LPRECT rc);
+};
+
+//--------------------------------------------------------------------
+
+class DrawIcon : public IconFigure
+{
+public:
+
+	DrawIcon();
+	virtual ~DrawIcon();
+	virtual void load(const MSXML2::IXMLDOMElementPtr& element);
+	virtual void draw(HDC dc, LPRECT rc);
+};
+
+//--------------------------------------------------------------------
+
+class DrawShadowIcon : public IconFigure
+{
 };
 
 //--------------------------------------------------------------------
@@ -419,6 +464,7 @@ public:
 	void init(HINSTANCE instance, HWND hwnd);
 	BOOL reloadSettings(BOOL force);
 	void reloadSettingsInternal(LPCWSTR fileName);
+	void reloadExeditSettings();
 	void reloadSkin(LPCWSTR fileName);
 	void loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement);
 	void loadFigures(const MSXML2::IXMLDOMElementPtr& parentElement);
