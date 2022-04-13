@@ -293,9 +293,13 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 					stateId = Dark::CTLCOLOR_NORMAL;
 				}
 			}
-			else
+			else if (brush != (HBRUSH)::GetStockObject(DC_BRUSH))
 			{
 				if (brush == (HBRUSH)(COLOR_BTNFACE + 1) || bkColor == ::GetSysColor(COLOR_BTNFACE))
+				{
+					stateId = Dark::CTLCOLOR_NORMAL;
+				}
+				else if (brush == (HBRUSH)(COLOR_WINDOW + 1) || bkColor == ::GetSysColor(COLOR_WINDOW))
 				{
 					stateId = Dark::CTLCOLOR_NORMAL;
 				}
@@ -307,7 +311,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 
 			::SetTextColor(dc, state->m_textForeColor);
 			::SetBkColor(dc, state->m_textBkColor);
-			return (LRESULT)state->m_fillBrush;
+			return (LRESULT)state->getFillBrush();
 		}
 	case WM_NOTIFY:
 		{
@@ -642,7 +646,7 @@ void drawLayerLeft(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERLEFT, 0);
 	if (state && state->m_fillColor != CLR_NONE)
 	{
-		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->getFillBrush());
 		::PatBlt(dc, mx, my, 1, ly - my, PATCOPY);
 		::SelectObject(dc, oldBrush);
 	}
@@ -658,7 +662,7 @@ void drawLayerRight(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERRIGHT, 0);
 	if (state && state->m_fillColor != CLR_NONE)
 	{
-		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->getFillBrush());
 		::PatBlt(dc, mx, my, 1, ly - my, PATCOPY);
 		::SelectObject(dc, oldBrush);
 	}
@@ -674,7 +678,7 @@ void drawLayerTop(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERTOP, 0);
 	if (state && state->m_fillColor != CLR_NONE)
 	{
-		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->getFillBrush());
 		::PatBlt(dc, mx, my, lx - mx, 1, PATCOPY);
 		::SelectObject(dc, oldBrush);
 	}
@@ -690,7 +694,7 @@ void drawLayerBottom(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERBOTTOM, 0);
 	if (state && state->m_fillColor != CLR_NONE)
 	{
-		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->getFillBrush());
 		::PatBlt(dc, mx, my, lx - mx, 1, PATCOPY);
 		::SelectObject(dc, oldBrush);
 	}
@@ -706,7 +710,7 @@ void drawLayerSeparator(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 	Dark::StatePtr state = g_skin.getState(theme, Dark::EXEDIT_LAYERSEPARATOR, 0);
 	if (state && state->m_fillColor != CLR_NONE)
 	{
-		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->m_fillBrush);
+		HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, state->getFillBrush());
 		::PatBlt(dc, mx, my, 1, ly - my, PATCOPY);
 		::SelectObject(dc, oldBrush);
 	}

@@ -492,7 +492,23 @@ State::State()
 
 State::~State()
 {
-	if (m_fillBrush) ::DeleteObject(m_fillBrush);
+	deleteFillBrush();
+}
+
+HBRUSH State::getFillBrush()
+{
+	if (!m_fillBrush && m_fillColor != CLR_NONE)
+		m_fillBrush = ::CreateSolidBrush(m_fillColor);
+	return m_fillBrush;
+}
+
+void State::deleteFillBrush()
+{
+	if (m_fillBrush)
+	{
+		::DeleteObject(m_fillBrush);
+		m_fillBrush = 0;
+	}
 }
 
 //--------------------------------------------------------------------
@@ -1018,11 +1034,7 @@ void Skin::loadState(const MSXML2::IXMLDOMElementPtr& parentElement, const PartP
 		getPrivateProfileColor(element, L"textForeColor", state->m_textForeColor);
 		getPrivateProfileColor(element, L"textBackColor", state->m_textBackColor);
 
-		if (state->m_fillColor != CLR_NONE)
-		{
-			if (state->m_fillBrush) ::DeleteObject(state->m_fillBrush);
-			state->m_fillBrush = ::CreateSolidBrush(state->m_fillColor);
-		}
+		state->deleteFillBrush();
 
 		loadFigure(element, state);
 		loadIconFigure(element, state);

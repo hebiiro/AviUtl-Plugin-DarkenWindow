@@ -385,6 +385,9 @@ public:
 
 	State();
 	~State();
+
+	HBRUSH getFillBrush();
+	void deleteFillBrush();
 };
 
 typedef std::shared_ptr<State> StatePtr;
