@@ -488,9 +488,12 @@ BOOL WINAPI drawRootText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR 
 {
 //	MY_TRACE(_T("drawRootText(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
 
+	WCHAR text2[MAX_PATH] = {};
+	UINT c2 = ::MultiByteToWideChar(CP_ACP, 0, text, c, text2, MAX_PATH);
+
 	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
 
-	if (g_skin.onExtTextOut(theme, dc, Dark::EXEDIT_ROOT, 0, x, y, options, rc, (_bstr_t)text, c, dx))
+	if (g_skin.onExtTextOut(theme, dc, Dark::EXEDIT_ROOT, 0, x, y, options, rc, text2, c2, dx))
 		return TRUE;
 
 	return TRUE;
@@ -512,6 +515,9 @@ BOOL WINAPI drawLayerText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR
 {
 //	MY_TRACE(_T("drawLayerText(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
 
+	WCHAR text2[MAX_PATH] = {};
+	UINT c2 = ::MultiByteToWideChar(CP_ACP, 0, text, c, text2, MAX_PATH);
+
 	int stateId = Dark::EXEDIT_LAYER_ACTIVE;
 
 	COLORREF bkColor = ::GetBkColor(dc);
@@ -524,7 +530,7 @@ BOOL WINAPI drawLayerText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR
 
 	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
 
-	if (g_skin.onExtTextOut(theme, dc, Dark::EXEDIT_LAYER, stateId, x, y, options, rc, (_bstr_t)text, c, dx))
+	if (g_skin.onExtTextOut(theme, dc, Dark::EXEDIT_LAYER, stateId, x, y, options, rc, text2, c2, dx))
 		return TRUE;
 
 	return TRUE;
