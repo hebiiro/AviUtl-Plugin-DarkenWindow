@@ -1,5 +1,6 @@
 # AviUtl プラグイン - 黒窓
 
+* 4.0.0 by 蛇色 - 2022/05/04 リファクタリング
 * 3.2.1 by 蛇色 - 2022/04/14 拡張編集ウィンドウの文字列描画処理を修正
 * 3.2.0 by 蛇色 - 2022/04/13 メッセージボックスの背景色に対応
 * 3.1.0 by 蛇色 - 2022/03/26 レイヤーの線の色などを変更できるように修正
@@ -42,9 +43,10 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 ## 動作確認
 
 * (必須) AviUtl 1.10 & 拡張編集 0.92 http://spring-fragrance.mints.ne.jp/aviutl/
-* (共存確認) patch.aul r19 https://scrapbox.io/ePi5131/patch.aul
+* (共存確認) patch.aul r21 https://scrapbox.io/ePi5131/patch.aul
 
 ## クレジット
 
-* Auls https://auls.client.jp/
-	* yulib、aulslib を使用しています。
+* Microsoft Research Detours Package https://github.com/microsoft/Detours
+* aviutl_exedit_sdk https://github.com/ePi5131/aviutl_exedit_sdk
+* Common Library https://github.com/hebiiro/Common-Library

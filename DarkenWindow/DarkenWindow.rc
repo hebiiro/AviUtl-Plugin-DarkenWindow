@@ -504,35 +504,35 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-ICON_AL                 ICON                    "ICON_AL.ico"
+WHITE_ICON_AL                 ICON                    "res\WHITE_ICON_AL.ico"
 
-ICON_AR                 ICON                    "ICON_AR.ico"
+WHITE_ICON_AR                 ICON                    "res\WHITE_ICON_AR.ico"
 
-ICON_CA0                ICON                    "ICON_CA0.ico"
+WHITE_ICON_CA0                ICON                    "res\WHITE_ICON_CA0.ico"
 
-ICON_CA1                ICON                    "ICON_CA1.ico"
+WHITE_ICON_CA1                ICON                    "res\WHITE_ICON_CA1.ico"
 
-ICON_CH                 ICON                    "ICON_CH.ico"
+WHITE_ICON_CH                 ICON                    "res\WHITE_ICON_CH.ico"
 
-ICON_CL                 ICON                    "ICON_CL.ico"
+WHITE_ICON_CL                 ICON                    "res\WHITE_ICON_CL.ico"
 
-ICON_CL0                ICON                    "ICON_CL0.ico"
+WHITE_ICON_CL0                ICON                    "res\WHITE_ICON_CL0.ico"
 
-ICON_CL1                ICON                    "ICON_CL1.ico"
+WHITE_ICON_CL1                ICON                    "res\WHITE_ICON_CL1.ico"
 
-ICON_LL                 ICON                    "ICON_LL.ico"
+WHITE_ICON_LL                 ICON                    "res\WHITE_ICON_LL.ico"
 
-ICON_MA                 ICON                    "ICON_MA.ico"
+WHITE_ICON_MA                 ICON                    "res\WHITE_ICON_MA.ico"
 
-ICON_MN                 ICON                    "ICON_MN.ico"
+WHITE_ICON_MN                 ICON                    "res\WHITE_ICON_MN.ico"
 
-ICON_OP                 ICON                    "ICON_OP.ico"
+WHITE_ICON_OP                 ICON                    "res\WHITE_ICON_OP.ico"
 
-ICON_PL                 ICON                    "ICON_PL.ico"
+WHITE_ICON_PL                 ICON                    "res\WHITE_ICON_PL.ico"
 
-ICON_RR                 ICON                    "ICON_RR.ico"
+WHITE_ICON_RR                 ICON                    "res\WHITE_ICON_RR.ico"
 
-ICON_SP                 ICON                    "ICON_SP.ico"
+WHITE_ICON_SP                 ICON                    "res\WHITE_ICON_SP.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////

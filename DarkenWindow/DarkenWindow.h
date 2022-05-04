@@ -1,35 +1,10 @@
 ﻿#pragma once
 
 //---------------------------------------------------------------------
-// Define
 
-#define DECLARE_INTERNAL_PROC(resultType, callType, procName, args) \
-	typedef resultType (callType *Type_##procName) args; \
-	Type_##procName procName = NULL
-
-#define DECLARE_HOOK_PROC(resultType, callType, procName, args) \
-	typedef resultType (callType *Type_##procName) args; \
-	extern Type_##procName true_##procName; \
-	resultType callType hook_##procName args
-
-#define IMPLEMENT_HOOK_PROC(resultType, callType, procName, args) \
-	Type_##procName true_##procName = procName; \
-	resultType callType hook_##procName args
-
-#define IMPLEMENT_HOOK_PROC_NULL(resultType, callType, procName, args) \
-	Type_##procName true_##procName = NULL; \
-	resultType callType hook_##procName args
-
-#define GET_INTERNAL_PROC(module, procName) \
-	procName = (Type_##procName)::GetProcAddress(module, #procName)
-
-#define GET_HOOK_PROC(module, procName) \
-	true_##procName = (Type_##procName)::GetProcAddress(module, #procName)
-
-#define ATTACH_HOOK_PROC(name) DetourAttach((PVOID*)&true_##name, hook_##name)
+extern AviUtlInternal g_auin;
 
 //---------------------------------------------------------------------
-// Api Hook
 
 DECLARE_HOOK_PROC(HRESULT, WINAPI, DrawThemeParentBackground, (HWND hwnd, HDC dc, LPCRECT rc));
 DECLARE_HOOK_PROC(HRESULT, WINAPI, DrawThemeBackground, (HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip));
@@ -60,9 +35,6 @@ DECLARE_HOOK_PROC(HTHEME, WINAPI, OpenThemeDataForDpi, (HWND hwnd, LPCWSTR class
 DECLARE_HOOK_PROC(HTHEME, WINAPI, OpenThemeDataEx, (HWND hwnd, LPCWSTR classList, DWORD flags));
 DECLARE_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppName, LPCWSTR subIdList));
 
-DECLARE_HOOK_PROC(void, CDECL, exedit_00030500, ());
-DECLARE_HOOK_PROC(BOOL, CDECL, exedit_000305E0, (int objectIndex));
-
 //---------------------------------------------------------------------
 namespace Exedit {
 //---------------------------------------------------------------------
@@ -87,45 +59,6 @@ void drawLayerSeparator(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
 
 //---------------------------------------------------------------------
 } // namespace Exedit
-//---------------------------------------------------------------------
-// Function
-
-// CALL を書き換える
-template<class T>
-void hookCall(DWORD address, T hookProc)
-{
-	BYTE code[5];
-	code[0] = 0xE8; // CALL
-	*(DWORD*)&code[1] = (DWORD)hookProc - (address + 5);
-
-	// CALL を書き換える。そのあと命令キャッシュをフラッシュする。
-	::WriteProcessMemory(::GetCurrentProcess(), (LPVOID)address, code, sizeof(code), NULL);
-	::FlushInstructionCache(::GetCurrentProcess(), (LPVOID)address, sizeof(code));
-}
-
-// CALL を書き換える
-template<class T>
-void hookAbsoluteCall(DWORD address, T& hookProc)
-{
-	BYTE code[6];
-	code[0] = 0xE8; // CALL
-	*(DWORD*)&code[1] = (DWORD)hookProc - (address + 5);
-	code[5] = 0x90; // NOP
-
-	// CALL を書き換える。そのあと命令キャッシュをフラッシュする。
-	::WriteProcessMemory(::GetCurrentProcess(), (LPVOID)address, code, sizeof(code), NULL);
-	::FlushInstructionCache(::GetCurrentProcess(), (LPVOID)address, sizeof(code));
-}
-
-// 絶対アドレスを書き換える
-template<class T>
-void writeAbsoluteAddress(DWORD address, const T* x)
-{
-	// 絶対アドレスを書き換える。そのあと命令キャッシュをフラッシュする。
-	::WriteProcessMemory(::GetCurrentProcess(), (LPVOID)address, &x, sizeof(x), NULL);
-	::FlushInstructionCache(::GetCurrentProcess(), (LPVOID)address, sizeof(x));
-}
-
 //---------------------------------------------------------------------
 
 LRESULT WINAPI onNcPaint(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

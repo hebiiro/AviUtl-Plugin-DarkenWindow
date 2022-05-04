@@ -2,12 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="..\Common\MyMSXML.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Common\MyTracer.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="DarkenWindow.h" />
     <ClInclude Include="MyDraw.h" />
     <ClInclude Include="ClassicHook.h" />
@@ -16,7 +10,25 @@
       <Filter>Resource</Filter>
     </ClInclude>
     <ClInclude Include="Skin.h" />
-    <ClInclude Include="..\Common\FileUpdateChecker.h">
+    <ClInclude Include="..\..\Common\AviUtlInternal.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Dialog.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\FileUpdateChecker.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Hook.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\MSXML.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Profile.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Common\Tracer.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -81,9 +93,6 @@
       <Filter>Controls</Filter>
     </ClCompile>
     <ClCompile Include="Skin.cpp" />
-    <ClCompile Include="..\Common\FileUpdateChecker.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="CommandModule.cpp">
       <Filter>Controls</Filter>
     </ClCompile>

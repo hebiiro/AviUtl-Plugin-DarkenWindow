@@ -8,7 +8,7 @@
 Dark::Skin g_skin;
 
 //--------------------------------------------------------------------
-namespace Dark {
+namespace Dark {\
 //--------------------------------------------------------------------
 
 Figure::Figure()
@@ -410,7 +410,7 @@ void IconFigure::draw(HDC dc, LPRECT rc)
 	RECT rc2 = *rc;
 	int w = rc2.right - rc2.left;
 	int h = rc2.bottom - rc2.top;
-	int size = yulib::Min(w, h);
+	int size = min(w, h);
 
 	UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
 
@@ -462,7 +462,7 @@ void DrawIcon::draw(HDC dc, LPRECT rc)
 	RECT rc2 = *rc;
 	int w = rc2.right - rc2.left;
 	int h = rc2.bottom - rc2.top;
-	int size = yulib::Min(w, h);
+	int size = min(w, h);
 
 	UINT format = DT_NOCLIP | DT_CENTER | DT_VCENTER | DT_SINGLELINE;
 

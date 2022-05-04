@@ -15,8 +15,8 @@ void ___outputLog(LPCTSTR text, LPCTSTR output)
 
 //---------------------------------------------------------------------
 
+AviUtlInternal g_auin;
 HINSTANCE g_instance = 0;
-HWND g_exeditObjectDialog = 0;
 
 //---------------------------------------------------------------------
 #if 1
@@ -197,34 +197,33 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			{
 				MY_TRACE(_T("拡張編集をフックします\n"));
 
-				g_exeditObjectDialog = hwnd;
-				HMODULE exedit_auf = ::GetModuleHandle(_T("exedit.auf"));
-				true_exedit_00030500 = (Type_exedit_00030500)((DWORD)exedit_auf + 0x00030500);
-				true_exedit_000305E0 = (Type_exedit_000305E0)((DWORD)exedit_auf + 0x000305E0);
+				g_auin.init();
 
-				Exedit::g_font = (HFONT*)((DWORD)exedit_auf + 0x00167D84);
+				DWORD exedit = (DWORD)::GetModuleHandle(_T("exedit.auf"));
 
-				hookAbsoluteCall((DWORD)exedit_auf + 0x0003833E, Exedit::drawRootText);
-				hookAbsoluteCall((DWORD)exedit_auf + 0x0003836A, Exedit::drawRootEdge);
+				Exedit::g_font = (HFONT*)(exedit + 0x00167D84);
 
-				hookAbsoluteCall((DWORD)exedit_auf + 0x00037CFF, Exedit::drawLayerText);
-//				hookAbsoluteCall((DWORD)exedit_auf + 0x00037D46, Exedit::drawLayerEdge);
+				hookAbsoluteCall(exedit + 0x0003833E, Exedit::drawRootText);
+				hookAbsoluteCall(exedit + 0x0003836A, Exedit::drawRootEdge);
+
+				hookAbsoluteCall(exedit + 0x00037CFF, Exedit::drawLayerText);
+//				hookAbsoluteCall(exedit + 0x00037D46, Exedit::drawLayerEdge);
 //				static DWORD g_Exedit_drawLayerEdge = (DWORD)Exedit::drawLayerEdge;
-//				writeAbsoluteAddress((DWORD)exedit_auf + 0x00037D46 + 2, &g_Exedit_drawLayerEdge);
+//				writeAbsoluteAddress(exedit + 0x00037D46 + 2, &g_Exedit_drawLayerEdge);
 
-				hookCall((DWORD)exedit_auf + 0x000380DF, Exedit::drawTimelineLongGuage);
-				hookCall((DWORD)exedit_auf + 0x000381D7, Exedit::drawTimelineShortGuage);
-				hookCall((DWORD)exedit_auf + 0x000381A2, Exedit::drawTimelineTime);
+				hookCall(exedit + 0x000380DF, Exedit::drawTimelineLongGuage);
+				hookCall(exedit + 0x000381D7, Exedit::drawTimelineShortGuage);
+				hookCall(exedit + 0x000381A2, Exedit::drawTimelineTime);
 
-				hookAbsoluteCall((DWORD)exedit_auf + 0x00038538, Exedit::fillLayerBackground);
-				hookAbsoluteCall((DWORD)exedit_auf + 0x0003860E, Exedit::fillLayerBackground);
-				hookAbsoluteCall((DWORD)exedit_auf + 0x000386E4, Exedit::fillGroupBackground);
+				hookAbsoluteCall(exedit + 0x00038538, Exedit::fillLayerBackground);
+				hookAbsoluteCall(exedit + 0x0003860E, Exedit::fillLayerBackground);
+				hookAbsoluteCall(exedit + 0x000386E4, Exedit::fillGroupBackground);
 
-				hookCall((DWORD)exedit_auf + 0x00038845, Exedit::drawLayerLeft);
-				hookCall((DWORD)exedit_auf + 0x000388AA, Exedit::drawLayerRight);
-				hookCall((DWORD)exedit_auf + 0x00038871, Exedit::drawLayerTop);
-				hookCall((DWORD)exedit_auf + 0x000388DA, Exedit::drawLayerBottom);
-				hookCall((DWORD)exedit_auf + 0x00037A1F, Exedit::drawLayerSeparator);
+				hookCall(exedit + 0x00038845, Exedit::drawLayerLeft);
+				hookCall(exedit + 0x000388AA, Exedit::drawLayerRight);
+				hookCall(exedit + 0x00038871, Exedit::drawLayerTop);
+				hookCall(exedit + 0x000388DA, Exedit::drawLayerBottom);
+				hookCall(exedit + 0x00037A1F, Exedit::drawLayerSeparator);
 #if 0
 				DetourTransactionBegin();
 				DetourUpdateThread(::GetCurrentThread());
@@ -385,7 +384,13 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name
 		if (instance == ::GetModuleHandle(_T("exedit.auf")) && ::StrStrIA(name, "ICON_"))
 		{
 //			MY_TRACE(_T("アイコンを置き換えます\n"));
-			instance = g_instance;
+
+			char name2[MAX_PATH] = {};
+			::StringCbCopyA(name2, sizeof(name2), "WHITE_");
+			::StringCbCatA(name2, sizeof(name2), name);
+			MY_TRACE_STR(name2);
+
+			return true_LoadImageA(g_instance, name2, type, cx, cy, flags);
 		}
 	}
 
@@ -458,24 +463,6 @@ IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppN
 {
 	MY_TRACE(_T("SetWindowTheme(0x%08X, %ws, %ws)\n"), hwnd, subAppName, subIdList);
 	return true_SetWindowTheme(hwnd, subAppName, subIdList);
-}
-
-//---------------------------------------------------------------------
-
-IMPLEMENT_HOOK_PROC_NULL(void, CDECL, exedit_00030500, ())
-{
-	MY_TRACE(_T("exedit_00030500()\n"));
-
-	true_exedit_00030500();
-}
-
-IMPLEMENT_HOOK_PROC_NULL(BOOL, CDECL, exedit_000305E0, (int objectIndex))
-{
-	MY_TRACE(_T("exedit_000305E0(%d)\n"), objectIndex);
-
-	BOOL result = true_exedit_000305E0(objectIndex);
-
-	return result;
 }
 
 //---------------------------------------------------------------------
