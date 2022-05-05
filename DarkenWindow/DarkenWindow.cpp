@@ -192,10 +192,14 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 					g_skin.init(g_instance, hwnd);
 					g_skin.reloadSettings(TRUE);
 				}
+
+				g_skin.setDwm(hwnd, FALSE);
 			}
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
 			{
 				MY_TRACE(_T("拡張編集をフックします\n"));
+
+				g_skin.setDwm(hwnd, FALSE);
 
 				g_auin.init();
 
@@ -242,6 +246,21 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 #endif
 				g_skin.reloadExeditSettings();
 			}
+			else if (::GetWindowLong(hwnd, GWL_STYLE) & WS_CAPTION)
+			{
+				g_skin.setDwm(hwnd, FALSE);
+			}
+
+
+			break;
+		}
+	case WM_ACTIVATE:
+		{
+			int active = LOWORD(wParam);
+
+			MY_TRACE(_T("WM_ACTIVATE, %d\n"), active);
+
+			g_skin.setDwm(hwnd, active);
 
 			break;
 		}

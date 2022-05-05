@@ -578,6 +578,15 @@ Skin::Skin()
 	m_instance = 0;
 	m_hwnd = 0;
 	memset(m_themes, 0, sizeof(m_themes));
+
+	m_dwm.m_darkMode = -1;
+	m_dwm.m_cornerMode = -1;
+	m_dwm.m_activeBorderColor = -1;
+	m_dwm.m_activeCaptionColor = -1;
+	m_dwm.m_activeTextColor = -1;
+	m_dwm.m_inactiveBorderColor = -1;
+	m_dwm.m_inactiveCaptionColor = -1;
+	m_dwm.m_inactiveTextColor = -1;
 }
 
 Skin::~Skin()
@@ -695,7 +704,7 @@ void Skin::reloadSettingsInternal(LPCWSTR fileName)
 			// スキンファイルを読み込む。
 
 			MSXML2::IXMLDOMNodeListPtr nodeList =
-				document->documentElement->selectNodes(L"Skin");
+				document->documentElement->getElementsByTagName(L"Skin");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -777,7 +786,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 	// <Attributes> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Attributes");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Attributes");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -786,7 +795,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawSingleRaisedEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawSingleRaisedEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawSingleRaisedEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -800,7 +809,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawSingleSunkenEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawSingleSunkenEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawSingleSunkenEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -814,7 +823,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawDoubleRaisedEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawDoubleRaisedEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawDoubleRaisedEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -830,7 +839,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawDoubleSunkenEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawDoubleSunkenEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawDoubleSunkenEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -846,7 +855,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawDoubleBumpEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawDoubleBumpEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawDoubleBumpEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -862,7 +871,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawDoubleEtchedEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawDoubleEtchedEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawDoubleEtchedEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -874,6 +883,26 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 				getPrivateProfileColor(element, L"outerBottomRightColor", DrawDoubleEtchedEdge::m_outerBottomRightColor);
 			}
 		}
+
+		{
+			// <Dwm> を読み込む。
+
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"Dwm");
+			int c = nodeList->length;
+			for (int i = 0; i < c; i++)
+			{
+				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
+
+				getPrivateProfileColor(element, L"activeBorderColor", m_dwm.m_activeBorderColor);
+				getPrivateProfileColor(element, L"activeCaptionColor", m_dwm.m_activeCaptionColor);
+				getPrivateProfileColor(element, L"activeTextColor", m_dwm.m_activeTextColor);
+				getPrivateProfileColor(element, L"inactiveBorderColor", m_dwm.m_inactiveBorderColor);
+				getPrivateProfileColor(element, L"inactiveCaptionColor", m_dwm.m_inactiveCaptionColor);
+				getPrivateProfileColor(element, L"inactiveTextColor", m_dwm.m_inactiveTextColor);
+				getPrivateProfileInt(element, L"darkMode", m_dwm.m_darkMode);
+				getPrivateProfileInt(element, L"cornerMode", m_dwm.m_cornerMode);
+			}
+		}
 	}
 }
 
@@ -883,7 +912,7 @@ void Skin::loadFigures(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 	// <Figures> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Figures");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Figures");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -912,7 +941,7 @@ void Skin::loadVSClasses(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 	// <VSClasses> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"VSClasses");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"VSClasses");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -928,7 +957,7 @@ void Skin::loadVSClass(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 	// <VSClass> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"VSClass");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"VSClass");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -951,7 +980,7 @@ void Skin::loadName(const MSXML2::IXMLDOMElementPtr& parentElement, VSClassPtr& 
 
 	// <Name> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Name");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Name");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -995,7 +1024,7 @@ void Skin::loadPart(const MSXML2::IXMLDOMElementPtr& parentElement, const VSClas
 
 	// <Part> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Part");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Part");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1017,7 +1046,7 @@ void Skin::loadState(const MSXML2::IXMLDOMElementPtr& parentElement, const PartP
 
 	// <State> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"State");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"State");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1048,7 +1077,7 @@ void Skin::loadFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const Stat
 
 	// <Figure> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Figure");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Figure");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1068,7 +1097,7 @@ void Skin::loadIconFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const 
 
 	// <IconFigure> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"IconFigure");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"IconFigure");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1088,7 +1117,7 @@ void Skin::loadTextFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const 
 
 	// <TextFigure> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"TextFigure");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"TextFigure");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1973,6 +2002,75 @@ int Skin::getCtlColorPartId(UINT message)
 	}
 
 	return 0;
+}
+
+void Skin::setDwm(HWND hwnd, BOOL active)
+{
+	MY_TRACE(_T("Skin::setDwm(0x%08X, %d)\n"), hwnd, active);
+
+	enum MY_DWMWINDOWATTRIBUTE
+	{
+		DWMWA_USE_IMMERSIVE_DARK_MODE = 20,
+		DWMWA_WINDOW_CORNER_PREFERENCE = 33,
+		DWMWA_BORDER_COLOR = 34,
+		DWMWA_CAPTION_COLOR = 35,
+		DWMWA_TEXT_COLOR = 36,
+		DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
+		DWMWA_LAST
+	};
+
+	if (active)
+	{
+		if (m_dwm.m_activeBorderColor != -1)
+		{
+			HRESULT hr = ::DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR , &m_dwm.m_activeBorderColor, sizeof(m_dwm.m_activeBorderColor));
+			MY_TRACE_COM_ERROR(hr);
+		}
+
+		if (m_dwm.m_activeCaptionColor != -1)
+		{
+			HRESULT hr = ::DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR , &m_dwm.m_activeCaptionColor, sizeof(m_dwm.m_activeCaptionColor));
+			MY_TRACE_COM_ERROR(hr);
+		}
+
+		if (m_dwm.m_activeTextColor != -1)
+		{
+			HRESULT hr = ::DwmSetWindowAttribute(hwnd, DWMWA_TEXT_COLOR , &m_dwm.m_activeTextColor, sizeof(m_dwm.m_activeTextColor));
+			MY_TRACE_COM_ERROR(hr);
+		}
+	}
+	else
+	{
+		if (m_dwm.m_inactiveBorderColor != -1)
+		{
+			HRESULT hr = ::DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR , &m_dwm.m_inactiveBorderColor, sizeof(m_dwm.m_inactiveBorderColor));
+			MY_TRACE_COM_ERROR(hr);
+		}
+
+		if (m_dwm.m_inactiveCaptionColor != -1)
+		{
+			HRESULT hr = ::DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR , &m_dwm.m_inactiveCaptionColor, sizeof(m_dwm.m_inactiveCaptionColor));
+			MY_TRACE_COM_ERROR(hr);
+		}
+
+		if (m_dwm.m_inactiveTextColor != -1)
+		{
+			HRESULT hr = ::DwmSetWindowAttribute(hwnd, DWMWA_TEXT_COLOR , &m_dwm.m_inactiveTextColor, sizeof(m_dwm.m_inactiveTextColor));
+			MY_TRACE_COM_ERROR(hr);
+		}
+	}
+
+	if (m_dwm.m_darkMode != -1)
+	{
+		HRESULT hr = ::DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE , &m_dwm.m_darkMode, sizeof(m_dwm.m_darkMode));
+		MY_TRACE_COM_ERROR(hr);
+	}
+
+	if (m_dwm.m_cornerMode != -1)
+	{
+		HRESULT hr = ::DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE , &m_dwm.m_cornerMode, sizeof(m_dwm.m_cornerMode));
+		MY_TRACE_COM_ERROR(hr);
+	}
 }
 
 //--------------------------------------------------------------------

@@ -457,6 +457,21 @@ private:
 
 	HTHEME m_themes[THEME_MAXSIZE];
 
+	class Dwm
+	{
+	public:
+
+		int m_darkMode;
+		int m_cornerMode;
+		COLORREF m_activeBorderColor;
+		COLORREF m_activeCaptionColor;
+		COLORREF m_activeTextColor;
+		COLORREF m_inactiveBorderColor;
+		COLORREF m_inactiveCaptionColor;
+		COLORREF m_inactiveTextColor;
+
+	} m_dwm;
+
 public:
 
 	Skin();
@@ -494,7 +509,7 @@ public:
 	{
 		MY_TRACE(_T("Skin::loadFigures(%ws)\n"), tagName);
 
-		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(tagName);
+		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(tagName);
 		int c = nodeList->length;
 		for (int i = 0; i < c; i++)
 		{
@@ -512,7 +527,7 @@ public:
 	{
 		MY_TRACE(_T("Skin::loadIconFigures(%ws)\n"), tagName);
 
-		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(tagName);
+		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(tagName);
 		int c = nodeList->length;
 		for (int i = 0; i < c; i++)
 		{
@@ -530,7 +545,7 @@ public:
 	{
 		MY_TRACE(_T("Skin::loadTextFigures(%ws)\n"), tagName);
 
-		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(tagName);
+		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(tagName);
 		int c = nodeList->length;
 		for (int i = 0; i < c; i++)
 		{
@@ -555,6 +570,8 @@ public:
 
 	HTHEME getTheme(THEMES theme);
 	static int getCtlColorPartId(UINT message);
+
+	void setDwm(HWND hwnd, BOOL active);
 };
 
 //--------------------------------------------------------------------
