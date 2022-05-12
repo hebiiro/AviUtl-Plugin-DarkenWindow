@@ -23,7 +23,7 @@ int DialogRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 		HTHEME theme = g_skin.getTheme(Dark::THEME_DIALOG);
 
 		COLORREF color = my::getBrushColor(brush);
-		MY_TRACE_HEX(color);
+//		MY_TRACE_HEX(color);
 		if (color == ::GetSysColor(COLOR_WINDOW))
 		{
 			if (g_skin.onDrawThemeBackground(theme, dc, WP_DIALOG, ETS_NORMAL, rc))

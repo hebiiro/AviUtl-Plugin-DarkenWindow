@@ -71,7 +71,7 @@ LRESULT ListBoxRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT
 
 int ListBoxRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-//	MY_TRACE(_T("ListBoxRenderer::FillRect()\n"));
+//	MY_TRACE(_T("ListBoxRenderer::FillRect(0x%08X)\n"), brush);
 
 	return true_FillRect(dc, rc, brush);
 }
@@ -120,9 +120,9 @@ BOOL ListBoxRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWS
 
 BOOL ListBoxRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-	MY_TRACE(_T("ListBoxRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X)\n"), x, y, options, rc, text, c, ::GetBkColor(dc));
+//	MY_TRACE(_T("ListBoxRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X)\n"), x, y, options, rc, text, c, ::GetBkColor(dc));
 #if 1
-	if (options & (ETO_GLYPH_INDEX | ETO_IGNORELANGUAGE))
+	if (!(options & (ETO_GLYPH_INDEX | ETO_IGNORELANGUAGE)))
 	{
 		HTHEME theme = g_skin.getTheme(Dark::THEME_LISTBOX);
 

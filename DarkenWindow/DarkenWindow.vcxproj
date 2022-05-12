@@ -236,23 +236,6 @@
   <ItemGroup>
     <ResourceCompile Include="DarkenWindow.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="ICON_AL.ico" />
-    <Image Include="ICON_AR.ico" />
-    <Image Include="ICON_CA0.ico" />
-    <Image Include="ICON_CA1.ico" />
-    <Image Include="ICON_CH.ico" />
-    <Image Include="ICON_CL.ico" />
-    <Image Include="ICON_CL0.ico" />
-    <Image Include="ICON_CL1.ico" />
-    <Image Include="ICON_LL.ico" />
-    <Image Include="ICON_MA.ico" />
-    <Image Include="ICON_MN.ico" />
-    <Image Include="ICON_OP.ico" />
-    <Image Include="ICON_PL.ico" />
-    <Image Include="ICON_RR.ico" />
-    <Image Include="ICON_SP.ico" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

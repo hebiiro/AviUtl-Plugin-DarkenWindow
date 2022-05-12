@@ -17,6 +17,7 @@ void ___outputLog(LPCTSTR text, LPCTSTR output)
 
 AviUtlInternal g_auin;
 HINSTANCE g_instance = 0;
+HWND g_inProcessWindow = 0;
 
 //---------------------------------------------------------------------
 #if 1
@@ -107,6 +108,31 @@ void termHook()
 
 //---------------------------------------------------------------------
 
+HWND createInProcessWindow()
+{
+	MY_TRACE(_T("createInProcessWindow()\n"));
+
+	WNDCLASS wc = {};
+	wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+	wc.hCursor = ::LoadCursor(0, IDC_ARROW);
+	wc.lpfnWndProc = ::DefWindowProc;
+	wc.hInstance = g_instance;
+	wc.lpszClassName = _T("DarkenWindow");
+	::RegisterClass(&wc);
+
+	HWND hwnd = ::CreateWindowEx(
+		0,
+		_T("DarkenWindow"),
+		_T("DarkenWindow"),
+		WS_POPUP,
+		0, 0, 0, 0,
+		0, 0, g_instance, 0);
+
+	return hwnd;
+}
+
+//---------------------------------------------------------------------
+
 EXTERN_C BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
 	switch (reason)
@@ -179,20 +205,6 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 
 			if (::lstrcmpi(className, _T("AviUtl")) == 0)
 			{
-				static BOOL isInited = FALSE;
-				if (!isInited)
-				{
-					isInited = TRUE;
-
-					MY_TRACE(_T("AviUtl をフックします\n"));
-
-					// 最初の AviUtl ウィンドウ作成時にテーマフックをセットする。
-					initThemeHook(hwnd);
-
-					g_skin.init(g_instance, hwnd);
-					g_skin.reloadSettings(TRUE);
-				}
-
 				g_skin.setDwm(hwnd, FALSE);
 			}
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
@@ -258,7 +270,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		{
 			int active = LOWORD(wParam);
 
-			MY_TRACE(_T("WM_ACTIVATE, %d\n"), active);
+//			MY_TRACE(_T("WM_ACTIVATE, %d\n"), active);
 
 			g_skin.setDwm(hwnd, active);
 
@@ -400,16 +412,43 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name
 	else
 	{
 //		MY_TRACE(_T("LoadImageA(0x%08X, %hs)\n"), instance, name);
-		if (instance == ::GetModuleHandle(_T("exedit.auf")) && ::StrStrIA(name, "ICON_"))
+
+		if (instance == ::GetModuleHandle(0) && ::StrStrIA(name, "ICON_"))
 		{
-//			MY_TRACE(_T("アイコンを置き換えます\n"));
+			static BOOL isInited = FALSE;
+			if (!isInited)
+			{
+				isInited = TRUE;
+
+				// ウィンドウを作成する。
+				g_inProcessWindow = createInProcessWindow();
+				MY_TRACE_HEX(g_inProcessWindow);
+
+				// テーマフックをセットする。
+				initThemeHook(g_inProcessWindow);
+
+				// アイコンを書き換えないといけないのでこのタイミングでスキンを初期化する。
+				g_skin.init(g_instance, g_inProcessWindow);
+				g_skin.reloadSettings(TRUE);
+			}
+
+			MY_TRACE(_T("AviUtl のアイコンを書き換えます %hs, 0x%08X\n"), name, flags);
 
 			char name2[MAX_PATH] = {};
-			::StringCbCopyA(name2, sizeof(name2), "WHITE_");
+			::StringCbCopyA(name2, sizeof(name2), "AVIUTL_");
 			::StringCbCatA(name2, sizeof(name2), name);
-			MY_TRACE_STR(name2);
 
-			return true_LoadImageA(g_instance, name2, type, cx, cy, flags);
+			return g_skin.editIcon((HICON)true_LoadImageA(g_instance, name2, type, cx, cy, flags));
+		}
+		else if (instance == ::GetModuleHandle(_T("exedit.auf")) && ::StrStrIA(name, "ICON_"))
+		{
+			MY_TRACE(_T("拡張編集のアイコンを書き換えます %hs, 0x%08X\n"), name, flags);
+
+			char name2[MAX_PATH] = {};
+			::StringCbCopyA(name2, sizeof(name2), "EXEDIT_");
+			::StringCbCatA(name2, sizeof(name2), name);
+
+			return g_skin.editIcon((HICON)true_LoadImageA(g_instance, name2, type, cx, cy, flags));
 		}
 	}
 

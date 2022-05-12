@@ -504,35 +504,89 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-WHITE_ICON_AL                 ICON                    "res\WHITE_ICON_AL.ico"
+AVIUTL_ICON             ICON                    "res/AVIUTL_ICON.ico"
 
-WHITE_ICON_AR                 ICON                    "res\WHITE_ICON_AR.ico"
+AVIUTL_ICON_BACK        ICON                    "res/AVIUTL_ICON_BACK.ico"
 
-WHITE_ICON_CA0                ICON                    "res\WHITE_ICON_CA0.ico"
+AVIUTL_ICON_BACK2       ICON                    "res/AVIUTL_ICON_BACK2.ico"
 
-WHITE_ICON_CA1                ICON                    "res\WHITE_ICON_CA1.ico"
+AVIUTL_ICON_DEL         ICON                    "res/AVIUTL_ICON_DEL.ico"
 
-WHITE_ICON_CH                 ICON                    "res\WHITE_ICON_CH.ico"
+AVIUTL_ICON_DEL2        ICON                    "res/AVIUTL_ICON_DEL2.ico"
 
-WHITE_ICON_CL                 ICON                    "res\WHITE_ICON_CL.ico"
+AVIUTL_ICON_DRAG        ICON                    "res/AVIUTL_ICON_DRAG.ico"
 
-WHITE_ICON_CL0                ICON                    "res\WHITE_ICON_CL0.ico"
+AVIUTL_ICON_FORWARD     ICON                    "res/AVIUTL_ICON_FORWARD.ico"
 
-WHITE_ICON_CL1                ICON                    "res\WHITE_ICON_CL1.ico"
+AVIUTL_ICON_FORWARD2    ICON                    "res/AVIUTL_ICON_FORWARD2.ico"
 
-WHITE_ICON_LL                 ICON                    "res\WHITE_ICON_LL.ico"
+AVIUTL_ICON_IN          ICON                    "res/AVIUTL_ICON_IN.ico"
 
-WHITE_ICON_MA                 ICON                    "res\WHITE_ICON_MA.ico"
+AVIUTL_ICON_I_AUTO      ICON                    "res/AVIUTL_ICON_I_AUTO.ico"
 
-WHITE_ICON_MN                 ICON                    "res\WHITE_ICON_MN.ico"
+AVIUTL_ICON_I_EVEN      ICON                    "res/AVIUTL_ICON_I_EVEN.ico"
 
-WHITE_ICON_OP                 ICON                    "res\WHITE_ICON_OP.ico"
+AVIUTL_ICON_I_MIX       ICON                    "res/AVIUTL_ICON_I_MIX.ico"
 
-WHITE_ICON_PL                 ICON                    "res\WHITE_ICON_PL.ico"
+AVIUTL_ICON_I_NORM      ICON                    "res/AVIUTL_ICON_I_NORM.ico"
 
-WHITE_ICON_RR                 ICON                    "res\WHITE_ICON_RR.ico"
+AVIUTL_ICON_I_ODD       ICON                    "res/AVIUTL_ICON_I_ODD.ico"
 
-WHITE_ICON_SP                 ICON                    "res\WHITE_ICON_SP.ico"
+AVIUTL_ICON_I_REV       ICON                    "res/AVIUTL_ICON_I_REV.ico"
+
+AVIUTL_ICON_LEFT        ICON                    "res/AVIUTL_ICON_LEFT.ico"
+
+AVIUTL_ICON_MARK        ICON                    "res/AVIUTL_ICON_MARK.ico"
+
+AVIUTL_ICON_OUT         ICON                    "res/AVIUTL_ICON_OUT.ico"
+
+AVIUTL_ICON_PAUSE       ICON                    "res/AVIUTL_ICON_PAUSE.ico"
+
+AVIUTL_ICON_PLAY        ICON                    "res/AVIUTL_ICON_PLAY.ico"
+
+AVIUTL_ICON_RIGHT       ICON                    "res/AVIUTL_ICON_RIGHT.ico"
+
+AVIUTL_ICON_STOP        ICON                    "res/AVIUTL_ICON_STOP.ico"
+
+AVIUTL_ICON_VOL         ICON                    "res/AVIUTL_ICON_VOL.ico"
+
+AVIUTL_ICON_Z_1         ICON                    "res/AVIUTL_ICON_Z_1.ico"
+
+AVIUTL_ICON_Z_2         ICON                    "res/AVIUTL_ICON_Z_2.ico"
+
+AVIUTL_ICON_Z_3         ICON                    "res/AVIUTL_ICON_Z_3.ico"
+
+AVIUTL_ICON_Z_4         ICON                    "res/AVIUTL_ICON_Z_4.ico"
+
+EXEDIT_ICON_AL          ICON                    "res\\EXEDIT_ICON_AL.ico"
+
+EXEDIT_ICON_AR          ICON                    "res\\EXEDIT_ICON_AR.ico"
+
+EXEDIT_ICON_CA0         ICON                    "res\\EXEDIT_ICON_CA0.ico"
+
+EXEDIT_ICON_CA1         ICON                    "res\\EXEDIT_ICON_CA1.ico"
+
+EXEDIT_ICON_CH          ICON                    "res\\EXEDIT_ICON_CH.ico"
+
+EXEDIT_ICON_CL          ICON                    "res\\EXEDIT_ICON_CL.ico"
+
+EXEDIT_ICON_CL0         ICON                    "res\\EXEDIT_ICON_CL0.ico"
+
+EXEDIT_ICON_CL1         ICON                    "res\\EXEDIT_ICON_CL1.ico"
+
+EXEDIT_ICON_LL          ICON                    "res\\EXEDIT_ICON_LL.ico"
+
+EXEDIT_ICON_MA          ICON                    "res\\EXEDIT_ICON_MA.ico"
+
+EXEDIT_ICON_MN          ICON                    "res\\EXEDIT_ICON_MN.ico"
+
+EXEDIT_ICON_OP          ICON                    "res\\EXEDIT_ICON_OP.ico"
+
+EXEDIT_ICON_PL          ICON                    "res\\EXEDIT_ICON_PL.ico"
+
+EXEDIT_ICON_RR          ICON                    "res\\EXEDIT_ICON_RR.ico"
+
+EXEDIT_ICON_SP          ICON                    "res\\EXEDIT_ICON_SP.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -542,7 +596,7 @@ WHITE_ICON_SP                 ICON                    "res\WHITE_ICON_SP.ico"
 
 STRINGTABLE
 BEGIN
-    IDS_INFORMATION         "黒蛇 version 1.0.0 by 蛇色"
+    IDS_INFORMATION         "黒窓 1.0.0 by 蛇色"
 END
 
 #endif    // 日本語 (日本) resources

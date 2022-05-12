@@ -162,6 +162,26 @@ public:
 
 //--------------------------------------------------------------------
 
+class RoundRect : public Figure
+{
+protected:
+
+	COLORREF m_fillColor;
+	COLORREF m_edgeColor;
+	int m_edgeWidth;
+	int m_roundWidth;
+	int m_roundHeight;
+
+public:
+
+	RoundRect();
+	virtual ~RoundRect();
+	virtual void load(const MSXML2::IXMLDOMElementPtr& element);
+	virtual void draw(HDC dc, LPRECT rc);
+};
+
+//--------------------------------------------------------------------
+
 class DrawAlphaRectangle : public Figure
 {
 protected:
@@ -443,6 +463,16 @@ struct StateAttributes
 
 //--------------------------------------------------------------------
 
+struct IconColor
+{
+	COLORREF m_src;
+	COLORREF m_dst;
+};
+
+typedef std::vector<IconColor> IconColorArray;
+
+//--------------------------------------------------------------------
+
 class Skin
 {
 private:
@@ -471,6 +501,7 @@ private:
 		COLORREF m_inactiveTextColor;
 
 	} m_dwm;
+	IconColorArray m_iconColorArray;
 
 public:
 
@@ -507,7 +538,7 @@ public:
 	template<class T>
 	void loadFigure(const MSXML2::IXMLDOMElementPtr& parentElement, LPCWSTR tagName)
 	{
-		MY_TRACE(_T("Skin::loadFigures(%ws)\n"), tagName);
+//		MY_TRACE(_T("Skin::loadFigures(%ws)\n"), tagName);
 
 		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(tagName);
 		int c = nodeList->length;
@@ -518,14 +549,14 @@ public:
 			FigurePtr figure(new T());
 			figure->load(element);
 			m_figureMap[figure->getName()] = figure;
-			MY_TRACE(_T("figure = %ws, %ws\n"), tagName, figure->getName());
+//			MY_TRACE(_T("figure = %ws, %ws\n"), tagName, figure->getName());
 		}
 	}
 
 	template<class T>
 	void loadIconFigure(const MSXML2::IXMLDOMElementPtr& parentElement, LPCWSTR tagName)
 	{
-		MY_TRACE(_T("Skin::loadIconFigures(%ws)\n"), tagName);
+//		MY_TRACE(_T("Skin::loadIconFigures(%ws)\n"), tagName);
 
 		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(tagName);
 		int c = nodeList->length;
@@ -536,14 +567,14 @@ public:
 			IconFigurePtr figure(new T());
 			figure->load(element);
 			m_iconFigureMap[figure->getName()] = figure;
-			MY_TRACE(_T("icon figure = %ws, %ws\n"), tagName, figure->getName());
+//			MY_TRACE(_T("icon figure = %ws, %ws\n"), tagName, figure->getName());
 		}
 	}
 
 	template<class T>
 	void loadTextFigure(const MSXML2::IXMLDOMElementPtr& parentElement, LPCWSTR tagName)
 	{
-		MY_TRACE(_T("Skin::loadTextFigures(%ws)\n"), tagName);
+//		MY_TRACE(_T("Skin::loadTextFigures(%ws)\n"), tagName);
 
 		MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(tagName);
 		int c = nodeList->length;
@@ -554,7 +585,7 @@ public:
 			TextFigurePtr figure(new T());
 			figure->load(element);
 			m_textFigureMap[figure->getName()] = figure;
-			MY_TRACE(_T("text figure = %ws, %ws\n"), tagName, figure->getName());
+//			MY_TRACE(_T("text figure = %ws, %ws\n"), tagName, figure->getName());
 		}
 	}
 
@@ -572,6 +603,7 @@ public:
 	static int getCtlColorPartId(UINT message);
 
 	void setDwm(HWND hwnd, BOOL active);
+	HICON editIcon(HICON originalIcon);
 };
 
 //--------------------------------------------------------------------

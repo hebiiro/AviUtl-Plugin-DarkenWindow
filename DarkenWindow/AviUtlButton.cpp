@@ -66,9 +66,8 @@ BOOL AviUtlButtonRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT
 
 	RECT rc2 = *rc;
 	g_skin.onDrawThemeBackground(theme, dc, partId, stateId, &rc2);
-	::InvertRect(dc, rc);
+
 	::DrawIconEx(dc, x, y, icon, w, h, 0, NULL, DI_NORMAL);
-	::InvertRect(dc, rc);
 
 	return TRUE;
 }

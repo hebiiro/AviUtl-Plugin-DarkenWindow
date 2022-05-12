@@ -10,6 +10,7 @@ void clipRect(HDC dc, LPCRECT rc);
 void clipRect(HDC dc, LPCRECT rc, int mode);
 void fillRect(HDC dc, LPCRECT rc, COLORREF fillColor);
 void frameRect(HDC dc, LPCRECT rc, COLORREF edgeColor, int edgeWidth);
+void roundRect(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth, int roundWidth, int roundHeight);
 void drawRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth);
 void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth);
 void drawSingleEdge(HDC dc, LPCRECT rc, COLORREF topLeftColor, COLORREF bottomRightColor);

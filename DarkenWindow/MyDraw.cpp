@@ -55,6 +55,32 @@ void frameRect(HDC dc, LPCRECT rc, COLORREF edgeColor, int edgeWidth)
 	::DeleteObject(edgeBrush);
 }
 
+void roundRect(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth, int roundWidth, int roundHeight)
+{
+	HBRUSH brush = (HBRUSH)::GetStockObject(NULL_BRUSH);
+	if (fillColor != CLR_NONE)
+		brush = ::CreateSolidBrush(fillColor);
+	HBRUSH oldBrush = (HBRUSH)::SelectObject(dc, brush);
+
+	HPEN pen = (HPEN)::GetStockObject(NULL_PEN);
+	if (edgeColor != CLR_NONE && edgeWidth > 0)
+		pen = ::CreatePen(PS_SOLID, edgeWidth, edgeColor);
+	HPEN oldPen = (HPEN)::SelectObject(dc, pen);
+
+	int w = rc->right - rc->left;
+	int h = rc->bottom - rc->top;
+
+	::RoundRect(dc, rc->left, rc->top, rc->right, rc->bottom, roundWidth, roundHeight);
+
+	::SelectObject(dc, oldPen);
+	if (edgeColor != CLR_NONE && edgeWidth > 0)
+		::DeleteObject(pen);
+
+	::SelectObject(dc, oldBrush);
+	if (fillColor != CLR_NONE)
+		::DeleteObject(brush);
+}
+
 void drawRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth)
 {
 	HBRUSH fillBrush = ::CreateSolidBrush(fillColor);
@@ -230,32 +256,32 @@ void shadowTextOut(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text,
 	COLORREF oldBkColor = ::GetBkColor(dc);
 	COLORREF oldTextColor = ::GetTextColor(dc);
 
-	RECT rc2 = {};
-	if (rc) rc2 = *rc;
-
-	if (fillColor != CLR_NONE)
+	if (options & ETO_OPAQUE && fillColor != CLR_NONE)
 	{
 		// 背景を塗りつぶす。
 		::SetBkColor(dc, fillColor);
-		true_ExtTextOutW(dc, x, y, options, &rc2, L"", 0, dx);
+		true_ExtTextOutW(dc, x, y, options, rc, 0, 0, dx);
 	}
 
-	::SetBkMode(dc, TRANSPARENT);
-
-	if (textBackColor != CLR_NONE)
+	if (text && c)
 	{
-		x += 1, y += 1; ::OffsetRect(&rc2, +1, +1);
-		::SetTextColor(dc, textBackColor);
-		true_ExtTextOutW(dc, x, y, options & ~ETO_OPAQUE, &rc2, text, c, dx);
-		x -= 1, y -= 1; ::OffsetRect(&rc2, -1, -1);
+		::SetBkMode(dc, TRANSPARENT);
+
+		if (textBackColor != CLR_NONE)
+		{
+			x += 1, y += 1;
+			::SetTextColor(dc, textBackColor);
+			true_ExtTextOutW(dc, x, y, options & ~ETO_OPAQUE, rc, text, c, dx);
+			x -= 1, y -= 1;
+		}
+
+		::SetTextColor(dc, textForeColor);
+		true_ExtTextOutW(dc, x, y, options & ~ETO_OPAQUE, rc, text, c, dx);
+
+		::SetBkMode(dc, oldBkMode);
+		::SetBkColor(dc, oldBkColor);
+		::SetTextColor(dc, oldTextColor);
 	}
-
-	::SetTextColor(dc, textForeColor);
-	true_ExtTextOutW(dc, x, y, options & ~ETO_OPAQUE, &rc2, text, c, dx);
-
-	::SetBkMode(dc, oldBkMode);
-	::SetBkColor(dc, oldBkColor);
-	::SetTextColor(dc, oldTextColor);
 }
 
 //--------------------------------------------------------------------

@@ -112,53 +112,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="ICON_AL.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_AR.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_CA0.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_CA1.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_CH.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_CL.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_CL0.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_CL1.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_LL.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_MA.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_MN.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_OP.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_PL.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_RR.ico">
-      <Filter>Resource</Filter>
-    </Image>
-    <Image Include="ICON_SP.ico">
-      <Filter>Resource</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="DarkenWindow.rc">
       <Filter>Resource</Filter>
     </ResourceCompile>
