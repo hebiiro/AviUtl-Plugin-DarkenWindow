@@ -131,6 +131,28 @@ HWND createInProcessWindow()
 	return hwnd;
 }
 
+// 外部プロセスで使用する場合はこの関数をインポートして呼ぶ。
+void WINAPI DarkenWindow_init()
+{
+	MY_TRACE(_T("DarkenWindow_init()\n"));
+
+	static BOOL isInited = FALSE;
+	if (!isInited)
+	{
+		isInited = TRUE;
+
+		// ウィンドウを作成する。
+		g_inProcessWindow = createInProcessWindow();
+		MY_TRACE_HEX(g_inProcessWindow);
+
+		// テーマフックをセットする。
+		initThemeHook(g_inProcessWindow);
+
+		g_skin.init(g_instance, g_inProcessWindow);
+		g_skin.reloadSettings(TRUE);
+	}
+}
+
 //---------------------------------------------------------------------
 
 EXTERN_C BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
@@ -216,6 +238,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				g_auin.init();
 
 				DWORD exedit = (DWORD)::GetModuleHandle(_T("exedit.auf"));
+				if (!exedit) break;
 
 				Exedit::g_font = (HFONT*)(exedit + 0x00167D84);
 
@@ -260,7 +283,6 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			{
 				g_skin.setDwm(hwnd, FALSE);
 			}
-
 
 			break;
 		}
@@ -478,22 +500,8 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name
 
 		if (instance == ::GetModuleHandle(0) && ::StrStrIA(name, "ICON_"))
 		{
-			static BOOL isInited = FALSE;
-			if (!isInited)
-			{
-				isInited = TRUE;
-
-				// ウィンドウを作成する。
-				g_inProcessWindow = createInProcessWindow();
-				MY_TRACE_HEX(g_inProcessWindow);
-
-				// テーマフックをセットする。
-				initThemeHook(g_inProcessWindow);
-
-				// アイコンを書き換えないといけないのでこのタイミングでスキンを初期化する。
-				g_skin.init(g_instance, g_inProcessWindow);
-				g_skin.reloadSettings(TRUE);
-			}
+			// アイコンを書き換えないといけないのでこのタイミングでスキンを初期化する。
+			DarkenWindow_init();
 
 			MY_TRACE(_T("AviUtl のアイコンを書き換えます %hs, 0x%08X\n"), name, flags);
 
