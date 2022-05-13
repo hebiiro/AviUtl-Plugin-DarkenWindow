@@ -110,9 +110,9 @@ BOOL StaticRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWST
 
 BOOL StaticRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("StaticRenderer::ExtTextOutW()\n"));
+//	MY_TRACE(_T("StaticRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X)\n"), x, y, options, rc, text, c, ::GetBkColor(dc));
 
-	if (!(options & ETO_IGNORELANGUAGE))
+//	if (!(options & ETO_IGNORELANGUAGE))
 	{
 		HTHEME theme = g_skin.getTheme(Dark::THEME_STATIC);
 

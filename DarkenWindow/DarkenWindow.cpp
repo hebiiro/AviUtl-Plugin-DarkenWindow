@@ -223,9 +223,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				hookAbsoluteCall(exedit + 0x0003836A, Exedit::drawRootEdge);
 
 				hookAbsoluteCall(exedit + 0x00037CFF, Exedit::drawLayerText);
-//				hookAbsoluteCall(exedit + 0x00037D46, Exedit::drawLayerEdge);
-//				static DWORD g_Exedit_drawLayerEdge = (DWORD)Exedit::drawLayerEdge;
-//				writeAbsoluteAddress(exedit + 0x00037D46 + 2, &g_Exedit_drawLayerEdge);
+				hookAbsoluteCall(exedit + 0x00037D46, Exedit::drawLayerEdge);
 
 				hookCall(exedit + 0x000380DF, Exedit::drawTimelineLongGuage);
 				hookCall(exedit + 0x000381D7, Exedit::drawTimelineShortGuage);
@@ -279,7 +277,6 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 	case WM_CTLCOLORDLG:
 	case WM_CTLCOLORMSGBOX:
 	case WM_CTLCOLORBTN:
-	case WM_CTLCOLORSTATIC:
 	case WM_CTLCOLOREDIT:
 	case WM_CTLCOLORLISTBOX:
 	case WM_CTLCOLORSCROLLBAR:
@@ -301,26 +298,34 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			HWND control = (HWND)lParam;
 			BOOL enable = ::IsWindowEnabled(control);
 			HBRUSH brush = (HBRUSH)true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+//			HBRUSH dcBrush = (HBRUSH)::GetStockObject(DC_BRUSH);
 			COLORREF bkColor = ::GetBkColor(dc);
-			COLORREF brushColor = my::getBrushColor(brush);
-//			MY_TRACE(_T("brush = 0x%08X, bkColor = 0x%08X, brushColor = 0x%08X\n"), brush, bkColor, brushColor);
+//			COLORREF brushColor = my::getBrushColor(brush);
+//			MY_TRACE(_T("brush = 0x%08X, dcBrush = 0x%08X, bkColor = 0x%08X, brushColor = 0x%08X\n"), brush, dcBrush, bkColor, brushColor);
 
 			HTHEME theme = g_skin.getTheme(Dark::THEME_CTLCOLOR);
 			int partId = g_skin.getCtlColorPartId(message);
 			int stateId = 0;
+
 			if (!enable)
 			{
 				stateId = Dark::CTLCOLOR_DISABLED;
 			}
-			else if (message == WM_CTLCOLOREDIT || message == WM_CTLCOLORLISTBOX)
+			else if (message == WM_CTLCOLOREDIT)
 			{
 				if (brush == (HBRUSH)(COLOR_BTNFACE + 1) || bkColor == ::GetSysColor(COLOR_BTNFACE))
 				{
-					stateId = Dark::CTLCOLOR_READONLY;
+					// スタティックコントロールに似たエディットボックスだった。
+					stateId = Dark::CTLCOLOR_STATICTEXT;
+					::SetProp(control, _T("DarkenWindow.State"), (HANDLE)ETS_STATICTEXT);
+//					MY_TRACE(_T("ETS_STATICTEXT 0x%08X\n"), control);
 				}
 				else
 				{
+					// 通常のエディットボックスだった。
 					stateId = Dark::CTLCOLOR_NORMAL;
+					::SetProp(control, _T("DarkenWindow.State"), (HANDLE)ETS_NORMAL);
+//					MY_TRACE(_T("ETS_NORMAL 0x%08X\n"), control);
 				}
 			}
 			else if (brush != (HBRUSH)::GetStockObject(DC_BRUSH))
@@ -339,8 +344,66 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			if (!state)
 				return (LRESULT)brush;
 
-			::SetTextColor(dc, state->m_textForeColor);
-			::SetBkColor(dc, state->m_textBkColor);
+			return (LRESULT)state->getFillBrush();
+		}
+	case WM_CTLCOLORSTATIC:
+		{
+//			MY_TRACE(_T("WM_CTLCOLORSTATIC, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
+
+			HDC dc = (HDC)wParam;
+			HWND control = (HWND)lParam;
+			BOOL enable = ::IsWindowEnabled(control);
+			HBRUSH brush = (HBRUSH)true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+//			COLORREF bkColor = ::GetBkColor(dc);
+//			COLORREF brushColor = my::getBrushColor(brush);
+//			MY_TRACE(_T("brush = 0x%08X, bkColor = 0x%08X, brushColor = 0x%08X\n"), brush, bkColor, brushColor);
+
+			HTHEME theme = g_skin.getTheme(Dark::THEME_CTLCOLOR);
+			int partId = g_skin.getCtlColorPartId(message);
+			int stateId = 0;
+
+			// 読み取り専用または無効状態のエディットボックスの場合は WM_CTLCOLORSTATIC が送られてくる。
+			// しかし、エディットボックスのスキンは WM_CTLCOLOREDIT で処理したい。
+			// したがって、コントロールがエディットボックスかどうか調べて、
+			// エディットボックスだった場合は WM_CTLCOLOREDIT に変更する。
+
+			TCHAR className[MAX_PATH] = {};
+			::GetClassName(hwnd, className, MAX_PATH);
+			if (::lstrcmpi(className, WC_EDIT) == 0)
+			{
+				// エディットボックスだった。
+				partId = g_skin.getCtlColorPartId(WM_CTLCOLOREDIT);
+
+				if (enable)
+				{
+					// 読み取り専用のエディットボックスだった。
+					stateId = Dark::CTLCOLOR_READONLY;
+					::SetProp(control, _T("DarkenWindow.State"), (HANDLE)Dark::CTLCOLOR_READONLY);
+//					MY_TRACE(_T("ETS_READONLY 0x%08X\n"), control);
+				}
+				else
+				{
+					// 無効状態のエディットボックスだった。
+					stateId = Dark::CTLCOLOR_DISABLED;
+					::SetProp(control, _T("DarkenWindow.State"), (HANDLE)Dark::CTLCOLOR_DISABLED);
+//					MY_TRACE(_T("ETS_DISABLED 0x%08X\n"), control);
+				}
+			}
+			else if (!enable)
+			{
+				// 無効状態のスタティックコントロールだった。
+				stateId = Dark::CTLCOLOR_DISABLED;
+			}
+			else if (brush != (HBRUSH)::GetStockObject(DC_BRUSH))
+			{
+				// 通常状態のスタティックコントロールだった。
+				stateId = Dark::CTLCOLOR_NORMAL;
+			}
+
+			Dark::StatePtr state = g_skin.getState(theme, partId, stateId);
+			if (!state)
+				return (LRESULT)brush;
+
 			return (LRESULT)state->getFillBrush();
 		}
 	case WM_NOTIFY:
@@ -575,10 +638,12 @@ BOOL WINAPI drawLayerText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR
 
 	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
 
+	g_skin.onDrawThemeBackground(theme, dc, Dark::EXEDIT_LAYER, stateId, rc);
+
 	if (g_skin.onExtTextOut(theme, dc, Dark::EXEDIT_LAYER, stateId, x, y, options, rc, text2, c2, dx))
 		return TRUE;
 
-	return TRUE;
+	return ::ExtTextOutA(dc, x, y, options, rc, text, c, dx);
 }
 
 BOOL WINAPI drawLayerEdge(HDC dc, LPRECT rc, UINT edge, UINT flags)
@@ -587,10 +652,10 @@ BOOL WINAPI drawLayerEdge(HDC dc, LPRECT rc, UINT edge, UINT flags)
 
 	HTHEME theme = g_skin.getTheme(Dark::THEME_EXEDIT);
 
-	if (g_skin.onDrawThemeBackground(theme, dc, Dark::EXEDIT_LAYER, 0, rc))
+	if (g_skin.onDrawThemeBackground(theme, dc, Dark::EXEDIT_LAYEREDGE, 0, rc))
 		return TRUE;
 
-	return TRUE;
+	return ::DrawEdge(dc, rc, edge, flags);
 }
 
 void drawTimelineLongGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen)

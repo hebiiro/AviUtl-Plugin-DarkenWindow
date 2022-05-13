@@ -30,7 +30,7 @@ typedef std::map<_bstr_t, ColorSet> ColorSetMap;
 
 ColorSetMap g_colorSetMap;
 
-inline HRESULT WINAPI getPrivateProfileColor2(
+inline HRESULT WINAPI getPrivateProfileNamedColor(
 	const MSXML2::IXMLDOMElementPtr& element, LPCWSTR name, COLORREF& outValue, int type)
 {
 	_variant_t var = element->getAttribute(name);
@@ -48,8 +48,24 @@ inline HRESULT WINAPI getPrivateProfileColor2(
 		case ColorSet::textBackColor: outValue = it->second.m_textBackColor; return S_OK;
 		}
 	}
-
+	if (::lstrlenW(varBSTR) == 0)
+	{
+		outValue = CLR_NONE;
+		return S_OK;
+	}
 	return ::getPrivateProfileColor(element, name, outValue);
+}
+
+inline HRESULT WINAPI getPrivateProfileColorSet(
+	const MSXML2::IXMLDOMElementPtr& element, LPCWSTR name, ColorSet& outValue)
+{
+	_variant_t var = element->getAttribute(name);
+	if (var.vt == VT_NULL) return S_FALSE;
+	_bstr_t varBSTR(var);
+	auto it = g_colorSetMap.find(varBSTR);
+	if (it == g_colorSetMap.end()) return S_FALSE;
+	outValue = it->second;
+	return S_OK;
 }
 
 //--------------------------------------------------------------------
@@ -136,7 +152,13 @@ FillRect::~FillRect()
 void FillRect::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
-	getPrivateProfileColor2(element, L"fillColor", m_fillColor, ColorSet::fillColor);
+
+	ColorSet colorSet;
+	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+	{
+		m_fillColor = colorSet.m_fillColor;
+	}
+	getPrivateProfileNamedColor(element, L"fillColor", m_fillColor, ColorSet::fillColor);
 }
 
 void FillRect::draw(HDC dc, LPRECT rc)
@@ -161,7 +183,12 @@ FrameRect::~FrameRect()
 void FrameRect::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
-	getPrivateProfileColor2(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
+	ColorSet colorSet;
+	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+	{
+		m_edgeColor = colorSet.m_edgeColor;
+	}
+	getPrivateProfileNamedColor(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
 	getPrivateProfileInt(element, L"edgeWidth", m_edgeWidth);
 }
 
@@ -190,8 +217,14 @@ RoundRect::~RoundRect()
 void RoundRect::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
-	getPrivateProfileColor2(element, L"fillColor", m_fillColor, ColorSet::fillColor);
-	getPrivateProfileColor2(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
+	ColorSet colorSet;
+	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+	{
+		m_fillColor = colorSet.m_fillColor;
+		m_edgeColor = colorSet.m_edgeColor;
+	}
+	getPrivateProfileNamedColor(element, L"fillColor", m_fillColor, ColorSet::fillColor);
+	getPrivateProfileNamedColor(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
 	getPrivateProfileInt(element, L"edgeWidth", m_edgeWidth);
 	getPrivateProfileInt(element, L"roundWidth", m_roundWidth);
 	getPrivateProfileInt(element, L"roundHeight", m_roundHeight);
@@ -219,8 +252,14 @@ DrawAlphaRectangle::~DrawAlphaRectangle()
 void DrawAlphaRectangle::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
-	getPrivateProfileColor2(element, L"fillColor", m_fillColor, ColorSet::fillColor);
-	getPrivateProfileColor2(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
+	ColorSet colorSet;
+	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+	{
+		m_fillColor = colorSet.m_fillColor;
+		m_edgeColor = colorSet.m_edgeColor;
+	}
+	getPrivateProfileNamedColor(element, L"fillColor", m_fillColor, ColorSet::fillColor);
+	getPrivateProfileNamedColor(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
 	getPrivateProfileInt(element, L"edgeWidth", m_edgeWidth);
 }
 
@@ -408,10 +447,17 @@ TextFigure::~TextFigure()
 void TextFigure::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
+	ColorSet colorSet;
+	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+	{
+		m_fillColor = colorSet.m_fillColor;
+		m_foreColor = colorSet.m_textForeColor;
+		m_backColor = colorSet.m_textBackColor;
+	}
 	getPrivateProfileBSTR(element, L"fontName", m_fontName);
-	getPrivateProfileColor2(element, L"fillColor", m_fillColor, ColorSet::fillColor);
-	getPrivateProfileColor2(element, L"foreColor", m_foreColor, ColorSet::textForeColor);
-	getPrivateProfileColor2(element, L"backColor", m_backColor, ColorSet::textBackColor);
+	getPrivateProfileNamedColor(element, L"fillColor", m_fillColor, ColorSet::fillColor);
+	getPrivateProfileNamedColor(element, L"foreColor", m_foreColor, ColorSet::textForeColor);
+	getPrivateProfileNamedColor(element, L"backColor", m_backColor, ColorSet::textBackColor);
 	getPrivateProfileInt(element, L"format", m_format);
 }
 
@@ -875,8 +921,8 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				getPrivateProfileColor2(element, L"topLeftColor", DrawSingleRaisedEdge::m_topLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"bottomRightColor", DrawSingleRaisedEdge::m_bottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"topLeftColor", DrawSingleRaisedEdge::m_topLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"bottomRightColor", DrawSingleRaisedEdge::m_bottomRightColor, ColorSet::edgeColor);
 			}
 		}
 
@@ -889,8 +935,8 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				getPrivateProfileColor2(element, L"topLeftColor", DrawSingleSunkenEdge::m_topLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"bottomRightColor", DrawSingleSunkenEdge::m_bottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"topLeftColor", DrawSingleSunkenEdge::m_topLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"bottomRightColor", DrawSingleSunkenEdge::m_bottomRightColor, ColorSet::edgeColor);
 			}
 		}
 
@@ -903,10 +949,10 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				getPrivateProfileColor2(element, L"innerTopLeftColor", DrawDoubleRaisedEdge::m_innerTopLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"innerBottomRightColor", DrawDoubleRaisedEdge::m_innerBottomRightColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"outerTopLeftColor", DrawDoubleRaisedEdge::m_outerTopLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"outerBottomRightColor", DrawDoubleRaisedEdge::m_outerBottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"innerTopLeftColor", DrawDoubleRaisedEdge::m_innerTopLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"innerBottomRightColor", DrawDoubleRaisedEdge::m_innerBottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"outerTopLeftColor", DrawDoubleRaisedEdge::m_outerTopLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"outerBottomRightColor", DrawDoubleRaisedEdge::m_outerBottomRightColor, ColorSet::edgeColor);
 			}
 		}
 
@@ -919,10 +965,10 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				getPrivateProfileColor2(element, L"innerTopLeftColor", DrawDoubleSunkenEdge::m_innerTopLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"innerBottomRightColor", DrawDoubleSunkenEdge::m_innerBottomRightColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"outerTopLeftColor", DrawDoubleSunkenEdge::m_outerTopLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"outerBottomRightColor", DrawDoubleSunkenEdge::m_outerBottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"innerTopLeftColor", DrawDoubleSunkenEdge::m_innerTopLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"innerBottomRightColor", DrawDoubleSunkenEdge::m_innerBottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"outerTopLeftColor", DrawDoubleSunkenEdge::m_outerTopLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"outerBottomRightColor", DrawDoubleSunkenEdge::m_outerBottomRightColor, ColorSet::edgeColor);
 			}
 		}
 
@@ -935,10 +981,10 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				getPrivateProfileColor2(element, L"innerTopLeftColor", DrawDoubleBumpEdge::m_innerTopLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"innerBottomRightColor", DrawDoubleBumpEdge::m_innerBottomRightColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"outerTopLeftColor", DrawDoubleBumpEdge::m_outerTopLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"outerBottomRightColor", DrawDoubleBumpEdge::m_outerBottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"innerTopLeftColor", DrawDoubleBumpEdge::m_innerTopLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"innerBottomRightColor", DrawDoubleBumpEdge::m_innerBottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"outerTopLeftColor", DrawDoubleBumpEdge::m_outerTopLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"outerBottomRightColor", DrawDoubleBumpEdge::m_outerBottomRightColor, ColorSet::edgeColor);
 			}
 		}
 
@@ -951,10 +997,10 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				getPrivateProfileColor2(element, L"innerTopLeftColor", DrawDoubleEtchedEdge::m_innerTopLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"innerBottomRightColor", DrawDoubleEtchedEdge::m_innerBottomRightColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"outerTopLeftColor", DrawDoubleEtchedEdge::m_outerTopLeftColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"outerBottomRightColor", DrawDoubleEtchedEdge::m_outerBottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"innerTopLeftColor", DrawDoubleEtchedEdge::m_innerTopLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"innerBottomRightColor", DrawDoubleEtchedEdge::m_innerBottomRightColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"outerTopLeftColor", DrawDoubleEtchedEdge::m_outerTopLeftColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"outerBottomRightColor", DrawDoubleEtchedEdge::m_outerBottomRightColor, ColorSet::edgeColor);
 			}
 		}
 
@@ -967,12 +1013,12 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				getPrivateProfileColor2(element, L"activeBorderColor", m_dwm.m_activeBorderColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"activeCaptionColor", m_dwm.m_activeCaptionColor, ColorSet::fillColor);
-				getPrivateProfileColor2(element, L"activeTextColor", m_dwm.m_activeTextColor, ColorSet::textForeColor);
-				getPrivateProfileColor2(element, L"inactiveBorderColor", m_dwm.m_inactiveBorderColor, ColorSet::edgeColor);
-				getPrivateProfileColor2(element, L"inactiveCaptionColor", m_dwm.m_inactiveCaptionColor, ColorSet::fillColor);
-				getPrivateProfileColor2(element, L"inactiveTextColor", m_dwm.m_inactiveTextColor, ColorSet::textForeColor);
+				getPrivateProfileNamedColor(element, L"activeBorderColor", m_dwm.m_activeBorderColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"activeCaptionColor", m_dwm.m_activeCaptionColor, ColorSet::fillColor);
+				getPrivateProfileNamedColor(element, L"activeTextColor", m_dwm.m_activeTextColor, ColorSet::textForeColor);
+				getPrivateProfileNamedColor(element, L"inactiveBorderColor", m_dwm.m_inactiveBorderColor, ColorSet::edgeColor);
+				getPrivateProfileNamedColor(element, L"inactiveCaptionColor", m_dwm.m_inactiveCaptionColor, ColorSet::fillColor);
+				getPrivateProfileNamedColor(element, L"inactiveTextColor", m_dwm.m_inactiveTextColor, ColorSet::textForeColor);
 				getPrivateProfileInt(element, L"darkMode", m_dwm.m_darkMode);
 				getPrivateProfileInt(element, L"cornerMode", m_dwm.m_cornerMode);
 			}
@@ -1008,19 +1054,19 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		}
 
 		{
-			// <ColorNames> を読み込む。
+			// <NamedColors> を読み込む。
 
 			g_colorSetMap.clear();
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"ColorNames");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"NamedColors");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				// <ColorName> を読み込む。
+				// <NamedColor> を読み込む。
 
-				MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"ColorName");
+				MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"NamedColor");
 				int c = nodeList->length;
 				for (int i = 0; i < c; i++)
 				{
@@ -1206,10 +1252,18 @@ void Skin::loadState(const MSXML2::IXMLDOMElementPtr& parentElement, const PartP
 
 		StatePtr state = part->addState(getStateId(stateIdString));
 
-		getPrivateProfileColor2(element, L"fillColor", state->m_fillColor, ColorSet::fillColor);
-		getPrivateProfileColor2(element, L"textBkColor", state->m_textBkColor, ColorSet::textBkColor);
-		getPrivateProfileColor2(element, L"textForeColor", state->m_textForeColor, ColorSet::textForeColor);
-		getPrivateProfileColor2(element, L"textBackColor", state->m_textBackColor, ColorSet::textBackColor);
+		ColorSet colorSet;
+		if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+		{
+			state->m_fillColor = colorSet.m_fillColor;
+			state->m_textBkColor = colorSet.m_textBkColor;
+			state->m_textForeColor = colorSet.m_textForeColor;
+			state->m_textBackColor = colorSet.m_textBackColor;
+		}
+		getPrivateProfileNamedColor(element, L"fillColor", state->m_fillColor, ColorSet::fillColor);
+		getPrivateProfileNamedColor(element, L"textBkColor", state->m_textBkColor, ColorSet::textBkColor);
+		getPrivateProfileNamedColor(element, L"textForeColor", state->m_textForeColor, ColorSet::textForeColor);
+		getPrivateProfileNamedColor(element, L"textBackColor", state->m_textBackColor, ColorSet::textBackColor);
 
 		state->deleteFillBrush();
 
@@ -1381,6 +1435,7 @@ int Skin::getPartId(LPCWSTR id)
 
 	IF_RETURN(EXEDIT_ROOT);
 	IF_RETURN(EXEDIT_LAYER);
+	IF_RETURN(EXEDIT_LAYEREDGE);
 	IF_RETURN(EXEDIT_LONGGUAGE);
 	IF_RETURN(EXEDIT_SHORTGUAGE);
 	IF_RETURN(EXEDIT_LAYERBACKGROUND);
@@ -1564,6 +1619,7 @@ int Skin::getStateId(LPCWSTR id)
 	IF_RETURN(CTLCOLOR_NORMAL);
 	IF_RETURN(CTLCOLOR_DISABLED);
 	IF_RETURN(CTLCOLOR_READONLY);
+	IF_RETURN(CTLCOLOR_STATICTEXT);
 
 	// ExEdit
 
@@ -1727,6 +1783,7 @@ int Skin::getStateId(LPCWSTR id)
 	IF_RETURN(ETS_READONLY);
 	IF_RETURN(ETS_ASSIST);
 	IF_RETURN(ETS_CUEBANNER);
+	IF_RETURN(ETS_STATICTEXT);
 
 	IF_RETURN(EBS_NORMAL);
 	IF_RETURN(EBS_HOT);

@@ -104,47 +104,38 @@ BOOL EditRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTAT
 
 BOOL EditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X)\n"), dc, x, y, options);
+//	MY_TRACE(_T("EditRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X)\n"), x, y, options, rc, text, c, ::GetBkColor(dc));
 #if 1
-	if (!(options & ETO_IGNORELANGUAGE))
+//	if (!(options & ETO_IGNORELANGUAGE))
 	{
 		HTHEME theme = g_skin.getTheme(Dark::THEME_EDIT);
 
-		if (options & ETO_OPAQUE)
-		{
-			COLORREF color = ::GetBkColor(dc);
-			if (color == ::GetSysColor(COLOR_HIGHLIGHT))
-			{
-				if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_SELECTED, x, y, options, rc, text, c, dx))
-					return TRUE;
-			}
-		}
+		// WM_CTLCOLOR で設定された stateId を取得する。
+		int stateId = (int)::GetProp(currentState->m_hwnd, _T("DarkenWindow.State"));
 
-		if (::IsWindowEnabled(currentState->m_hwnd))
+		COLORREF color = ::GetBkColor(dc);
+		COLORREF hilightColor = ::GetSysColor(COLOR_HIGHLIGHT);
+		COLORREF _3dface = ::GetSysColor(COLOR_3DFACE);
+//		MY_TRACE(_T("color = 0x%08X, 0x%08X, 0x%08X\n"), color, hilightColor, _3dface);
+
+		// コンテキストメニューかどうかチェックする。
+		if (color == _3dface && stateId == ETS_NORMAL)
+			return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+
+		// 選択テキストかどうかチェックする。
+		if (color == hilightColor)
+			stateId = ETS_SELECTED;
+
+//		MY_TRACE(_T("stateId = %d, hwnd = 0x%08X\n"), stateId, currentState->m_hwnd);
+
+		if (stateId != 0)
 		{
-			DWORD style = GetWindowStyle(currentState->m_hwnd);
-			if (style & ES_READONLY)
-			{
-				if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_READONLY, x, y, options, rc, text, c, dx))
-					return TRUE;
-			}
-			else
-			{
-				if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_NORMAL, x, y, options, rc, text, c, dx))
-					return TRUE;
-			}
-		}
-		else
-		{
-			if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_DISABLED, x, y, options, rc, text, c, dx))
+			if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, stateId, x, y, options, rc, text, c, dx))
 				return TRUE;
 		}
 	}
 #endif
-//	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) Begin\n"), dc, x, y, options);
-	BOOL result = true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
-//	MY_TRACE(_T("EditRenderer::ExtTextOutW(0x%08X, %d, %d, 0x%08X) End\n"), dc, x, y, options);
-	return result;
+	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }
 
 BOOL EditRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)

@@ -207,9 +207,14 @@ void textOut(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT 
 	if (rc) rc2 = *rc;
 
 	if (fillColor != CLR_NONE)
+	{
 		::SetBkColor(dc, fillColor);
+	}
 	else
+	{
+		options &= ~ETO_OPAQUE;
 		::SetBkMode(dc, TRANSPARENT);
+	}
 
 	::SetTextColor(dc, textColor);
 	true_ExtTextOutW(dc, x, y, options, &rc2, text, c, dx);

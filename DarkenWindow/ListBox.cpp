@@ -126,26 +126,28 @@ BOOL ListBoxRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UIN
 	{
 		HTHEME theme = g_skin.getTheme(Dark::THEME_LISTBOX);
 
-		if (options & ETO_OPAQUE)
-		{
-			COLORREF color = ::GetBkColor(dc);
-			COLORREF hilightColor = ::GetSysColor(COLOR_HIGHLIGHT);
-			MY_TRACE(_T("color = 0x%08X, 0x%08X\n"), color, hilightColor);
-			if (color == hilightColor)
-			{
-				if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_SELECTED, x, y, options, rc, text, c, dx))
-					return TRUE;
-			}
-		}
+		COLORREF color = ::GetBkColor(dc);
+		COLORREF hilightColor = ::GetSysColor(COLOR_HIGHLIGHT);
+//		MY_TRACE(_T("color = 0x%08X, 0x%08X\n"), color, hilightColor);
 
-		if (::IsWindowEnabled(currentState->m_hwnd))
+		int stateId = -1;
+
+		if (color == hilightColor)
 		{
-			if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_NORMAL, x, y, options, rc, text, c, dx))
-				return TRUE;
+			stateId = ETS_SELECTED;
+		}
+		else if (::IsWindowEnabled(currentState->m_hwnd))
+		{
+			stateId = ETS_NORMAL;
 		}
 		else
 		{
-			if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, ETS_DISABLED, x, y, options, rc, text, c, dx))
+			stateId = ETS_DISABLED;
+		}
+
+		if (stateId != -1)
+		{
+			if (g_skin.onExtTextOut(theme, dc, EP_EDITTEXT, stateId, x, y, options, rc, text, c, dx))
 				return TRUE;
 		}
 	}

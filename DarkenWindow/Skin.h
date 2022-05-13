@@ -6,6 +6,10 @@ enum MY_STATICPARTS {
 	STAT_ETCHEDEDGE = 2,
 };
 
+enum MY_EDITTEXTSTATES {
+	ETS_STATICTEXT = 9,
+};
+
 //--------------------------------------------------------------------
 namespace Dark {\
 //--------------------------------------------------------------------
@@ -54,6 +58,7 @@ enum CUSTOM_PARTS {
 	WINDOW_ETCHEDEDGE,
 	EXEDIT_ROOT,
 	EXEDIT_LAYER,
+	EXEDIT_LAYEREDGE,
 	EXEDIT_LONGGUAGE,
 	EXEDIT_SHORTGUAGE,
 	EXEDIT_LAYERBACKGROUND,
@@ -72,6 +77,7 @@ enum CTLCOLOR_STATES {
 	CTLCOLOR_NORMAL = 1,
 	CTLCOLOR_DISABLED = 2,
 	CTLCOLOR_READONLY = 3,
+	CTLCOLOR_STATICTEXT = 4,
 };
 
 enum EXEDIT_LAYER_STATES {
