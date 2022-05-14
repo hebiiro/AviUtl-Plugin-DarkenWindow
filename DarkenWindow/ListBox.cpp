@@ -122,7 +122,7 @@ BOOL ListBoxRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UIN
 {
 //	MY_TRACE(_T("ListBoxRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X)\n"), x, y, options, rc, text, c, ::GetBkColor(dc));
 #if 1
-	if (!(options & (ETO_GLYPH_INDEX | ETO_IGNORELANGUAGE)))
+//	if (!(options & (ETO_GLYPH_INDEX | ETO_IGNORELANGUAGE)))
 	{
 		HTHEME theme = g_skin.getTheme(Dark::THEME_LISTBOX);
 

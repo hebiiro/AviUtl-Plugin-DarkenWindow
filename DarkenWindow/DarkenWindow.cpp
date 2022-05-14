@@ -44,8 +44,6 @@ void initHook()
 
 	HMODULE user32 = ::GetModuleHandle(_T("user32.dll"));
 	GET_HOOK_PROC(user32, DrawFrame);
-	GET_HOOK_PROC(user32, DialogBoxParamA);
-	GET_HOOK_PROC(user32, DialogBoxParamW);
 
 	// 2B = 7671339B - 76713370
 	DWORD address1 = ::CallWindowProcW(getCallWindowProcInternal, 0, 0, 0, 0) - 0x2B;
@@ -82,9 +80,7 @@ void initHook()
 //	ATTACH_HOOK_PROC(LoadIconW);
 	ATTACH_HOOK_PROC(LoadImageA);
 //	ATTACH_HOOK_PROC(LoadImageW);
-#if 0
-	ATTACH_HOOK_PROC(DialogBoxParamA);
-#endif
+//	ATTACH_HOOK_PROC(DrawIconEx);
 #if 0
 	ATTACH_HOOK_PROC(OpenThemeData);
 	ATTACH_HOOK_PROC(OpenThemeDataForDpi);
@@ -536,33 +532,9 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageW, (HINSTANCE instance, LPCWSTR nam
 	return true_LoadImageW(instance, name, type, cx, cy, flags);
 }
 
-IMPLEMENT_HOOK_PROC_NULL(INT_PTR, WINAPI, DialogBoxParamA, (HINSTANCE instance, LPCSTR templateName, HWND parent, DLGPROC dialogFunc, LPARAM initParam))
+IMPLEMENT_HOOK_PROC(BOOL, WINAPI, DrawIconEx, (HDC dc, int x, int y, HICON icon, int w, int h, UINT step, HBRUSH brush, UINT flags))
 {
-	if ((DWORD)templateName <= 0x0000FFFF || ::IsBadReadPtr(templateName, 1))
-	{
-		MY_TRACE(_T("DialogBoxParamA(0x%08X, %d)\n"), instance, templateName);
-	}
-	else
-	{
-		MY_TRACE(_T("DialogBoxParamA(0x%08X, %hs)\n"), instance, templateName);
-		if (instance == ::GetModuleHandle(_T("exedit.auf")))
-		{
-			MY_TRACE(_T("ダイアログを置き換えます\n"));
-			instance = g_instance;
-		}
-	}
-
-	return true_DialogBoxParamA(instance, templateName, parent, dialogFunc, initParam);
-}
-
-IMPLEMENT_HOOK_PROC_NULL(INT_PTR, WINAPI, DialogBoxParamW, (HINSTANCE instance, LPCWSTR templateName, HWND parent, DLGPROC dialogFunc, LPARAM initParam))
-{
-	if ((DWORD)templateName <= 0x0000FFFF || ::IsBadReadPtr(templateName, 1))
-		MY_TRACE(_T("DialogBoxParamW(0x%08X, %d)\n"), instance, templateName);
-	else
-		MY_TRACE(_T("DialogBoxParamW(0x%08X, %ws)\n"), instance, templateName);
-
-	return true_DialogBoxParamW(instance, templateName, parent, dialogFunc, initParam);
+	return TRUE;
 }
 
 //---------------------------------------------------------------------

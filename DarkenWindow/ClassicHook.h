@@ -28,7 +28,8 @@ public:
 
 struct Dispatcher
 {
-	State m_currentState;
+	State m_currentState = {};
+	BOOL m_ExtTextOutWFlag = FALSE;
 
 	State getCurrentState();
 	void setCurrentState(const State& state);

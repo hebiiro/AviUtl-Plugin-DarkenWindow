@@ -164,6 +164,7 @@ void FillRect::load(const MSXML2::IXMLDOMElementPtr& element)
 void FillRect::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	if (m_fillColor != CLR_NONE)
 		my::fillRect(dc, rc, m_fillColor);
 }
@@ -183,6 +184,7 @@ FrameRect::~FrameRect()
 void FrameRect::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
+
 	ColorSet colorSet;
 	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
 	{
@@ -195,6 +197,7 @@ void FrameRect::load(const MSXML2::IXMLDOMElementPtr& element)
 void FrameRect::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	if (m_edgeColor != CLR_NONE)
 		my::frameRect(dc, rc, m_edgeColor, m_edgeWidth);
 }
@@ -217,6 +220,7 @@ RoundRect::~RoundRect()
 void RoundRect::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
+
 	ColorSet colorSet;
 	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
 	{
@@ -233,6 +237,7 @@ void RoundRect::load(const MSXML2::IXMLDOMElementPtr& element)
 void RoundRect::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	my::roundRect(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth, m_roundWidth, m_roundHeight);
 }
 
@@ -252,6 +257,7 @@ DrawAlphaRectangle::~DrawAlphaRectangle()
 void DrawAlphaRectangle::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
+
 	ColorSet colorSet;
 	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
 	{
@@ -266,6 +272,7 @@ void DrawAlphaRectangle::load(const MSXML2::IXMLDOMElementPtr& element)
 void DrawAlphaRectangle::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	my::drawAlphaRectangle(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth);
 }
 
@@ -290,6 +297,7 @@ void DrawSingleRaisedEdge::load(const MSXML2::IXMLDOMElementPtr& element)
 void DrawSingleRaisedEdge::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	my::drawSingleEdge(dc, rc, m_topLeftColor, m_bottomRightColor);
 }
 
@@ -314,6 +322,7 @@ void DrawSingleSunkenEdge::load(const MSXML2::IXMLDOMElementPtr& element)
 void DrawSingleSunkenEdge::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	my::drawSingleEdge(dc, rc, m_topLeftColor, m_bottomRightColor);
 }
 
@@ -340,6 +349,7 @@ void DrawDoubleRaisedEdge::load(const MSXML2::IXMLDOMElementPtr& element)
 void DrawDoubleRaisedEdge::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	my::drawDoubleEdge(dc, rc,
 		m_innerTopLeftColor, m_innerBottomRightColor,
 		m_outerTopLeftColor, m_outerBottomRightColor);
@@ -368,6 +378,7 @@ void DrawDoubleSunkenEdge::load(const MSXML2::IXMLDOMElementPtr& element)
 void DrawDoubleSunkenEdge::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	my::drawDoubleEdge(dc, rc,
 		m_innerTopLeftColor, m_innerBottomRightColor,
 		m_outerTopLeftColor, m_outerBottomRightColor);
@@ -396,6 +407,7 @@ void DrawDoubleBumpEdge::load(const MSXML2::IXMLDOMElementPtr& element)
 void DrawDoubleBumpEdge::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	my::drawDoubleEdge(dc, rc,
 		m_innerTopLeftColor, m_innerBottomRightColor,
 		m_outerTopLeftColor, m_outerBottomRightColor);
@@ -424,6 +436,7 @@ void DrawDoubleEtchedEdge::load(const MSXML2::IXMLDOMElementPtr& element)
 void DrawDoubleEtchedEdge::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
+
 	my::drawDoubleEdge(dc, rc,
 		m_innerTopLeftColor, m_innerBottomRightColor,
 		m_outerTopLeftColor, m_outerBottomRightColor);
@@ -447,12 +460,23 @@ TextFigure::~TextFigure()
 void TextFigure::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	Figure::load(element);
-	ColorSet colorSet;
-	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+
 	{
-		m_fillColor = colorSet.m_fillColor;
-		m_foreColor = colorSet.m_textForeColor;
-		m_backColor = colorSet.m_textBackColor;
+		ColorSet colorSet;
+		if (S_OK == getPrivateProfileColorSet(element, L"textColorSet", colorSet))
+		{
+			m_foreColor = colorSet.m_textForeColor;
+			m_backColor = colorSet.m_textBackColor;
+		}
+	}
+	{
+		ColorSet colorSet;
+		if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+		{
+			m_fillColor = colorSet.m_fillColor;
+			m_foreColor = colorSet.m_textForeColor;
+			m_backColor = colorSet.m_textBackColor;
+		}
 	}
 	getPrivateProfileBSTR(element, L"fontName", m_fontName);
 	getPrivateProfileNamedColor(element, L"fillColor", m_fillColor, ColorSet::fillColor);
@@ -518,6 +542,7 @@ IconFigure::~IconFigure()
 void IconFigure::load(const MSXML2::IXMLDOMElementPtr& element)
 {
 	TextFigure::load(element);
+
 	getPrivateProfileBSTR(element, L"text", m_text);
 }
 

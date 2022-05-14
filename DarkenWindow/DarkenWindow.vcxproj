@@ -190,6 +190,7 @@
     <ClInclude Include="..\..\Common\MSXML.h" />
     <ClInclude Include="..\..\Common\Profile.h" />
     <ClInclude Include="..\..\Common\Tracer.h" />
+    <ClInclude Include="..\..\Common\WinUtility.h" />
     <ClInclude Include="ClassicHook.h" />
     <ClInclude Include="MyDraw.h" />
     <ClInclude Include="pch.h" />

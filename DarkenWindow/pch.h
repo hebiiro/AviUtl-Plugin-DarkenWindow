@@ -35,6 +35,7 @@
 #include "AviUtl/aviutl_exedit_sdk/aviutl.hpp"
 #include "AviUtl/aviutl_exedit_sdk/exedit.hpp"
 #include "Common/Tracer.h"
+#include "Common/WinUtility.h"
 #include "Common/FileUpdateChecker.h"
 #include "Common/MSXML.h"
 #include "Common/Hook.h"

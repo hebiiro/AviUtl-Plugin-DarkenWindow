@@ -308,7 +308,18 @@ IMPLEMENT_HOOK_PROC(BOOL, WINAPI, ExtTextOutW, (HDC dc, int x, int y, UINT optio
 	DWORD from = *((DWORD*)&dc - 1);
 //	MY_TRACE(_T("0x%08X => ExtTextOutW()\n"), from);
 	Dispatcher* dispatcher = getDispatcher();
-	return dispatcher->ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+
+	if (dispatcher->m_ExtTextOutWFlag)
+	{
+//		MY_TRACE(_T("再帰呼び出し時はフックしない\n"));
+		return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+	}
+
+	dispatcher->m_ExtTextOutWFlag = TRUE;
+	BOOL retValue = dispatcher->ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+	dispatcher->m_ExtTextOutWFlag = FALSE;
+
+	return retValue;
 }
 
 IMPLEMENT_HOOK_PROC(BOOL, WINAPI, PatBlt, (HDC dc, int x, int y, int w, int h, DWORD rop))

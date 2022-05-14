@@ -1,5 +1,6 @@
 # AviUtl プラグイン - 黒窓
 
+* 5.2.0 - 2022/05/14 「ごちゃまぜドロップス」でエラーが出る問題を修正
 * 5.1.0 - 2022/05/13 外部プロセスでもある程度動作するように修正
 * 5.0.0 - 2022/05/13 RoundDark スキンを実装
 * 4.2.0 - 2022/05/12 アイコンの色を指定できるように修正
@@ -54,7 +55,7 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 ## 動作確認
 
 * (必須) AviUtl 1.10 & 拡張編集 0.92 http://spring-fragrance.mints.ne.jp/aviutl/
-* (共存確認) patch.aul r21 https://scrapbox.io/ePi5131/patch.aul
+* (必須) patch.aul r21 https://scrapbox.io/ePi5131/patch.aul
 
 ## クレジット
 
