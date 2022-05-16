@@ -243,6 +243,41 @@ void RoundRect::draw(HDC dc, LPRECT rc)
 
 //--------------------------------------------------------------------
 
+DrawRectangle::DrawRectangle()
+{
+	m_fillColor = CLR_NONE;
+	m_edgeColor = CLR_NONE;
+	m_edgeWidth = 0;
+}
+
+DrawRectangle::~DrawRectangle()
+{
+}
+
+void DrawRectangle::load(const MSXML2::IXMLDOMElementPtr& element)
+{
+	Figure::load(element);
+
+	ColorSet colorSet;
+	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+	{
+		m_fillColor = colorSet.m_fillColor;
+		m_edgeColor = colorSet.m_edgeColor;
+	}
+	getPrivateProfileNamedColor(element, L"fillColor", m_fillColor, ColorSet::fillColor);
+	getPrivateProfileNamedColor(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
+	getPrivateProfileInt(element, L"edgeWidth", m_edgeWidth);
+}
+
+void DrawRectangle::draw(HDC dc, LPRECT rc)
+{
+	Figure::draw(dc, rc);
+
+	my::drawRectangle(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth);
+}
+
+//--------------------------------------------------------------------
+
 DrawAlphaRectangle::DrawAlphaRectangle()
 {
 	m_fillColor = CLR_NONE;
@@ -1140,6 +1175,7 @@ void Skin::loadFigures(const MSXML2::IXMLDOMElementPtr& parentElement)
 		loadFigure<FillRect>(element, L"FillRect");
 		loadFigure<FrameRect>(element, L"FrameRect");
 		loadFigure<RoundRect>(element, L"RoundRect");
+		loadFigure<DrawRectangle>(element, L"DrawRectangle");
 		loadFigure<DrawAlphaRectangle>(element, L"DrawAlphaRectangle");
 		loadFigure<DrawSingleRaisedEdge>(element, L"DrawSingleRaisedEdge");
 		loadFigure<DrawSingleSunkenEdge>(element, L"DrawSingleSunkenEdge");

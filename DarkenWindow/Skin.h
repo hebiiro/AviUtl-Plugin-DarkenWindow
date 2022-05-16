@@ -188,6 +188,24 @@ public:
 
 //--------------------------------------------------------------------
 
+class DrawRectangle : public Figure
+{
+protected:
+
+	COLORREF m_fillColor;
+	COLORREF m_edgeColor;
+	int m_edgeWidth;
+
+public:
+
+	DrawRectangle();
+	virtual ~DrawRectangle();
+	virtual void load(const MSXML2::IXMLDOMElementPtr& element);
+	virtual void draw(HDC dc, LPRECT rc);
+};
+
+//--------------------------------------------------------------------
+
 class DrawAlphaRectangle : public Figure
 {
 protected:

@@ -1,8 +1,9 @@
 # AviUtl プラグイン - 黒窓
 
+* 5.3.0 - 2022/05/16 「Dark」スキンを追加
 * 5.2.0 - 2022/05/14 「ごちゃまぜドロップス」でエラーが出る問題を修正
 * 5.1.0 - 2022/05/13 外部プロセスでもある程度動作するように修正
-* 5.0.0 - 2022/05/13 RoundDark スキンを実装
+* 5.0.0 - 2022/05/13 「RoundDark」スキンを実装
 * 4.2.0 - 2022/05/12 アイコンの色を指定できるように修正
 * 4.1.1 - 2022/05/08 リストボックスが正常に描画されなかった問題を修正
 * 4.1.0 - 2022/05/05 タイトルバーの色などに対応 (Win11 のみ)
@@ -26,6 +27,12 @@
 AviUtl の見た目をダークモードにします。
 
 ![黒窓 2 0 1](https://user-images.githubusercontent.com/96464759/154665614-90c6a2fb-d9d3-42b5-bcd0-292497c8b5d9.png)
+
+## 免責事項
+
+このプラグインおよび同梱物を使用したことによって生じたすべての障害・損害・
+不具合等に関しては、私と私の関係者および私の所属するいかなる団体・組織とも、
+一切の責任を負いません。各自の責任においてご使用ください。
 
 ## ダウンロード
 
@@ -62,3 +69,9 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 * Microsoft Research Detours Package https://github.com/microsoft/Detours
 * aviutl_exedit_sdk https://github.com/ePi5131/aviutl_exedit_sdk
 * Common Library https://github.com/hebiiro/Common-Library
+
+# 作成者情報
+ 
+* 作成者名 - 蛇色 (へびいろ)
+* GitHub - https://github.com/hebiiro
+* Twitter - https://twitter.com/io_hebiiro
