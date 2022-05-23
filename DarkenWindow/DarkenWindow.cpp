@@ -386,7 +386,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			// エディットボックスだった場合は WM_CTLCOLOREDIT に変更する。
 
 			TCHAR className[MAX_PATH] = {};
-			::GetClassName(hwnd, className, MAX_PATH);
+			::GetClassName(control, className, MAX_PATH);
 			if (::lstrcmpi(className, WC_EDIT) == 0)
 			{
 				// エディットボックスだった。
@@ -396,14 +396,14 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 				{
 					// 読み取り専用のエディットボックスだった。
 					stateId = Dark::CTLCOLOR_READONLY;
-					::SetProp(control, _T("DarkenWindow.State"), (HANDLE)Dark::CTLCOLOR_READONLY);
+					::SetProp(control, _T("DarkenWindow.State"), (HANDLE)ETS_READONLY);
 //					MY_TRACE(_T("ETS_READONLY 0x%08X\n"), control);
 				}
 				else
 				{
 					// 無効状態のエディットボックスだった。
 					stateId = Dark::CTLCOLOR_DISABLED;
-					::SetProp(control, _T("DarkenWindow.State"), (HANDLE)Dark::CTLCOLOR_DISABLED);
+					::SetProp(control, _T("DarkenWindow.State"), (HANDLE)ETS_DISABLED);
 //					MY_TRACE(_T("ETS_DISABLED 0x%08X\n"), control);
 				}
 			}
