@@ -168,26 +168,35 @@ BOOL ListViewRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAW
 
 BOOL ListViewRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("ListViewRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
-
-	if (!(options & ETO_IGNORELANGUAGE))
+//	MY_TRACE(_T("ListViewRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X, 0x%08X)\n"), x, y, options, rc, text, c, ::GetTextColor(dc), ::GetBkColor(dc));
+#if 1
+//	if (!(options & ETO_IGNORELANGUAGE))
 	{
 		HTHEME theme = g_skin.getTheme(Dark::THEME_LISTVIEW);
 
-		if (options & ETO_OPAQUE)
+		if (options == ETO_OPAQUE)
 		{
 			// セパレータのカラーを指定する。
 
 			Dark::StatePtr state = g_skin.getState(theme, LVP_LISTITEM, 0);
 
 			if (state && state->m_fillColor != CLR_NONE)
+			{
 				::SetBkColor(dc, state->m_fillColor);
+				return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+			}
 		}
 
-		if (g_skin.onExtTextOut(theme, dc, LVP_LISTITEM, LISS_NORMAL, x, y, options, rc, text, c, dx))
+		int stateId = LISS_NORMAL;
+
+		COLORREF bkColor = ::GetBkColor(dc);
+		if (bkColor == ::GetSysColor(COLOR_HIGHLIGHT) || bkColor == CLR_NONE)
+			stateId = LISS_HOT;
+
+		if (g_skin.onExtTextOut(theme, dc, LVP_LISTITEM, stateId, x, y, options, rc, text, c, dx))
 			return TRUE;
 	}
-
+#endif
 	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 }
 

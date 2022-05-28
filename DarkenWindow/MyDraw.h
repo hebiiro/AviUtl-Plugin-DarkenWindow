@@ -4,6 +4,7 @@
 namespace my {
 //--------------------------------------------------------------------
 
+COLORREF getPenColor(HPEN pen);
 COLORREF getBrushColor(HBRUSH brush);
 
 void clipRect(HDC dc, LPCRECT rc);
@@ -12,7 +13,8 @@ void fillRect(HDC dc, LPCRECT rc, COLORREF fillColor);
 void frameRect(HDC dc, LPCRECT rc, COLORREF edgeColor, int edgeWidth);
 void roundRect(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth, int roundWidth, int roundHeight);
 void drawRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth);
-void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth);
+void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth, int alpha);
+void drawAlphaRoundRect(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth, int roundWidth, int roundHeight, int alpha);
 void drawSingleEdge(HDC dc, LPCRECT rc, COLORREF topLeftColor, COLORREF bottomRightColor);
 void drawDoubleEdge(HDC dc, LPCRECT rc, COLORREF innerTopLeftColor, COLORREF innerBottomRightColor, COLORREF outerTopLeftColor, COLORREF outerBottomRightColor);
 void drawFocusRect(HDC dc, LPCRECT rc, COLORREF lineColor, UINT lineStyle);

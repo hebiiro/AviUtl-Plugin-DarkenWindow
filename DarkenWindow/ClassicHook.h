@@ -29,7 +29,7 @@ public:
 struct Dispatcher
 {
 	State m_currentState = {};
-	BOOL m_ExtTextOutWFlag = FALSE;
+	BOOL m_ExtTextOutLock = FALSE;
 
 	State getCurrentState();
 	void setCurrentState(const State& state);
@@ -45,6 +45,15 @@ struct Dispatcher
 
 	BOOL ExtTextOutW(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
 	BOOL PatBlt(HDC dc, int x, int y, int w, int h, DWORD rop);
+};
+
+class ExtTextOutHookBlocker
+{
+private:
+	Dispatcher* m_dispatcher;
+public:
+	ExtTextOutHookBlocker();
+	~ExtTextOutHookBlocker();
 };
 
 void initDispatcher();

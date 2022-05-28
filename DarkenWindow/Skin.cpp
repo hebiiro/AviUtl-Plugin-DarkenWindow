@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Skin.h"
 #include "MyDraw.h"
-#include "DarkenWindow.h"
+#include "ClassicHook.h"
 
 //--------------------------------------------------------------------
 
@@ -283,6 +283,7 @@ DrawAlphaRectangle::DrawAlphaRectangle()
 	m_fillColor = CLR_NONE;
 	m_edgeColor = CLR_NONE;
 	m_edgeWidth = 0;
+	m_alpha = 0;
 }
 
 DrawAlphaRectangle::~DrawAlphaRectangle()
@@ -302,13 +303,55 @@ void DrawAlphaRectangle::load(const MSXML2::IXMLDOMElementPtr& element)
 	getPrivateProfileNamedColor(element, L"fillColor", m_fillColor, ColorSet::fillColor);
 	getPrivateProfileNamedColor(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
 	getPrivateProfileInt(element, L"edgeWidth", m_edgeWidth);
+	getPrivateProfileInt(element, L"alpha", m_alpha);
 }
 
 void DrawAlphaRectangle::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
 
-	my::drawAlphaRectangle(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth);
+	my::drawAlphaRectangle(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth, m_alpha);
+}
+
+//--------------------------------------------------------------------
+
+DrawAlphaRoundRect::DrawAlphaRoundRect()
+{
+	m_fillColor = CLR_NONE;
+	m_edgeColor = CLR_NONE;
+	m_edgeWidth = 0;
+	m_roundWidth = 0;
+	m_roundHeight = 0;
+	m_alpha = 0;
+}
+
+DrawAlphaRoundRect::~DrawAlphaRoundRect()
+{
+}
+
+void DrawAlphaRoundRect::load(const MSXML2::IXMLDOMElementPtr& element)
+{
+	Figure::load(element);
+
+	ColorSet colorSet;
+	if (S_OK == getPrivateProfileColorSet(element, L"colorSet", colorSet))
+	{
+		m_fillColor = colorSet.m_fillColor;
+		m_edgeColor = colorSet.m_edgeColor;
+	}
+	getPrivateProfileNamedColor(element, L"fillColor", m_fillColor, ColorSet::fillColor);
+	getPrivateProfileNamedColor(element, L"edgeColor", m_edgeColor, ColorSet::edgeColor);
+	getPrivateProfileInt(element, L"edgeWidth", m_edgeWidth);
+	getPrivateProfileInt(element, L"roundWidth", m_roundWidth);
+	getPrivateProfileInt(element, L"roundHeight", m_roundHeight);
+	getPrivateProfileInt(element, L"alpha", m_alpha);
+}
+
+void DrawAlphaRoundRect::draw(HDC dc, LPRECT rc)
+{
+	Figure::draw(dc, rc);
+
+	my::drawAlphaRoundRect(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth, m_roundWidth, m_roundHeight, m_alpha);
 }
 
 //--------------------------------------------------------------------
@@ -1085,30 +1128,48 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		}
 
 		{
-			// <Icon> を読み込む。
+			m_editIconMap.clear();
+			for (auto drawIconData : m_drawIconDataMap)
+				drawIconData.second->m_icon = 0;
 
-			m_iconColorArray.clear();
+			// <EditIcons> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"Icon");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"EditIcons");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
 				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-				// <ChangeColor> を読み込む。
+				// <EditIcon> を読み込む。
 
-				MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"ChangeColor");
+				MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"EditIcon");
 				int c = nodeList->length;
 				for (int i = 0; i < c; i++)
 				{
 					MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
 
-					IconColor iconColor = { CLR_NONE, CLR_NONE };
-					getPrivateProfileColor(element, L"src", iconColor.m_src);
-					getPrivateProfileColor(element, L"dst", iconColor.m_dst);
+					_bstr_t iconName = L"";
+					getPrivateProfileString(element, L"iconName", iconName);
 
-					if (iconColor.m_src != CLR_NONE && iconColor.m_dst != CLR_NONE)
-						m_iconColorArray.push_back(iconColor);
+					EditIconPtr editIcon(new EditIcon);
+
+					// <ChangeColor> を読み込む。
+
+					MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"ChangeColor");
+					int c = nodeList->length;
+					for (int i = 0; i < c; i++)
+					{
+						MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
+
+						EditIcon::ChangeColor changeColor = { CLR_NONE, CLR_NONE };
+						getPrivateProfileColor(element, L"src", changeColor.m_src);
+						getPrivateProfileColor(element, L"dst", changeColor.m_dst);
+
+						if (changeColor.m_src != CLR_NONE && changeColor.m_dst != CLR_NONE)
+							editIcon->m_changeColorArray.push_back(changeColor);
+					}
+
+					m_editIconMap[iconName] = editIcon;
 				}
 			}
 		}
@@ -1177,6 +1238,7 @@ void Skin::loadFigures(const MSXML2::IXMLDOMElementPtr& parentElement)
 		loadFigure<RoundRect>(element, L"RoundRect");
 		loadFigure<DrawRectangle>(element, L"DrawRectangle");
 		loadFigure<DrawAlphaRectangle>(element, L"DrawAlphaRectangle");
+		loadFigure<DrawAlphaRoundRect>(element, L"DrawAlphaRoundRect");
 		loadFigure<DrawSingleRaisedEdge>(element, L"DrawSingleRaisedEdge");
 		loadFigure<DrawSingleSunkenEdge>(element, L"DrawSingleSunkenEdge");
 		loadFigure<DrawDoubleRaisedEdge>(element, L"DrawDoubleRaisedEdge");
@@ -2229,6 +2291,8 @@ BOOL Skin::textOut(HDC dc, HTHEME theme, int partId, int stateId, int x, int y, 
 
 BOOL Skin::onDrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc)
 {
+	ExtTextOutHookBlocker blocker; // このスコープ内での ::ExtTextOutW() のフックをブロックする。
+
 	RECT rc2 = *rc;
 	BOOL result = FALSE;
 	if (drawBackground(dc, theme, partId, stateId, &rc2)) result = TRUE;
@@ -2238,6 +2302,8 @@ BOOL Skin::onDrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, 
 
 BOOL Skin::onDrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPCRECT rc)
 {
+	ExtTextOutHookBlocker blocker; // このスコープ内での ::ExtTextOutW() のフックをブロックする。
+
 	RECT rc2 = *rc;
 	return drawText(dc, theme, partId, stateId, &rc2, text, c, textFlags);
 }
@@ -2339,42 +2405,84 @@ void Skin::setDwm(HWND hwnd, BOOL active)
 	}
 }
 
-HICON Skin::editIcon(HICON originalIcon)
+void Skin::addDrawIconData(HICON icon, LPCWSTR iconName)
 {
-//	MY_TRACE(_T("Skin::editIcon(0x%08X)\n"), originalIcon);
+	MY_TRACE(_T("Skin::addDrawIconData(0x%08X, %ws)\n"), icon, iconName);
+
+	DrawIconDataPtr drawIconData(new DrawIconData);
+	drawIconData->m_name = iconName;
+	m_drawIconDataMap[icon] = drawIconData;
+}
+
+HICON Skin::getDrawIcon(HICON icon)
+{
+	MY_TRACE(_T("Skin::getDrawIcon(0x%08X)\n"), icon);
+
+	// アイコン描画用データを取得する。
+	auto it = m_drawIconDataMap.find(icon);
+	if (it == m_drawIconDataMap.end()) return icon;
+	DrawIconDataPtr drawIconData = it->second;
+	if (!drawIconData) return icon;
+
+	// すでに編集済みアイコンを持っている場合はそれを返す。
+	if (drawIconData->m_icon) return drawIconData->m_icon;
+
+	// アイコンを編集する。
+	drawIconData->m_icon = editIcon(icon, drawIconData->m_name);
+
+	// 編集済みアイコンを返す。
+	return drawIconData->m_icon;
+}
+
+HICON Skin::editIcon(HICON originalIcon, LPCWSTR iconName)
+{
+	MY_TRACE(_T("Skin::editIcon(0x%08X, %ws)\n"), originalIcon, iconName);
 
 	ICONINFO ii = {};
 	::GetIconInfo(originalIcon, &ii);
 
-	BITMAP bm = {};
-	::GetObject(ii.hbmColor, sizeof(bm), &bm);
-	int w = bm.bmWidth;
-	int h = bm.bmHeight;
+	EditIconPtr editIcon;
 
-	HDC colorDC = ::CreateCompatibleDC(0);
-	HBITMAP oldColorBitmap = (HBITMAP)::SelectObject(colorDC, ii.hbmColor);
-	HDC maskDC = ::CreateCompatibleDC(0);
-	HBITMAP oldMaskBitmap = (HBITMAP)::SelectObject(maskDC, ii.hbmMask);
-	for (int y = 0; y < h; y++)
+	// 名前なしアイコン編集用データを取得する。
+	auto it = m_editIconMap.find(L"");
+	if (it != m_editIconMap.end()) editIcon = it->second;
+
+	// 名前付きアイコン編集用データを取得する。
+	it = m_editIconMap.find(iconName);
+	if (it != m_editIconMap.end()) editIcon = it->second;
+
+	if (editIcon) // アイコン編集用データが見つかったのでアイコンを編集する。
 	{
-		for (int x = 0; x < w; x++)
+		BITMAP bm = {};
+		::GetObject(ii.hbmColor, sizeof(bm), &bm);
+		int w = bm.bmWidth;
+		int h = bm.bmHeight;
+
+		HDC colorDC = ::CreateCompatibleDC(0);
+		HBITMAP oldColorBitmap = (HBITMAP)::SelectObject(colorDC, ii.hbmColor);
+		HDC maskDC = ::CreateCompatibleDC(0);
+		HBITMAP oldMaskBitmap = (HBITMAP)::SelectObject(maskDC, ii.hbmMask);
+		for (int y = 0; y < h; y++)
 		{
-			if (::GetPixel(maskDC, x, y))
-				continue;
-
-			COLORREF color = ::GetPixel(colorDC, x, y);
-
-			for (auto iconColor : m_iconColorArray)
+			for (int x = 0; x < w; x++)
 			{
-				if (color == iconColor.m_src)
-					::SetPixel(colorDC, x, y, iconColor.m_dst);
+				if (::GetPixel(maskDC, x, y))
+					continue;
+
+				COLORREF color = ::GetPixel(colorDC, x, y);
+
+				for (auto changeColor : editIcon->m_changeColorArray)
+				{
+					if (color == changeColor.m_src)
+						::SetPixel(colorDC, x, y, changeColor.m_dst);
+				}
 			}
 		}
+		::SelectObject(maskDC, oldMaskBitmap);
+		::DeleteDC(maskDC);
+		::SelectObject(colorDC, oldColorBitmap);
+		::DeleteDC(colorDC);
 	}
-	::SelectObject(maskDC, oldMaskBitmap);
-	::DeleteDC(maskDC);
-	::SelectObject(colorDC, oldColorBitmap);
-	::DeleteDC(colorDC);
 
 	HICON icon = ::CreateIconIndirect(&ii);
 	::DeleteObject(ii.hbmColor);

@@ -213,11 +213,33 @@ protected:
 	COLORREF m_fillColor;
 	COLORREF m_edgeColor;
 	int m_edgeWidth;
+	int m_alpha;
 
 public:
 
 	DrawAlphaRectangle();
 	virtual ~DrawAlphaRectangle();
+	virtual void load(const MSXML2::IXMLDOMElementPtr& element);
+	virtual void draw(HDC dc, LPRECT rc);
+};
+
+//--------------------------------------------------------------------
+
+class DrawAlphaRoundRect : public Figure
+{
+protected:
+
+	COLORREF m_fillColor;
+	COLORREF m_edgeColor;
+	int m_edgeWidth;
+	int m_roundWidth;
+	int m_roundHeight;
+	int m_alpha;
+
+public:
+
+	DrawAlphaRoundRect();
+	virtual ~DrawAlphaRoundRect();
 	virtual void load(const MSXML2::IXMLDOMElementPtr& element);
 	virtual void draw(HDC dc, LPRECT rc);
 };
@@ -487,13 +509,32 @@ struct StateAttributes
 
 //--------------------------------------------------------------------
 
-struct IconColor
+struct EditIcon
 {
-	COLORREF m_src;
-	COLORREF m_dst;
+	struct ChangeColor
+	{
+		COLORREF m_src;
+		COLORREF m_dst;
+	};
+
+	typedef std::vector<ChangeColor> ChangeColorArray;
+
+	ChangeColorArray m_changeColorArray;
 };
 
-typedef std::vector<IconColor> IconColorArray;
+typedef std::shared_ptr<EditIcon> EditIconPtr;
+typedef std::map<_bstr_t, EditIconPtr> EditIconMap;
+
+//--------------------------------------------------------------------
+
+struct DrawIconData
+{
+	_bstr_t m_name;
+	IconHolder m_icon;
+};
+
+typedef std::shared_ptr<DrawIconData> DrawIconDataPtr;
+typedef std::map<HICON, DrawIconDataPtr> DrawIconDataMap;
 
 //--------------------------------------------------------------------
 
@@ -525,7 +566,8 @@ private:
 		COLORREF m_inactiveTextColor;
 
 	} m_dwm;
-	IconColorArray m_iconColorArray;
+	EditIconMap m_editIconMap;
+	DrawIconDataMap m_drawIconDataMap;
 
 public:
 
@@ -627,7 +669,9 @@ public:
 	static int getCtlColorPartId(UINT message);
 
 	void setDwm(HWND hwnd, BOOL active);
-	HICON editIcon(HICON originalIcon);
+	void addDrawIconData(HICON icon, LPCWSTR iconName);
+	HICON getDrawIcon(HICON icon);
+	HICON editIcon(HICON originalIcon, LPCWSTR iconName);
 };
 
 //--------------------------------------------------------------------

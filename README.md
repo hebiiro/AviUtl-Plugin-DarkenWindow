@@ -1,5 +1,6 @@
 # AviUtl プラグイン - 黒窓
 
+* 6.0.0 - 2022/05/24 アイコンの色を動的に変えられるように修正
 * 5.5.0 - 2022/05/24 CreateDark.exe を追加
 * 5.4.2 - 2022/05/23 無効状態のエディットボックスが正しく描画されなかった問題を修正
 * 5.4.1 - 2022/05/19 「設定ダイアログ画面サイズ固定化プラグイン」で描画が乱れる問題を修正
@@ -49,7 +50,7 @@ AviUtl の見た目をダークモードにします。
 2. 以下のファイルとフォルダを AviUtl の Plugins フォルダに配置します。
 	* DarkenWindow.aul
 	* DarkenWindow (フォルダ)
-3. aviutl_dark.exe を作成します。手順は [Wiki](/../../wiki/aviutl_dark.exe-%E3%81%AE%E4%BD%9C%E6%88%90%E6%96%B9%E6%B3%95) にまとめてあります。
+3. aviutl_dark.exe を作成します。手順は [Wiki](https://github.com/hebiiro/AviUtl-Plugin-DarkenWindow/wiki/aviutl_dark.exe-%E3%81%AE%E4%BD%9C%E6%88%90%E6%96%B9%E6%B3%95) にまとめてあります。
 
 ## 使い方
 
@@ -62,7 +63,7 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 ## 動作確認
 
 * (必須) AviUtl 1.10 & 拡張編集 0.92 http://spring-fragrance.mints.ne.jp/aviutl/
-* (必須) patch.aul r21 https://scrapbox.io/ePi5131/patch.aul
+* (必須) patch.aul r18 以上 https://scrapbox.io/ePi5131/patch.aul
 
 ## クレジット
 

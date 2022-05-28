@@ -17,7 +17,6 @@ void ___outputLog(LPCTSTR text, LPCTSTR output)
 
 AviUtlInternal g_auin;
 HINSTANCE g_instance = 0;
-HWND g_inProcessWindow = 0;
 
 //---------------------------------------------------------------------
 #if 1
@@ -80,7 +79,7 @@ void initHook()
 //	ATTACH_HOOK_PROC(LoadIconW);
 	ATTACH_HOOK_PROC(LoadImageA);
 //	ATTACH_HOOK_PROC(LoadImageW);
-//	ATTACH_HOOK_PROC(DrawIconEx);
+	ATTACH_HOOK_PROC(DrawIconEx);
 #if 0
 	ATTACH_HOOK_PROC(OpenThemeData);
 	ATTACH_HOOK_PROC(OpenThemeDataForDpi);
@@ -100,53 +99,106 @@ void initHook()
 void termHook()
 {
 	MY_TRACE(_T("termHook()\n"));
+
+	DETACH_HOOK_PROC2(DrawThemeParentBackground);
+	DETACH_HOOK_PROC2(DrawThemeBackground);
+	DETACH_HOOK_PROC2(DrawThemeBackgroundEx);
+	DETACH_HOOK_PROC2(DrawThemeText);
+	DETACH_HOOK_PROC2(DrawThemeTextEx);
+	DETACH_HOOK_PROC2(DrawThemeIcon);
+	DETACH_HOOK_PROC2(DrawThemeEdge);
+
+	DETACH_HOOK_PROC2(FillRect);
+	DETACH_HOOK_PROC2(DrawFrame);
+	DETACH_HOOK_PROC2(DrawFrameControl);
+	DETACH_HOOK_PROC2(FrameRect);
+	DETACH_HOOK_PROC2(DrawEdge);
+	DETACH_HOOK_PROC2(DrawFocusRect);
+	DETACH_HOOK_PROC2(DrawStateW);
+	DETACH_HOOK_PROC2(ExtTextOutW);
+	DETACH_HOOK_PROC2(PatBlt);
+
+	DETACH_HOOK_PROC2(CallWindowProcInternal);
+
+	DETACH_HOOK_PROC2(LoadIconA);
+	DETACH_HOOK_PROC2(LoadIconW);
+	DETACH_HOOK_PROC2(LoadImageA);
+	DETACH_HOOK_PROC2(LoadImageW);
+	DETACH_HOOK_PROC2(DrawIconEx);
+
+	DETACH_HOOK_PROC2(OpenThemeData);
+	DETACH_HOOK_PROC2(OpenThemeDataForDpi);
+	DETACH_HOOK_PROC2(OpenThemeDataEx);
+	DETACH_HOOK_PROC2(SetWindowTheme);
 }
 
 //---------------------------------------------------------------------
 
-HWND createInProcessWindow()
+// 外部プロセスで使用する場合はこの関数をインポートして呼ぶ。
+void WINAPI DarkenWindow_init(HWND hwnd)
 {
-	MY_TRACE(_T("createInProcessWindow()\n"));
+	MY_TRACE(_T("DarkenWindow_init(0x%08X)\n"), hwnd);
 
-	WNDCLASS wc = {};
-	wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-	wc.hCursor = ::LoadCursor(0, IDC_ARROW);
-	wc.lpfnWndProc = ::DefWindowProc;
-	wc.hInstance = g_instance;
-	wc.lpszClassName = _T("DarkenWindow");
-	::RegisterClass(&wc);
+	// テーマフックをセットする。
+	initThemeHook(hwnd);
 
-	HWND hwnd = ::CreateWindowEx(
-		0,
-		_T("DarkenWindow"),
-		_T("DarkenWindow"),
-		WS_POPUP,
-		0, 0, 0, 0,
-		0, 0, g_instance, 0);
-
-	return hwnd;
+	g_skin.init(g_instance, hwnd);
+	g_skin.reloadSettings(TRUE);
 }
 
-// 外部プロセスで使用する場合はこの関数をインポートして呼ぶ。
-void WINAPI DarkenWindow_init()
+BOOL WINAPI checkPatch()
 {
-	MY_TRACE(_T("DarkenWindow_init()\n"));
+	MY_TRACE(_T("checkPatch()\n"));
+
+	// システム情報を取得する。
+	SYS_INFO si = {};
+	g_auin.get_sys_info(0, &si);
+
+	// バージョン文字列を取得する。
+	LPCSTR p = ::StrStrA(si.info, "patched r");
+	if (!p) return FALSE; // バージョン文字列を取得できなかった。
+
+	p += ::lstrlenA("patched r");
+
+	// バージョンを取得する。
+	int version = ::StrToIntA(p);
+	if (version < 18) return FALSE; // バージョンが低すぎた。
+
+	return TRUE;
+}
+
+BOOL WINAPI init(HWND hwnd)
+{
+	MY_TRACE(_T("init(0x%08X)\n"), hwnd);
 
 	static BOOL isInited = FALSE;
 	if (!isInited)
 	{
 		isInited = TRUE;
 
-		// ウィンドウを作成する。
-		g_inProcessWindow = createInProcessWindow();
-		MY_TRACE_HEX(g_inProcessWindow);
+		// AviUtl のアドレス情報を取得する。
+		g_auin.initAviUtlAddress();
 
-		// テーマフックをセットする。
-		initThemeHook(g_inProcessWindow);
+		if(!checkPatch()) // patch.aul のバージョンを確認する。
+		{
+			::MessageBox(
+				0,
+				_T("patch.aul r18 以上が見つかりませんでした") _T("\n")
+				_T("DarkenWindow は正常に動作することができません"),
+				_T("DarkenWindow"),
+				MB_OK);
 
-		g_skin.init(g_instance, g_inProcessWindow);
-		g_skin.reloadSettings(TRUE);
+			termHook();
+
+			return FALSE;
+		}
+
+		DarkenWindow_init(hwnd);
+
+		return TRUE;
 	}
+
+	return TRUE;
 }
 
 //---------------------------------------------------------------------
@@ -180,7 +232,7 @@ EXTERN_C BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved
 		{
 			MY_TRACE(_T("DLL_PROCESS_DETACH\n"));
 
-			termHook();
+//			termHook();
 
 			break;
 		}
@@ -197,7 +249,6 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 	DWORD from = *((DWORD*)&wndProc - 1);
 	MY_TRACE(_T("0x%08X => CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), from, hwnd, message, wParam, lParam);
 #endif
-
 	switch (message)
 	{
 	case WM_NCCREATE:
@@ -223,6 +274,8 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 
 			if (::lstrcmpi(className, _T("AviUtl")) == 0)
 			{
+				init(hwnd);
+
 				g_skin.setDwm(hwnd, FALSE);
 			}
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
@@ -231,9 +284,8 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 
 				g_skin.setDwm(hwnd, FALSE);
 
-				g_auin.init();
-
-				DWORD exedit = (DWORD)::GetModuleHandle(_T("exedit.auf"));
+				g_auin.initExEditAddress();
+				DWORD exedit = g_auin.GetExedit();
 				if (!exedit) break;
 
 				Exedit::g_font = (HFONT*)(exedit + 0x00167D84);
@@ -496,16 +548,15 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name
 
 		if (instance == ::GetModuleHandle(0) && ::StrStrIA(name, "ICON_"))
 		{
-			// アイコンを書き換えないといけないのでこのタイミングでスキンを初期化する。
-			DarkenWindow_init();
-
 			MY_TRACE(_T("AviUtl のアイコンを書き換えます %hs, 0x%08X\n"), name, flags);
 
 			char name2[MAX_PATH] = {};
 			::StringCbCopyA(name2, sizeof(name2), "AVIUTL_");
 			::StringCbCatA(name2, sizeof(name2), name);
 
-			return g_skin.editIcon((HICON)true_LoadImageA(g_instance, name2, type, cx, cy, flags));
+			HANDLE result = true_LoadImageA(g_instance, name2, type, cx, cy, flags);
+			g_skin.addDrawIconData((HICON)result, (_bstr_t)name2);
+			return result;
 		}
 		else if (instance == ::GetModuleHandle(_T("exedit.auf")) && ::StrStrIA(name, "ICON_"))
 		{
@@ -515,7 +566,9 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name
 			::StringCbCopyA(name2, sizeof(name2), "EXEDIT_");
 			::StringCbCatA(name2, sizeof(name2), name);
 
-			return g_skin.editIcon((HICON)true_LoadImageA(g_instance, name2, type, cx, cy, flags));
+			HANDLE result = true_LoadImageA(g_instance, name2, type, cx, cy, flags);
+			g_skin.addDrawIconData((HICON)result, (_bstr_t)name2);
+			return result;
 		}
 	}
 
@@ -534,7 +587,8 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageW, (HINSTANCE instance, LPCWSTR nam
 
 IMPLEMENT_HOOK_PROC(BOOL, WINAPI, DrawIconEx, (HDC dc, int x, int y, HICON icon, int w, int h, UINT step, HBRUSH brush, UINT flags))
 {
-	return TRUE;
+	icon = g_skin.getDrawIcon(icon);
+	return true_DrawIconEx(dc, x, y, icon, w, h, step, brush, flags);
 }
 
 //---------------------------------------------------------------------

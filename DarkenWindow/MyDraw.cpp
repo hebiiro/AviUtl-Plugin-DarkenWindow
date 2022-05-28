@@ -6,6 +6,13 @@
 namespace my {
 //--------------------------------------------------------------------
 
+COLORREF getPenColor(HPEN pen)
+{
+	LOGPEN lp = {};
+	if (::GetObject(pen, sizeof(lp), &lp) != sizeof(lp)) return CLR_NONE;
+	return lp.lopnColor;
+}
+
 COLORREF getBrushColor(HBRUSH brush)
 {
 	LOGBRUSH lb = {};
@@ -107,7 +114,7 @@ void drawRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, i
 	::DeleteObject(edgeBrush);
 }
 
-void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth)
+void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth, int alpha)
 {
 	int w = rc->right - rc->left;
 	int h = rc->bottom - rc->top;
@@ -118,9 +125,29 @@ void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeCol
 	BLENDFUNCTION bf;
 	bf.BlendOp = AC_SRC_OVER;
 	bf.BlendFlags = 0;
-	bf.SourceConstantAlpha = 128;
+	bf.SourceConstantAlpha = alpha;
 	bf.AlphaFormat = AC_SRC_ALPHA;
 	drawRectangle(mdc, &mrc, fillColor, edgeColor, edgeWidth);
+	::AlphaBlend(dc, rc->left, rc->top, w, h, mdc, 0, 0, w, h, bf);
+	::SelectObject(mdc, oldBitmap);
+	::DeleteObject(bitmap);
+	::DeleteDC(mdc);
+}
+
+void drawAlphaRoundRect(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth, int roundWidth, int roundHeight, int alpha)
+{
+	int w = rc->right - rc->left;
+	int h = rc->bottom - rc->top;
+	RECT mrc = { 0, 0, w, h };
+	HDC mdc = ::CreateCompatibleDC(dc);
+	HBITMAP bitmap = ::CreateCompatibleBitmap(dc, w, h);
+	HBITMAP oldBitmap = (HBITMAP)::SelectObject(mdc, bitmap);
+	BLENDFUNCTION bf;
+	bf.BlendOp = AC_SRC_OVER;
+	bf.BlendFlags = 0;
+	bf.SourceConstantAlpha = alpha;
+	bf.AlphaFormat = AC_SRC_ALPHA;
+	roundRect(mdc, &mrc, fillColor, edgeColor, edgeWidth, roundWidth, roundHeight);
 	::AlphaBlend(dc, rc->left, rc->top, w, h, mdc, 0, 0, w, h, bf);
 	::SelectObject(mdc, oldBitmap);
 	::DeleteObject(bitmap);

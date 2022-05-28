@@ -152,6 +152,19 @@ BOOL Dispatcher::PatBlt(HDC dc, int x, int y, int w, int h, DWORD rop)
 
 //---------------------------------------------------------------------
 
+ExtTextOutHookBlocker::ExtTextOutHookBlocker()
+{
+	m_dispatcher = getDispatcher();
+	m_dispatcher->m_ExtTextOutLock = TRUE;
+}
+
+ExtTextOutHookBlocker::~ExtTextOutHookBlocker()
+{
+	m_dispatcher->m_ExtTextOutLock = FALSE;
+}
+
+//---------------------------------------------------------------------
+
 void initDispatcher()
 {
 	MY_TRACE(_T("initDispatcher()\n"));
@@ -309,15 +322,15 @@ IMPLEMENT_HOOK_PROC(BOOL, WINAPI, ExtTextOutW, (HDC dc, int x, int y, UINT optio
 //	MY_TRACE(_T("0x%08X => ExtTextOutW()\n"), from);
 	Dispatcher* dispatcher = getDispatcher();
 
-	if (dispatcher->m_ExtTextOutWFlag)
+	if (dispatcher->m_ExtTextOutLock)
 	{
 //		MY_TRACE(_T("再帰呼び出し時はフックしない\n"));
 		return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 	}
 
-	dispatcher->m_ExtTextOutWFlag = TRUE;
+	dispatcher->m_ExtTextOutLock = TRUE;
 	BOOL retValue = dispatcher->ExtTextOutW(dc, x, y, options, rc, text, c, dx);
-	dispatcher->m_ExtTextOutWFlag = FALSE;
+	dispatcher->m_ExtTextOutLock = FALSE;
 
 	return retValue;
 }
