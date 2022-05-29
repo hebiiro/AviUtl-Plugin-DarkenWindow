@@ -11,6 +11,30 @@ Dark::Skin g_skin;
 namespace Dark {\
 //--------------------------------------------------------------------
 
+struct
+{
+	int value;
+	LPCWSTR label;
+
+} const g_shadowModeLabel[] =
+{
+	{ SHADOW_MODE_OFF, L"OFF" },
+	{ SHADOW_MODE_ON, L"ON" },
+};
+
+struct
+{
+	int value;
+	LPCWSTR label;
+
+} const g_roundModeLabel[] =
+{
+	{ ROUND_MODE_OFF, L"OFF" },
+	{ ROUND_MODE_ON, L"ON" },
+};
+
+//--------------------------------------------------------------------
+
 struct ColorSet
 {
 	COLORREF m_fillColor;
@@ -238,7 +262,10 @@ void RoundRect::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
 
-	my::roundRect(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth, m_roundWidth, m_roundHeight);
+	if (g_skin.getRoundMode() == ROUND_MODE_ON)
+		my::roundRect(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth, m_roundWidth, m_roundHeight);
+	else
+		my::drawRectangle(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth);
 }
 
 //--------------------------------------------------------------------
@@ -351,7 +378,10 @@ void DrawAlphaRoundRect::draw(HDC dc, LPRECT rc)
 {
 	Figure::draw(dc, rc);
 
-	my::drawAlphaRoundRect(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth, m_roundWidth, m_roundHeight, m_alpha);
+	if (g_skin.getRoundMode() == ROUND_MODE_ON)
+		my::drawAlphaRoundRect(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth, m_roundWidth, m_roundHeight, m_alpha);
+	else
+		my::drawAlphaRectangle(dc, rc, m_fillColor, m_edgeColor, m_edgeWidth, m_alpha);
 }
 
 //--------------------------------------------------------------------
@@ -567,14 +597,20 @@ void TextFigure::drawText(HDC dc, LPRECT rc, LPCWSTR text, int c, UINT format)
 {
 	Figure::draw(dc, rc);
 
-	my::drawShadowText(dc, text, c, rc, format, m_fillColor, m_foreColor, m_backColor);
+	if (g_skin.getShadowMode() == SHADOW_MODE_ON)
+		my::drawShadowText(dc, text, c, rc, format, m_fillColor, m_foreColor, m_backColor);
+	else
+		my::drawText(dc, text, c, rc, format, m_fillColor, m_foreColor);
 }
 
 void TextFigure::textOut(HDC dc, int x, int y, UINT options, LPRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
 	Figure::draw(dc, rc);
 
-	my::shadowTextOut(dc, x, y, options, rc, text, c, dx, m_fillColor, m_foreColor, m_backColor);
+	if (g_skin.getShadowMode() == SHADOW_MODE_ON)
+		my::shadowTextOut(dc, x, y, options, rc, text, c, dx, m_fillColor, m_foreColor, m_backColor);
+	else
+		my::textOut(dc, x, y, options, rc, text, c, dx, m_fillColor, m_foreColor);
 }
 
 //--------------------------------------------------------------------
@@ -642,13 +678,17 @@ void IconFigure::draw(HDC dc, LPRECT rc)
 	int oldBkMode = ::SetBkMode(dc, TRANSPARENT);
 	COLORREF oldTextColor = ::GetTextColor(dc);
 
-	if (m_backColor != CLR_NONE)
+	if (g_skin.getShadowMode() == SHADOW_MODE_ON)
 	{
-		::OffsetRect(&rc2, +1, +1);
-		::SetTextColor(dc, m_backColor);
-		for (int i = 0; i < length; i++) ::DrawTextW(dc, (BSTR)m_text + i, 1, &rc2, format);
-		::OffsetRect(&rc2, -1, -1);
+		if (m_backColor != CLR_NONE)
+		{
+			::OffsetRect(&rc2, +1, +1);
+			::SetTextColor(dc, m_backColor);
+			for (int i = 0; i < length; i++) ::DrawTextW(dc, (BSTR)m_text + i, 1, &rc2, format);
+			::OffsetRect(&rc2, -1, -1);
+		}
 	}
+
 	if (m_foreColor != CLR_NONE)
 	{
 		::SetTextColor(dc, m_foreColor);
@@ -840,6 +880,27 @@ BOOL CALLBACK Skin::enumWindowsProc(HWND hwnd, LPARAM lParam)
 		::RedrawWindow(hwnd, 0, 0,
 			RDW_ERASE | RDW_FRAME | RDW_INTERNALPAINT |
 			RDW_INVALIDATE | RDW_ALLCHILDREN);
+		::EnumChildWindows(hwnd, enumChildWindowsProc, lParam);
+	}
+
+	return TRUE;
+}
+
+BOOL CALLBACK Skin::enumChildWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	TCHAR className[MAX_PATH] = {};
+	::GetClassName(hwnd, className, MAX_PATH);
+
+	if (::lstrcmpi(className, TRACKBAR_CLASS) == 0)
+	{
+		// トラックバー用。
+		::SendMessage(hwnd, WM_SETFOCUS, 0, 0);
+	}
+	else if (::lstrcmpi(className, WC_BUTTON) == 0)
+	{
+		// ボタン用。
+		HICON icon = (HICON)::SendMessage(hwnd, BM_GETIMAGE, IMAGE_ICON, 0);
+		::SendMessage(hwnd, BM_SETIMAGE, IMAGE_ICON, (LPARAM)icon);
 	}
 
 	return TRUE;
@@ -908,10 +969,6 @@ void Skin::reloadSettingsInternal(LPCWSTR fileName)
 
 	m_fileUpdateCheckers.add(fileName);
 
-	WCHAR folder[MAX_PATH] = {};
-	::StringCbCopyW(folder, sizeof(folder), fileName);
-	::PathRemoveFileSpecW(folder);
-
 	try
 	{
 		MSXML2::IXMLDOMDocumentPtr document(__uuidof(MSXML2::DOMDocument));
@@ -923,26 +980,16 @@ void Skin::reloadSettingsInternal(LPCWSTR fileName)
 			return;
 		}
 
-		{
-			// スキンファイルを読み込む。
+		MSXML2::IXMLDOMElementPtr element = document->documentElement;
 
-			MSXML2::IXMLDOMNodeListPtr nodeList =
-				document->documentElement->getElementsByTagName(L"Skin");
-			int c = nodeList->length;
-			for (int i = 0; i < c; i++)
-			{
-				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
+		getPrivateProfileString(element, L"skin", m_skinFileName);
+		getPrivateProfileLabel(element, L"shadowMode", m_shadowMode, g_shadowModeLabel);
+		getPrivateProfileLabel(element, L"roundMode", m_roundMode, g_roundModeLabel);
 
-				_bstr_t fileName;
-				getPrivateProfileBSTR(element, L"fileName", fileName);
+		_bstr_t skin;
+		getPrivateProfileFileName(element, L"skin", skin);
 
-				WCHAR fileName2[MAX_PATH] = {};
-				::StringCbCopyW(fileName2, sizeof(fileName2), folder);
-				::PathAppendW(fileName2, fileName);
-
-				reloadSkin(fileName2);
-			}
-		}
+		reloadSkinSettings(skin);
 	}
 	catch (_com_error& e)
 	{
@@ -973,6 +1020,46 @@ void Skin::reloadExeditSettings()
 		Dark::StatePtr state = getState(theme, Dark::EXEDIT_SELECTIONBK, 0);
 		if (state && state->m_fillColor != CLR_NONE)
 			writeAbsoluteAddress((DWORD)exedit_auf + 0x00038087, &state->m_fillColor);
+	}
+}
+
+void Skin::reloadSkinSettings(LPCWSTR fileName)
+{
+	MY_TRACE(_T("Skin::reloadSkinSettings(%ws)\n"), fileName);
+
+	m_fileUpdateCheckers.add(fileName);
+
+	try
+	{
+		MSXML2::IXMLDOMDocumentPtr document(__uuidof(MSXML2::DOMDocument));
+
+		if (document->load(fileName) == VARIANT_FALSE)
+		{
+			MY_TRACE(_T("%ws file loading failed\n"), fileName);
+
+			return;
+		}
+
+		{
+			// スキンファイルを読み込む。
+
+			MSXML2::IXMLDOMNodeListPtr nodeList =
+				document->documentElement->getElementsByTagName(L"Skin");
+			int c = nodeList->length;
+			for (int i = 0; i < c; i++)
+			{
+				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
+
+				_bstr_t fileName;
+				getPrivateProfileFileName(element, L"fileName", fileName);
+
+				reloadSkin(fileName);
+			}
+		}
+	}
+	catch (_com_error& e)
+	{
+		MY_TRACE(_T("%s\n"), e.ErrorMessage());
 	}
 }
 
@@ -1453,6 +1540,42 @@ void Skin::loadTextFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const 
 		TextFigurePtr textFigure = getTextFigure(name);
 //		MY_TRACE(_T("%ws => 0x%08X\n"), (LPCWSTR)name, textFigure.get());
 		if (textFigure) state->m_textFigures.push_back(textFigure);
+	}
+}
+
+void Skin::saveSettings()
+{
+	MY_TRACE(_T("Skin::saveSettings()\n"));
+
+	WCHAR fileName[MAX_PATH] = {};
+	::GetModuleFileNameW(m_instance, fileName, MAX_PATH);
+	::PathRemoveExtensionW(fileName);
+	::PathAppendW(fileName, L"DarkenWindowSettings.xml");
+
+	saveSettingsInternal(fileName);
+}
+
+void Skin::saveSettingsInternal(LPCWSTR fileName)
+{
+	MY_TRACE(_T("Skin::saveSettingsInternal(%ws)\n"), fileName);
+
+	try
+	{
+		// ドキュメントを作成する。
+		MSXML2::IXMLDOMDocumentPtr document(__uuidof(MSXML2::DOMDocument));
+
+		// ドキュメントエレメントを作成する。
+		MSXML2::IXMLDOMElementPtr element = appendElement(document, document, L"Settings");
+
+		setPrivateProfileString(element, L"skin", m_skinFileName);
+		setPrivateProfileLabel(element, L"shadowMode", m_shadowMode, g_shadowModeLabel);
+		setPrivateProfileLabel(element, L"roundMode", m_roundMode, g_roundModeLabel);
+
+		saveXMLDocument(document, fileName, L"UTF-16");
+	}
+	catch (_com_error& e)
+	{
+		MY_TRACE(_T("%s\n"), e.ErrorMessage());
 	}
 }
 

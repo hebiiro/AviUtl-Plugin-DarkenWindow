@@ -99,6 +99,16 @@ enum EXEDIT_GROUPBACKGROUND_STATES {
 	EXEDIT_GROUPBACKGROUND_INACTIVE_3 = 6,
 };
 
+enum SHADOW_MODE {
+	SHADOW_MODE_OFF,
+	SHADOW_MODE_ON,
+};
+
+enum ROUND_MODE {
+	ROUND_MODE_OFF,
+	ROUND_MODE_ON,
+};
+
 //--------------------------------------------------------------------
 
 class Figure
@@ -569,6 +579,10 @@ private:
 	EditIconMap m_editIconMap;
 	DrawIconDataMap m_drawIconDataMap;
 
+	_bstr_t m_skinFileName = L"";
+	int m_shadowMode = SHADOW_MODE_ON;
+	int m_roundMode = ROUND_MODE_ON;
+
 public:
 
 	Skin();
@@ -576,10 +590,12 @@ public:
 
 	static void CALLBACK timerProc(HWND hwnd, UINT message, UINT_PTR timerId, DWORD time);
 	static BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam);
+	static BOOL CALLBACK enumChildWindowsProc(HWND hwnd, LPARAM lParam);
 	void init(HINSTANCE instance, HWND hwnd);
 	BOOL reloadSettings(BOOL force);
 	void reloadSettingsInternal(LPCWSTR fileName);
 	void reloadExeditSettings();
+	void reloadSkinSettings(LPCWSTR fileName);
 	void reloadSkin(LPCWSTR fileName);
 	void loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement);
 	void loadFigures(const MSXML2::IXMLDOMElementPtr& parentElement);
@@ -591,6 +607,8 @@ public:
 	void loadFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const StatePtr& state);
 	void loadIconFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const StatePtr& state);
 	void loadTextFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const StatePtr& state);
+	void saveSettings();
+	void saveSettingsInternal(LPCWSTR fileName);
 
 	FigurePtr getFigure(LPCWSTR name);
 	IconFigurePtr getIconFigure(LPCWSTR name);
@@ -672,6 +690,15 @@ public:
 	void addDrawIconData(HICON icon, LPCWSTR iconName);
 	HICON getDrawIcon(HICON icon);
 	HICON editIcon(HICON originalIcon, LPCWSTR iconName);
+
+	_bstr_t getSkinFileName() const { return m_skinFileName; }
+	void setSkinFileName(_bstr_t skinFileName) { m_skinFileName = skinFileName; }
+
+	int getShadowMode() const { return m_shadowMode; }
+	void setShadowMode(int shadowMode) { m_shadowMode = shadowMode; }
+
+	int getRoundMode() const { return m_roundMode; }
+	void setRoundMode(int roundMode) { m_roundMode = roundMode; }
 };
 
 //--------------------------------------------------------------------

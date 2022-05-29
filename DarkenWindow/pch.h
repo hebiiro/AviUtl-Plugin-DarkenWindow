@@ -23,6 +23,7 @@
 #include <strsafe.h>
 #include <locale.h>
 
+#include <algorithm>
 #include <string>
 #include <memory>
 #include <vector>

@@ -90,28 +90,31 @@ void roundRect(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int e
 
 void drawRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth)
 {
-	HBRUSH fillBrush = ::CreateSolidBrush(fillColor);
-	HBRUSH edgeBrush = ::CreateSolidBrush(edgeColor);
 	HBRUSH oldBrush = (HBRUSH)::GetCurrentObject(dc, OBJ_BRUSH);
 
 	int w = rc->right - rc->left;
 	int h = rc->bottom - rc->top;
 
-	::SelectObject(dc, fillBrush);
-	true_PatBlt(dc, rc->left, rc->top, w, h, PATCOPY);
-
-	if (edgeWidth > 0)
+	if (fillColor != CLR_NONE)
 	{
+		HBRUSH fillBrush = ::CreateSolidBrush(fillColor);
+		::SelectObject(dc, fillBrush);
+		true_PatBlt(dc, rc->left, rc->top, w, h, PATCOPY);
+		::SelectObject(dc, oldBrush);
+		::DeleteObject(fillBrush);
+	}
+
+	if (edgeColor != CLR_NONE && edgeWidth > 0)
+	{
+		HBRUSH edgeBrush = ::CreateSolidBrush(edgeColor);
 		::SelectObject(dc, edgeBrush);
 		true_PatBlt(dc, rc->left, rc->top, w, edgeWidth, PATCOPY);
 		true_PatBlt(dc, rc->left, rc->bottom - edgeWidth, w, edgeWidth, PATCOPY);
 		true_PatBlt(dc, rc->left, rc->top, edgeWidth, h, PATCOPY);
 		true_PatBlt(dc, rc->right - edgeWidth, rc->top, edgeWidth, h, PATCOPY);
+		::SelectObject(dc, oldBrush);
+		::DeleteObject(edgeBrush);
 	}
-
-	::SelectObject(dc, oldBrush);
-	::DeleteObject(fillBrush);
-	::DeleteObject(edgeBrush);
 }
 
 void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeColor, int edgeWidth, int alpha)
@@ -126,7 +129,7 @@ void drawAlphaRectangle(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeCol
 	bf.BlendOp = AC_SRC_OVER;
 	bf.BlendFlags = 0;
 	bf.SourceConstantAlpha = alpha;
-	bf.AlphaFormat = AC_SRC_ALPHA;
+	bf.AlphaFormat = 0;//AC_SRC_ALPHA;
 	drawRectangle(mdc, &mrc, fillColor, edgeColor, edgeWidth);
 	::AlphaBlend(dc, rc->left, rc->top, w, h, mdc, 0, 0, w, h, bf);
 	::SelectObject(mdc, oldBitmap);
@@ -146,7 +149,7 @@ void drawAlphaRoundRect(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeCol
 	bf.BlendOp = AC_SRC_OVER;
 	bf.BlendFlags = 0;
 	bf.SourceConstantAlpha = alpha;
-	bf.AlphaFormat = AC_SRC_ALPHA;
+	bf.AlphaFormat = 0;//AC_SRC_ALPHA;
 	roundRect(mdc, &mrc, fillColor, edgeColor, edgeWidth, roundWidth, roundHeight);
 	::AlphaBlend(dc, rc->left, rc->top, w, h, mdc, 0, 0, w, h, bf);
 	::SelectObject(mdc, oldBitmap);

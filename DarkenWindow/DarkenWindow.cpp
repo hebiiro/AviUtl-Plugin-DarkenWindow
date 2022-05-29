@@ -155,13 +155,13 @@ BOOL WINAPI checkPatch()
 	g_auin.get_sys_info(0, &si);
 
 	// バージョン文字列を取得する。
-	LPCSTR p = ::StrStrA(si.info, "patched r");
+	LPCSTR p = strstr(si.info, "patched r");
 	if (!p) return FALSE; // バージョン文字列を取得できなかった。
 
-	p += ::lstrlenA("patched r");
+	p += strlen("patched r");
 
 	// バージョンを取得する。
-	int version = ::StrToIntA(p);
+	int version = atoi(p);
 	if (version < 18) return FALSE; // バージョンが低すぎた。
 
 	return TRUE;
@@ -199,6 +199,109 @@ BOOL WINAPI init(HWND hwnd)
 	}
 
 	return TRUE;
+}
+
+void showSkinSelector(HWND hwnd)
+{
+	MY_TRACE(_T("showSkinSelector(0x%08X)\n"), hwnd);
+
+	TCHAR origin[MAX_PATH] = {};
+	::GetModuleFileName(g_instance, origin, MAX_PATH);
+	::PathRemoveExtension(origin);
+	::PathAppend(origin, _T("Skin"));
+	MY_TRACE_TSTR(origin);
+
+	std::vector<std::string> fileNames;
+	{
+		TCHAR folder[MAX_PATH] = {};
+		::StringCbCopy(folder, sizeof(folder), origin);
+		::PathAppend(folder, _T("*.xml"));
+		MY_TRACE_TSTR(folder);
+
+		WIN32_FIND_DATA ffd = {};
+		HANDLE handle = ::FindFirstFile(folder, &ffd);
+
+		if (handle == INVALID_HANDLE_VALUE)
+			return;
+
+		do
+		{
+			if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				continue;
+
+			fileNames.push_back(ffd.cFileName);
+		}
+		while (::FindNextFile(handle, &ffd));
+
+		::FindClose(handle);
+
+		std::sort(fileNames.begin(), fileNames.end());
+	}
+
+	TCHAR current[MAX_PATH] = {};
+	::StringCbCopy(current, sizeof(current), g_skin.getSkinFileName());
+	::PathStripPath(current);
+
+	const int ID_SHADOW_MODE = 20000;
+	const int ID_ROUND_MODE = 20001;
+
+	HMENU menu = ::CreatePopupMenu();
+
+	for (int i = 0; i < (int)fileNames.size(); i++)
+	{
+		TCHAR text[MAX_PATH] = {};
+		::StringCbCopy(text, sizeof(text), fileNames[i].c_str());
+		::PathRemoveExtension(text);
+
+		::AppendMenu(menu, MF_STRING, i + 1, text);
+
+		if (::lstrcmpi(fileNames[i].c_str(), current) == 0)
+			::CheckMenuItem(menu, i + 1, MF_CHECKED);
+	}
+
+	::AppendMenu(menu, MF_SEPARATOR, -1, 0);
+	::AppendMenu(menu, MF_STRING, ID_SHADOW_MODE, _T("影を付ける"));
+	::AppendMenu(menu, MF_STRING, ID_ROUND_MODE, _T("丸くする"));
+
+	if (g_skin.getShadowMode() == Dark::SHADOW_MODE_ON)
+		::CheckMenuItem(menu, ID_SHADOW_MODE, MF_CHECKED);
+
+	if (g_skin.getRoundMode() == Dark::ROUND_MODE_ON)
+		::CheckMenuItem(menu, ID_ROUND_MODE, MF_CHECKED);
+
+	POINT pt; ::GetCursorPos(&pt);
+	int id = ::TrackPopupMenu(menu, TPM_NONOTIFY | TPM_RETURNCMD, pt.x, pt.y, 0, hwnd, 0);
+
+	::DestroyMenu(menu);
+
+	if (id > 0 && id <= (int)fileNames.size())
+	{
+		TCHAR fileName[MAX_PATH] = {};
+		::StringCbCopy(fileName, sizeof(fileName), _T("Skin"));
+		::PathAppend(fileName, fileNames[id - 1].c_str());
+		MY_TRACE_TSTR(fileName);
+
+		g_skin.setSkinFileName(fileName);
+		g_skin.saveSettings();
+	}
+	else if (id == ID_SHADOW_MODE)
+	{
+		if (g_skin.getShadowMode() == Dark::SHADOW_MODE_ON)
+			g_skin.setShadowMode(Dark::SHADOW_MODE_OFF);
+		else
+			g_skin.setShadowMode(Dark::SHADOW_MODE_ON);
+
+		g_skin.saveSettings();
+	}
+	else if (id == ID_ROUND_MODE)
+	{
+		if (g_skin.getRoundMode() == Dark::ROUND_MODE_ON)
+			g_skin.setRoundMode(Dark::ROUND_MODE_OFF);
+		else
+			g_skin.setRoundMode(Dark::ROUND_MODE_ON);
+
+		g_skin.saveSettings();
+	}
 }
 
 //---------------------------------------------------------------------
@@ -498,6 +601,17 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			}
 
 			break;
+		}
+	case WM_NCRBUTTONUP:
+		{
+			MY_TRACE(_T("WM_NCRBUTTONUP, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
+
+			if (wParam != HTMENU)
+				break;
+
+			showSkinSelector(hwnd);
+
+			return 0;
 		}
 	}
 
