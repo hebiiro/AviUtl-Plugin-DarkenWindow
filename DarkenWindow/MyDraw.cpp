@@ -304,10 +304,16 @@ void shadowTextOut(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text,
 
 		if (textBackColor != CLR_NONE)
 		{
+			UINT align = ::GetTextAlign(dc);
+//			MY_TRACE_HEX(align);
+			::SetTextAlign(dc, align & ~TA_UPDATECP);
+
 			x += 1, y += 1;
 			::SetTextColor(dc, textBackColor);
 			true_ExtTextOutW(dc, x, y, options & ~ETO_OPAQUE, rc, text, c, dx);
 			x -= 1, y -= 1;
+
+			::SetTextAlign(dc, align);
 		}
 
 		::SetTextColor(dc, textForeColor);

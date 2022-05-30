@@ -104,7 +104,7 @@ BOOL EditRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTAT
 
 BOOL EditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("EditRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X)\n"), x, y, options, rc, text, c, ::GetBkColor(dc));
+//	MY_TRACE(_T("EditRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X, 0x%08X)\n"), x, y, options, rc, text, c, dx, ::GetBkColor(dc));
 #if 1
 //	if (!(options & ETO_IGNORELANGUAGE))
 	{
