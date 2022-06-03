@@ -51,6 +51,7 @@ void initThemeHook(HWND hwnd)
 	static TreeViewThemeRenderer g_treeview;
 	static ToolBarThemeRenderer g_toolbar;
 	static CommandModuleThemeRenderer g_commandModule;
+	static WindowThemeRenderer g_window;
 
 	registerRendererNC(hwnd, VSCLASS_MENU, &g_menu);
 	registerRenderer(hwnd, VSCLASS_MENU, &g_menu);
@@ -67,6 +68,7 @@ void initThemeHook(HWND hwnd)
 	registerRenderer(hwnd, VSCLASS_LISTVIEW, &g_listview);
 	registerRenderer(hwnd, VSCLASS_TREEVIEW, &g_treeview);
 	registerRenderer(hwnd, VSCLASS_TOOLBAR, &g_toolbar);
+	registerRenderer(hwnd, VSCLASS_WINDOW, &g_window);
 
 	registerRendererNC(hwnd, L"Explorer::" VSCLASS_MENU, &g_menu);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_MENU, &g_menu);
@@ -83,6 +85,7 @@ void initThemeHook(HWND hwnd)
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_LISTVIEW, &g_listview);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_TREEVIEW, &g_treeview);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_TOOLBAR, &g_toolbar);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_WINDOW, &g_window);
 
 	registerRenderer(hwnd, L"CFD::" VSCLASS_COMBOBOX, &g_combobox);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_HEADER, &g_header);

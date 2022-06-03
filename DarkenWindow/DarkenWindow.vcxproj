@@ -230,6 +230,7 @@
     <ClCompile Include="ToolTip.cpp" />
     <ClCompile Include="TrackBar.cpp" />
     <ClCompile Include="TreeView.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DarkenWindow.def" />

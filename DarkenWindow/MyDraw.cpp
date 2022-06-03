@@ -150,6 +150,7 @@ void drawAlphaRoundRect(HDC dc, LPCRECT rc, COLORREF fillColor, COLORREF edgeCol
 	bf.BlendFlags = 0;
 	bf.SourceConstantAlpha = alpha;
 	bf.AlphaFormat = 0;//AC_SRC_ALPHA;
+	::BitBlt(mdc, 0, 0, w, h, dc, rc->left, rc->top, SRCCOPY);
 	roundRect(mdc, &mrc, fillColor, edgeColor, edgeWidth, roundWidth, roundHeight);
 	::AlphaBlend(dc, rc->left, rc->top, w, h, mdc, 0, 0, w, h, bf);
 	::SelectObject(mdc, oldBitmap);

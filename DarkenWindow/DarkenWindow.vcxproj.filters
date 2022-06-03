@@ -99,6 +99,9 @@
     <ClCompile Include="CommandModule.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DarkenWindow.def" />

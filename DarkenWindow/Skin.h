@@ -632,6 +632,7 @@ public:
 
 			FigurePtr figure(new T());
 			figure->load(element);
+			if (m_figureMap.contains(figure->getName())) continue; // すでに同じ名前が使われている場合は追加しない。
 			m_figureMap[figure->getName()] = figure;
 //			MY_TRACE(_T("figure = %ws, %ws\n"), tagName, figure->getName());
 		}
@@ -651,6 +652,7 @@ public:
 			IconFigurePtr figure(new T());
 			figure->load(element);
 			m_iconFigureMap[figure->getName()] = figure;
+			if (m_iconFigureMap.contains(figure->getName())) continue; // すでに同じ名前が使われている場合は追加しない。
 //			MY_TRACE(_T("icon figure = %ws, %ws\n"), tagName, figure->getName());
 		}
 	}
@@ -668,6 +670,7 @@ public:
 
 			TextFigurePtr figure(new T());
 			figure->load(element);
+			if (m_textFigureMap.contains(figure->getName())) continue; // すでに同じ名前が使われている場合は追加しない。
 			m_textFigureMap[figure->getName()] = figure;
 //			MY_TRACE(_T("text figure = %ws, %ws\n"), tagName, figure->getName());
 		}
