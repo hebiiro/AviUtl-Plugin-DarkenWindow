@@ -17,8 +17,8 @@ HRESULT WindowThemeRenderer::DrawThemeParentBackground(HWND hwnd, HDC dc, LPCREC
 
 HRESULT WindowThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
 {
-	MY_TRACE(_T("WindowThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+//	MY_TRACE(_T("WindowThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
 
 	{
 		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
@@ -38,8 +38,8 @@ HRESULT WindowThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int par
 
 HRESULT WindowThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
 {
-	MY_TRACE(_T("WindowThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
-		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
+//	MY_TRACE(_T("WindowThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
+//		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
 	{
 		if (g_skin.onDrawThemeText(theme, dc, partId, stateId, text, c, textFlags, rc))

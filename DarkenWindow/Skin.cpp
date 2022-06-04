@@ -2646,7 +2646,7 @@ void Skin::addDrawIconData(HICON icon, LPCWSTR iconName)
 
 HICON Skin::getDrawIcon(HICON icon)
 {
-	MY_TRACE(_T("Skin::getDrawIcon(0x%08X)\n"), icon);
+//	MY_TRACE(_T("Skin::getDrawIcon(0x%08X)\n"), icon);
 
 	// アイコン描画用データを取得する。
 	auto it = m_drawIconDataMap.find(icon);

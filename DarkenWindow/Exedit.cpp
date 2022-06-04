@@ -7,12 +7,12 @@
 
 //--------------------------------------------------------------------
 
-HWND getComboBox(HWND exeditObjectDialog)
+HWND getComboBox(HWND settingDialog)
 {
-	for (UINT i = 8200; i >= 8100; i--)
+	for (UINT i = 8147; i >= 8100; i--)
 	{
 		// ウィンドウハンドルを取得する。
-		HWND hwnd = ::GetDlgItem(exeditObjectDialog, i);
+		HWND hwnd = ::GetDlgItem(settingDialog, i);
 
 		// コンボボックスかどうかクラス名で調べる。
 		TCHAR className[MAX_PATH] = {};
@@ -22,7 +22,7 @@ HWND getComboBox(HWND exeditObjectDialog)
 		if (::IsWindowVisible(hwnd)) // ウィンドウが可視なら
 		{
 			// ID - 2 のウィンドウを返す。
-			return ::GetDlgItem(exeditObjectDialog, i - 2);
+			return ::GetDlgItem(settingDialog, i - 2);
 		}
 	}
 

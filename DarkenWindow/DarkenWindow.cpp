@@ -155,14 +155,47 @@ BOOL WINAPI checkPatch()
 	g_auin.get_sys_info(0, &si);
 
 	// バージョン文字列を取得する。
+	if (!si.info)
+	{
+		::MessageBox(
+			0,
+			_T("バージョン文字列を取得できませんでした") _T("\n")
+			_T("DarkenWindow は正常に動作することができません"),
+			_T("DarkenWindow"),
+			MB_OK);
+
+		return FALSE; // バージョン文字列を取得できなかった。
+	}
+
+	// バージョン文字列を見つける。
 	LPCSTR p = strstr(si.info, "patched r");
-	if (!p) return FALSE; // バージョン文字列を取得できなかった。
+	if (!p)
+	{
+		::MessageBox(
+			0,
+			_T("バージョン文字列が見つかりませんでした") _T("\n")
+			_T("DarkenWindow は正常に動作することができません"),
+			_T("DarkenWindow"),
+			MB_OK);
+
+		return FALSE; // バージョン文字列を見つけられなかった。
+	}
 
 	p += strlen("patched r");
 
 	// バージョンを取得する。
 	int version = atoi(p);
-	if (version < 18) return FALSE; // バージョンが低すぎた。
+	if (version < 18)
+	{
+		::MessageBox(
+			0,
+			_T("patch.aul r18 以上が見つかりませんでした") _T("\n")
+			_T("DarkenWindow は正常に動作することができません"),
+			_T("DarkenWindow"),
+			MB_OK);
+
+		return FALSE; // バージョンが低すぎた。
+	}
 
 	return TRUE;
 }
@@ -181,13 +214,6 @@ BOOL WINAPI init(HWND hwnd)
 
 		if(!checkPatch()) // patch.aul のバージョンを確認する。
 		{
-			::MessageBox(
-				0,
-				_T("patch.aul r18 以上が見つかりませんでした") _T("\n")
-				_T("DarkenWindow は正常に動作することができません"),
-				_T("DarkenWindow"),
-				MB_OK);
-
 			termHook();
 
 			return FALSE;
