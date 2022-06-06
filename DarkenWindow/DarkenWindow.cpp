@@ -160,7 +160,7 @@ BOOL WINAPI checkPatch()
 		::MessageBox(
 			0,
 			_T("バージョン文字列を取得できませんでした") _T("\n")
-			_T("DarkenWindow は正常に動作することができません"),
+			_T("DarkenWindow は正常に動作することができません") _T("\n") _T(" "),
 			_T("DarkenWindow"),
 			MB_OK);
 
@@ -171,12 +171,54 @@ BOOL WINAPI checkPatch()
 	LPCSTR p = strstr(si.info, "patched r");
 	if (!p)
 	{
-		::MessageBox(
+		int retValue = ::MessageBox(
 			0,
-			_T("バージョン文字列が見つかりませんでした") _T("\n")
-			_T("DarkenWindow は正常に動作することができません"),
+			_T("patch.aul のバージョン文字列が見つかりませんでした") _T("\n")
+			_T("DarkenWindow は正常に動作することができません") _T("\n")
+			_T("patch.aul を導入済みなのにこのメッセージが出ている場合は OK を押してください") _T("\n") _T(" "),
 			_T("DarkenWindow"),
-			MB_OK);
+			MB_OKCANCEL | MB_ICONQUESTION);
+
+		if (retValue == IDOK)
+		{
+			if (!::LoadLibrary(_T("MSVCP140_ATOMIC_WAIT.DLL")))
+			{
+				int retValue = ::MessageBox(
+					0,
+					_T("Visual Studio 2022 のランタイムライブラリがインストールされていない可能性があります") _T("\n")
+					_T("ランタイムライブラリのダウンロードリンクをクリップボードにコピーする場合は OK を押してください") _T("\n") _T(" "),
+					_T("DarkenWindow"),
+					MB_OKCANCEL | MB_ICONQUESTION);
+
+				if (retValue == IDOK)
+				{
+					::OpenClipboard(0);
+					::EmptyClipboard();
+					HANDLE handle = ::GlobalAlloc(GHND | GMEM_SHARE, MAX_PATH * sizeof(TCHAR));
+					LPTSTR buffer = (LPTSTR)::GlobalLock(handle);
+					::StringCchCopy(buffer, MAX_PATH, _T("https://aka.ms/vs/17/release/vc_redist.x86.exe"));
+					::GlobalUnlock(handle);
+					::SetClipboardData(CF_TEXT, handle);
+					::CloseClipboard();
+
+					::MessageBox(
+						0,
+						_T("https://aka.ms/vs/17/release/vc_redist.x86.exe") _T("\n")
+						_T("上記のランタイムライブラリのダウンロードリンクをクリップボードにコピーしました") _T("\n")
+						_T("ブラウザのアドレスバーに貼り付けてダウンロードしてください") _T("\n") _T(" "),
+						_T("DarkenWindow"),
+						MB_OK);
+				}
+			}
+			else
+			{
+				int retValue = ::MessageBox(
+					0,
+					_T("patch.aul が AviUtl のフォルダの中にあるか確認してください") _T("\n") _T(" "),
+					_T("DarkenWindow"),
+					MB_OK);
+			}
+		}
 
 		return FALSE; // バージョン文字列を見つけられなかった。
 	}
@@ -190,7 +232,8 @@ BOOL WINAPI checkPatch()
 		::MessageBox(
 			0,
 			_T("patch.aul r18 以上が見つかりませんでした") _T("\n")
-			_T("DarkenWindow は正常に動作することができません"),
+			_T("DarkenWindow は正常に動作することができません") _T("\n")
+			_T("patch.aul の最新バージョンを導入してください") _T("\n") _T(" "),
 			_T("DarkenWindow"),
 			MB_OK);
 
@@ -595,8 +638,15 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			}
 			else if (brush != (HBRUSH)::GetStockObject(DC_BRUSH))
 			{
-				// 通常状態のスタティックコントロールだった。
-				stateId = Dark::CTLCOLOR_NORMAL;
+				if (::GetWindowLong(control, GWL_STYLE) & SS_SUNKEN && ::GetWindowTextLength(control) == 0)
+				{
+					// カラーダイアログのスタティックコントロールだった。
+				}
+				else
+				{
+					// 通常状態のスタティックコントロールだった。
+					stateId = Dark::CTLCOLOR_NORMAL;
+				}
 			}
 
 			Dark::StatePtr state = g_skin.getState(theme, partId, stateId);
