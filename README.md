@@ -1,5 +1,35 @@
 # AviUtl プラグイン - 黒窓
 
+AviUtl の見た目をダークモードにします。
+[最新バージョンをダウンロード](../../releases/latest/)
+
+![黒窓 2 0 1](https://user-images.githubusercontent.com/96464759/154665614-90c6a2fb-d9d3-42b5-bcd0-292497c8b5d9.png)
+
+## 導入方法
+
+1. 以下のファイルとフォルダを AviUtl の Plugins フォルダに配置します。
+	* DarkenWindow.aul
+	* DarkenWindow (フォルダ)
+2. aviutl_dark.exe を作成します。手順は [Wiki](https://github.com/hebiiro/AviUtl-Plugin-DarkenWindow/wiki/aviutl_dark.exe-%E3%81%AE%E4%BD%9C%E6%88%90%E6%96%B9%E6%B3%95) にまとめてあります。
+
+## 使用方法
+
+1. aviutl_dark.exe を起動します。
+
+### スキンセレクタ
+
+1. メニューバーを右クリックします。
+2. ポップアップメニューが出くるのでその中からスキンを選択します。
+* 「影を付ける」のチェックを外すとテキストの影が強制的にオフになります。
+* 「丸くする」のチェックを外すと丸角矩形の描画が強制的にオフになります。
+
+## 設定方法
+
+DarkenWindow フォルダ内の xml ファイルをテキストエディタで編集します。AviUtl 起動中でも編集が反映されます。
+
+## 更新履歴
+
+* 6.3.0 - 2022/06/10 タブコントロールに対応
 * 6.2.2 - 2022/06/06 patch.aul 確認用メッセージボックスを修正
 * 6.2.1 - 2022/06/04 patch.aul 確認用メッセージボックスを修正
 * 6.2.0 - 2022/06/03 スキンファイルのリファクタリング
@@ -36,44 +66,6 @@
 * 1.1.0 - 2022/01/28 リストビューとツリービューに対応
 * 1.0.0 - 2022/01/23 初版
 
-AviUtl の見た目をダークモードにします。
-
-![黒窓 2 0 1](https://user-images.githubusercontent.com/96464759/154665614-90c6a2fb-d9d3-42b5-bcd0-292497c8b5d9.png)
-
-## 免責事項
-
-このプラグインおよび同梱物を使用したことによって生じたすべての障害・損害・不具合等に関しては、私と私の関係者および私の所属するいかなる団体・組織とも、一切の責任を負いません。各自の責任においてご使用ください。
-
-## ダウンロード
-
-1. ページ右側にある [Releases](/../../releases) をクリックして移動します。
-2. ダウンロードしたいバージョンをクリックして移動します。
-3. Assets の下に圧縮ファイルがあるのでクリックしてダウンロードします。
-
-## 導入方法
-
-1. 以下のファイルを AviUtl のフォルダに配置します。
-	* aviutl_dark.exe.manifest
-2. 以下のファイルとフォルダを AviUtl の Plugins フォルダに配置します。
-	* DarkenWindow.aul
-	* DarkenWindow (フォルダ)
-3. aviutl_dark.exe を作成します。手順は [Wiki](https://github.com/hebiiro/AviUtl-Plugin-DarkenWindow/wiki/aviutl_dark.exe-%E3%81%AE%E4%BD%9C%E6%88%90%E6%96%B9%E6%B3%95) にまとめてあります。
-
-## 使い方
-
-1. aviutl_dark.exe を起動します。
-
-### スキンセレクタ
-
-1. メニューバーを右クリックします。
-2. ポップアップメニューが出くるのでその中からスキンを選択します。
-* 「影を付ける」のチェックを外すとテキストの影が強制的にオフになります。
-* 「丸くする」のチェックを外すと丸角矩形の描画が強制的にオフになります。
-
-## 設定方法
-
-DarkenWindow フォルダ内の xml ファイルをテキストエディタで編集します。AviUtl 起動中でも編集が反映されます。
-
 ## 動作確認
 
 * (必須) AviUtl 1.10 & 拡張編集 0.92 http://spring-fragrance.mints.ne.jp/aviutl/
@@ -85,8 +77,12 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 * aviutl_exedit_sdk https://github.com/ePi5131/aviutl_exedit_sdk
 * Common Library https://github.com/hebiiro/Common-Library
 
-# 作成者情報
+## 作成者情報
  
 * 作成者 - 蛇色 (へびいろ)
 * GitHub - https://github.com/hebiiro
 * Twitter - https://twitter.com/io_hebiiro
+
+## 免責事項
+
+このプラグインおよび同梱物を使用したことによって生じたすべての障害・損害・不具合等に関しては、私と私の関係者および私の所属するいかなる団体・組織とも、一切の責任を負いません。各自の責任においてご使用ください。

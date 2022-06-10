@@ -7,6 +7,14 @@
 
 //--------------------------------------------------------------------
 
+HRESULT ToolTipThemeRenderer::DrawThemeParentBackground(HWND hwnd, HDC dc, LPCRECT rc)
+{
+	MY_TRACE(_T("ToolTipThemeRenderer::DrawThemeParentBackground(0x%08X, 0x%08X, (%d, %d, %d, %d))\n"),
+		hwnd, dc, rc->left, rc->top, rc->right, rc->bottom);
+
+	return true_DrawThemeParentBackground(hwnd, dc, rc);
+}
+
 HRESULT ToolTipThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
 {
 	MY_TRACE(_T("ToolTipThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
@@ -20,12 +28,33 @@ HRESULT ToolTipThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int part
 	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
 }
 
+HRESULT ToolTipThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
+{
+	MY_TRACE(_T("ToolTipThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+
+	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
+}
+
 HRESULT ToolTipThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
 {
 	MY_TRACE(_T("ToolTipThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
 		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
 
+	{
+		if (g_skin.onDrawThemeText(theme, dc, partId, stateId, text, c, textFlags, rc))
+			return S_OK;
+	}
+
 	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
+}
+
+HRESULT ToolTipThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
+{
+	MY_TRACE(_T("ToolTipThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+
+	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
 }
 
 HRESULT ToolTipThemeRenderer::DrawThemeIcon(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int imageIndex)
@@ -49,6 +78,13 @@ HRESULT ToolTipThemeRenderer::DrawThemeEdge(HTHEME theme, HDC dc, int partId, in
 LRESULT ToolTipRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	MY_TRACE(_T("ToolTipRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
+
+	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+}
+
+LRESULT ToolTipRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	MY_TRACE(_T("ToolTipRenderer::CustomDraw()\n"));
 
 	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 }

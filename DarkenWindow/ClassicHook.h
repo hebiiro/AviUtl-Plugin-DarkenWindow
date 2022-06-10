@@ -67,6 +67,21 @@ Renderer* getRenderer(HWND hwnd);
 
 //---------------------------------------------------------------------
 
+class WindowRenderer : public Renderer
+{
+public:
+	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual int FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type);
+	virtual BOOL DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state);
+	virtual BOOL FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags);
+	virtual BOOL DrawFocusRect(State* currentState, HDC dc, LPCRECT rc);
+	virtual BOOL DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTATEPROC cb, LPARAM lData, WPARAM wData, int x, int y, int cx, int cy, UINT flags);
+	virtual BOOL ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
+	virtual BOOL PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop);
+};
+
 class DialogRenderer : public Renderer
 {
 public:
@@ -176,6 +191,7 @@ class ToolTipRenderer : public Renderer
 {
 public:
 	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 	virtual int FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
 	virtual BOOL DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type);
 	virtual BOOL DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state);
@@ -250,6 +266,22 @@ public:
 };
 
 class ToolBarRenderer : public Renderer
+{
+public:
+	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual int FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type);
+	virtual BOOL DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state);
+	virtual BOOL FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush);
+	virtual BOOL DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags);
+	virtual BOOL DrawFocusRect(State* currentState, HDC dc, LPCRECT rc);
+	virtual BOOL DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTATEPROC cb, LPARAM lData, WPARAM wData, int x, int y, int cx, int cy, UINT flags);
+	virtual BOOL ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx);
+	virtual BOOL PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop);
+};
+
+class TabRenderer : public Renderer
 {
 public:
 	virtual LRESULT CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

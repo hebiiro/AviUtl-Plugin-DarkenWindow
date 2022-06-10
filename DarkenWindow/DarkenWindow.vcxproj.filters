@@ -102,6 +102,15 @@
     <ClCompile Include="Window.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
+    <ClCompile Include="PreviewPane.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonItemsDialog.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="Tab.cpp">
+      <Filter>Controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DarkenWindow.def" />

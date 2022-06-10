@@ -74,3 +74,80 @@ HRESULT WindowThemeRenderer::DrawThemeEdge(HTHEME theme, HDC dc, int partId, int
 }
 
 //--------------------------------------------------------------------
+
+LRESULT WindowRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+//	MY_TRACE(_T("WindowRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
+
+	{
+		LRESULT result = onNcPaint(wndProc, hwnd, message, wParam, lParam);
+		if (!result) return result;
+	}
+
+	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+}
+
+int WindowRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
+{
+	MY_TRACE(_T("WindowRenderer::FillRect(0x%08X)\n"), brush);
+
+	return true_FillRect(dc, rc, brush);
+}
+
+BOOL WindowRenderer::DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type)
+{
+	MY_TRACE(_T("WindowRenderer::DrawFrame()\n"));
+
+	return true_DrawFrame(dc, rc, width, type);
+}
+
+BOOL WindowRenderer::DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state)
+{
+	MY_TRACE(_T("WindowRenderer::DrawFrameControl()\n"));
+
+	return true_DrawFrameControl(dc, rc, type, state);
+}
+
+BOOL WindowRenderer::FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
+{
+	MY_TRACE(_T("WindowRenderer::FrameRect()\n"));
+
+	return true_FrameRect(dc, rc, brush);
+}
+
+BOOL WindowRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags)
+{
+	MY_TRACE(_T("WindowRenderer::DrawEdge(0x%08X, 0x%08X), 0x%08X\n"), edge, flags, currentState->m_message);
+
+	return true_DrawEdge(dc, rc, edge, flags);
+}
+
+BOOL WindowRenderer::DrawFocusRect(State* currentState, HDC dc, LPCRECT rc)
+{
+	MY_TRACE(_T("WindowRenderer::DrawFocusRect()\n"));
+
+	return true_DrawFocusRect( dc, rc);
+}
+
+BOOL WindowRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTATEPROC cb, LPARAM lData, WPARAM wData, int x, int y, int cx, int cy, UINT flags)
+{
+//	MY_TRACE(_T("WindowRenderer::DrawStateW()\n"));
+
+	return true_DrawStateW(dc, fore, cb, lData, wData, x, y, cx, cy, flags);
+}
+
+BOOL WindowRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
+{
+	MY_TRACE(_T("WindowRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X)\n"), x, y, options, rc, text, c, ::GetBkColor(dc));
+
+	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+}
+
+BOOL WindowRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)
+{
+	MY_TRACE(_T("WindowRenderer::PatBlt()\n"));
+
+	return true_PatBlt(dc, x, y, w, h, rop);
+}
+
+//--------------------------------------------------------------------

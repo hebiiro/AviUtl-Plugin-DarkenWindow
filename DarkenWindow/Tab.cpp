@@ -1,0 +1,162 @@
+﻿#include "pch.h"
+#include "DarkenWindow.h"
+#include "ThemeHook.h"
+#include "ClassicHook.h"
+#include "MyDraw.h"
+#include "Skin.h"
+
+//--------------------------------------------------------------------
+
+HRESULT TabThemeRenderer::DrawThemeParentBackground(HWND hwnd, HDC dc, LPCRECT rc)
+{
+	MY_TRACE(_T("TabThemeRenderer::DrawThemeParentBackground(0x%08X, 0x%08X, (%d, %d, %d, %d))\n"),
+		hwnd, dc, rc->left, rc->top, rc->right, rc->bottom);
+
+	return true_DrawThemeParentBackground(hwnd, dc, rc);
+}
+
+HRESULT TabThemeRenderer::DrawThemeBackground(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, LPCRECT rcClip)
+{
+	MY_TRACE(_T("TabThemeRenderer::DrawThemeBackground(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, rcClip);
+
+	{
+		if (g_skin.onDrawThemeBackground(theme, dc, partId, stateId, rc))
+			return S_OK;
+	}
+
+	return true_DrawThemeBackground(theme, dc, partId, stateId, rc, rcClip);
+}
+
+HRESULT TabThemeRenderer::DrawThemeBackgroundEx(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, const DTBGOPTS* options)
+{
+	MY_TRACE(_T("TabThemeRenderer::DrawThemeBackgroundEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, options);
+
+	return true_DrawThemeBackgroundEx(theme, dc, partId, stateId, rc, options);
+}
+
+HRESULT TabThemeRenderer::DrawThemeText(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, DWORD textFlags2, LPCRECT rc)
+{
+	MY_TRACE(_T("TabThemeRenderer::DrawThemeText(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X, 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags, textFlags2);
+
+	{
+		if (g_skin.onDrawThemeText(theme, dc, partId, stateId, text, c, textFlags, rc))
+			return S_OK;
+	}
+
+	return true_DrawThemeText(theme, dc, partId, stateId, text, c, textFlags, textFlags2, rc);
+}
+
+HRESULT TabThemeRenderer::DrawThemeTextEx(HTHEME theme, HDC dc, int partId, int stateId, LPCWSTR text, int c, DWORD textFlags, LPRECT rc, const DTTOPTS* options)
+{
+	MY_TRACE(_T("TabThemeRenderer::DrawThemeTextEx(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom, textFlags);
+
+	return true_DrawThemeTextEx(theme, dc, partId, stateId, text, c, textFlags, rc, options);
+}
+
+HRESULT TabThemeRenderer::DrawThemeIcon(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT rc, HIMAGELIST imageList, int imageIndex)
+{
+	MY_TRACE(_T("TabThemeRenderer::DrawThemeIcon(0x%08X, %d, %d, (%d, %d, %d, %d))\n"),
+		theme, partId, stateId, rc->left, rc->top, rc->right, rc->bottom);
+
+	return true_DrawThemeIcon(theme, dc, partId, stateId, rc, imageList, imageIndex);
+}
+
+HRESULT TabThemeRenderer::DrawThemeEdge(HTHEME theme, HDC dc, int partId, int stateId, LPCRECT destRect, UINT edge, UINT flags, LPRECT contentRect)
+{
+	MY_TRACE(_T("TabThemeRenderer::DrawThemeEdge(0x%08X, %d, %d, (%d, %d, %d, %d)), 0x%08X\n"),
+		theme, partId, stateId, destRect->left, destRect->top, destRect->right, destRect->bottom, contentRect);
+
+	return true_DrawThemeEdge(theme, dc, partId, stateId, destRect, edge, flags, contentRect);
+}
+
+//--------------------------------------------------------------------
+
+LRESULT TabRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+//	MY_TRACE(_T("TabRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
+
+	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+}
+
+LRESULT TabRenderer::CustomDraw(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	MY_TRACE(_T("TabRenderer::CustomDraw()\n"));
+
+	return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
+}
+
+int TabRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
+{
+	MY_TRACE(_T("TabRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
+
+	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_TAB);
+
+		if (g_skin.onDrawThemeBackground(theme, dc, 0, 0, rc))
+			return TRUE;
+	}
+
+	return true_FillRect(dc, rc, brush);
+}
+
+BOOL TabRenderer::DrawFrame(State* currentState, HDC dc, LPRECT rc, UINT width, UINT type)
+{
+	MY_TRACE(_T("TabRenderer::DrawFrame()\n"));
+
+	return true_DrawFrame(dc, rc, width, type);
+}
+
+BOOL TabRenderer::DrawFrameControl(State* currentState, HDC dc, LPRECT rc, UINT type, UINT state)
+{
+	MY_TRACE(_T("TabRenderer::DrawFrameControl()\n"));
+
+	return true_DrawFrameControl(dc, rc, type, state);
+}
+
+BOOL TabRenderer::FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
+{
+	MY_TRACE(_T("TabRenderer::FrameRect()\n"));
+
+	return true_FrameRect(dc, rc, brush);
+}
+
+BOOL TabRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags)
+{
+	MY_TRACE(_T("TabRenderer::DrawEdge()\n"));
+
+	return true_DrawEdge(dc, rc, edge, flags);
+}
+
+BOOL TabRenderer::DrawFocusRect(State* currentState, HDC dc, LPCRECT rc)
+{
+	MY_TRACE(_T("TabRenderer::DrawFocusRect()\n"));
+
+	return true_DrawFocusRect( dc, rc);
+}
+
+BOOL TabRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWSTATEPROC cb, LPARAM lData, WPARAM wData, int x, int y, int cx, int cy, UINT flags)
+{
+	MY_TRACE(_T("TabRenderer::DrawStateW()\n"));
+
+	return true_DrawStateW(dc, fore, cb, lData, wData, x, y, cx, cy, flags);
+}
+
+BOOL TabRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
+{
+	MY_TRACE(_T("TabRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
+
+	return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
+}
+
+BOOL TabRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)
+{
+	MY_TRACE(_T("TabRenderer::PatBlt()\n"));
+
+	return true_PatBlt(dc, x, y, w, h, rop);
+}
+
+//--------------------------------------------------------------------

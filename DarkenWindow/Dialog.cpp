@@ -15,7 +15,7 @@ LRESULT DialogRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 
 int DialogRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH brush)
 {
-//	MY_TRACE(_T("DialogRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
+	MY_TRACE(_T("DialogRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
 
 	HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
 	if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
@@ -35,6 +35,15 @@ int DialogRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 				return TRUE;
 		}
 	}
+#if 0
+	else
+	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_DIALOG);
+
+		if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_DIALOGFACE, 0, rc))
+			return TRUE;
+	}
+#endif
 
 	return true_FillRect(dc, rc, brush);
 }
@@ -63,7 +72,14 @@ BOOL DialogRenderer::FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH b
 BOOL DialogRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags)
 {
 	MY_TRACE(_T("DialogRenderer::DrawEdge()\n"));
+#if 0
+	{
+		HTHEME theme = g_skin.getTheme(Dark::THEME_DIALOG);
 
+		if (g_skin.onDrawThemeBackground(theme, dc, Dark::WINDOW_WINDOWEDGE, 0, rc))
+			return TRUE;
+	}
+#endif
 	return true_DrawEdge(dc, rc, edge, flags);
 }
 
@@ -83,7 +99,7 @@ BOOL DialogRenderer::DrawStateW(State* currentState, HDC dc, HBRUSH fore, DRAWST
 
 BOOL DialogRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx)
 {
-//	MY_TRACE(_T("DialogRenderer::ExtTextOutW(%d, %d, 0x%08X)\n"), x, y, options);
+	MY_TRACE(_T("DialogRenderer::ExtTextOutW(%d, %d, 0x%08X, 0x%08X, 0x%08X, %d, 0x%08X, 0x%08X, 0x%08X)\n"), x, y, options, rc, text, c, dx, ::GetBkColor(dc), ::GetTextColor(dc));
 
 	if (options == ETO_OPAQUE)
 	{
@@ -112,7 +128,7 @@ BOOL DialogRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT
 
 BOOL DialogRenderer::PatBlt(State* currentState, HDC dc, int x, int y, int w, int h, DWORD rop)
 {
-//	MY_TRACE(_T("DialogRenderer::PatBlt()\n"));
+	MY_TRACE(_T("DialogRenderer::PatBlt()\n"));
 
 	return true_PatBlt(dc, x, y, w, h, rop);
 }

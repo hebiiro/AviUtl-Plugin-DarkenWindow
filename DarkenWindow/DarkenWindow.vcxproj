@@ -206,6 +206,7 @@
     <ClCompile Include="ClassicHook.cpp" />
     <ClCompile Include="ComboBox.cpp" />
     <ClCompile Include="CommandModule.cpp" />
+    <ClCompile Include="CommonItemsDialog.cpp" />
     <ClCompile Include="Dialog.cpp" />
     <ClCompile Include="Edit.cpp" />
     <ClCompile Include="Exedit.cpp" />
@@ -221,10 +222,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PreviewPane.cpp" />
     <ClCompile Include="ScrollBar.cpp" />
     <ClCompile Include="Skin.cpp" />
     <ClCompile Include="Spin.cpp" />
     <ClCompile Include="Static.cpp" />
+    <ClCompile Include="Tab.cpp" />
     <ClCompile Include="ThemeHook.cpp" />
     <ClCompile Include="ToolBar.cpp" />
     <ClCompile Include="ToolTip.cpp" />

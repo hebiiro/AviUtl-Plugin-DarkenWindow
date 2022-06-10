@@ -200,6 +200,7 @@ void deleteDispatcher()
 
 //---------------------------------------------------------------------
 
+WindowRenderer g_windowRenderer;
 DialogRenderer g_dialogRenderer;
 StaticRenderer g_staticRenderer;
 ButtonRenderer g_buttonRenderer;
@@ -212,6 +213,7 @@ SpinRenderer g_spinRenderer;
 ListViewRenderer g_listviewRenderer;
 TreeViewRenderer g_treeviewRenderer;
 ToolBarRenderer g_toolbarRenderer;
+TabRenderer g_tabRenderer;
 AviUtlRenderer g_aviutlRenderer;
 AviUtlButtonRenderer g_aviutlButtonRenderer;
 ExeditRenderer g_exeditRenderer;
@@ -239,9 +241,23 @@ void initRenderer(HWND hwnd)
 	else if (::lstrcmpi(className, _T("DirectUIHWND")) == 0) renderer = &g_listviewRenderer;
 	else if (::lstrcmpi(className, WC_TREEVIEW) == 0) renderer = &g_treeviewRenderer;
 	else if (::lstrcmpi(className, TOOLBARCLASSNAME) == 0) renderer = &g_toolbarRenderer;
+	else if (::lstrcmpi(className, WC_TABCONTROL) == 0) renderer = &g_tabRenderer;
 	else if (::lstrcmpi(className, _T("AviUtl")) == 0) renderer = &g_aviutlRenderer;
 	else if (::lstrcmpi(className, _T("AviUtlButton")) == 0) renderer = &g_aviutlButtonRenderer;
 	else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0) renderer = &g_exeditRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") _T("Window"))) renderer = &g_dialogRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") WC_STATIC)) renderer = &g_staticRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") WC_BUTTON)) renderer = &g_buttonRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") WC_EDIT)) renderer = &g_editRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") WC_COMBOBOX)) renderer = &g_comboboxRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") WC_LISTBOX)) renderer = &g_listboxRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") TOOLTIPS_CLASS)) renderer = &g_tooltipRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") TRACKBAR_CLASS)) renderer = &g_trackbarRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") UPDOWN_CLASS)) renderer = &g_spinRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") WC_LISTVIEW)) renderer = &g_listviewRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") WC_TREEVIEW)) renderer = &g_treeviewRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") TOOLBARCLASSNAME)) renderer = &g_toolbarRenderer;
+	else if (::StrStrI(className, _T("WindowsForms10.") WC_TABCONTROL)) renderer = &g_tabRenderer;
 
 	::SetProp(hwnd, _T("DarkenWindow"), (HANDLE)renderer);
 }
@@ -319,7 +335,6 @@ IMPLEMENT_HOOK_PROC(BOOL, WINAPI, DrawStateW, (HDC dc, HBRUSH fore, DRAWSTATEPRO
 IMPLEMENT_HOOK_PROC(BOOL, WINAPI, ExtTextOutW, (HDC dc, int x, int y, UINT options, LPCRECT rc, LPCWSTR text, UINT c, CONST INT* dx))
 {
 	DWORD from = *((DWORD*)&dc - 1);
-//	MY_TRACE(_T("0x%08X => ExtTextOutW()\n"), from);
 	Dispatcher* dispatcher = getDispatcher();
 
 	if (dispatcher->m_ExtTextOutLock)
@@ -327,7 +342,16 @@ IMPLEMENT_HOOK_PROC(BOOL, WINAPI, ExtTextOutW, (HDC dc, int x, int y, UINT optio
 //		MY_TRACE(_T("再帰呼び出し時はフックしない\n"));
 		return true_ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 	}
+#if 0
+	{
+		// デバッグ用。
 
+		WCHAR buffer[MAX_PATH] = {};
+		if (text)
+			memcpy(buffer, text, min(c * sizeof(WCHAR), MAX_PATH - 1));
+		MY_TRACE(_T("0x%08X => ExtTextOutW(%ws)\n"), from, buffer);
+	}
+#endif
 	dispatcher->m_ExtTextOutLock = TRUE;
 	BOOL retValue = dispatcher->ExtTextOutW(dc, x, y, options, rc, text, c, dx);
 	dispatcher->m_ExtTextOutLock = FALSE;

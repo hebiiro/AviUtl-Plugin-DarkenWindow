@@ -50,7 +50,10 @@ void initThemeHook(HWND hwnd)
 	static ListViewThemeRenderer g_listview;
 	static TreeViewThemeRenderer g_treeview;
 	static ToolBarThemeRenderer g_toolbar;
+	static TabThemeRenderer g_tab;
 	static CommandModuleThemeRenderer g_commandModule;
+	static PreviewPaneThemeRenderer g_previewPane;
+	static CommonItemsDialogThemeRenderer g_commonItemsDialog;
 	static WindowThemeRenderer g_window;
 
 	registerRendererNC(hwnd, VSCLASS_MENU, &g_menu);
@@ -68,6 +71,7 @@ void initThemeHook(HWND hwnd)
 	registerRenderer(hwnd, VSCLASS_LISTVIEW, &g_listview);
 	registerRenderer(hwnd, VSCLASS_TREEVIEW, &g_treeview);
 	registerRenderer(hwnd, VSCLASS_TOOLBAR, &g_toolbar);
+	registerRenderer(hwnd, VSCLASS_TAB, &g_tab);
 	registerRenderer(hwnd, VSCLASS_WINDOW, &g_window);
 
 	registerRendererNC(hwnd, L"Explorer::" VSCLASS_MENU, &g_menu);
@@ -85,8 +89,10 @@ void initThemeHook(HWND hwnd)
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_LISTVIEW, &g_listview);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_TREEVIEW, &g_treeview);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_TOOLBAR, &g_toolbar);
+	registerRenderer(hwnd, L"Explorer::" VSCLASS_TAB, &g_tab);
 	registerRenderer(hwnd, L"Explorer::" VSCLASS_WINDOW, &g_window);
 
+	registerRenderer(hwnd, L"Combobox::" VSCLASS_LISTBOX, &g_listbox);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_COMBOBOX, &g_combobox);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_HEADER, &g_header);
 	registerRenderer(hwnd, L"CFD::" VSCLASS_LISTVIEW, &g_listview);
@@ -96,6 +102,10 @@ void initThemeHook(HWND hwnd)
 	registerRenderer(hwnd, L"Placesbar::" VSCLASS_TOOLBAR, &g_toolbar);
 	registerRenderer(hwnd, L"AddressComposited::" VSCLASS_COMBOBOX, &g_combobox);
 	registerRendererNC(hwnd, L"CommandModule", &g_commandModule);
+	registerRendererNC(hwnd, L"PreviewPane", &g_previewPane);
+//	registerRendererNC(hwnd, L"NavbarComposited::" L"PreviewPane", &g_previewPane);
+//	registerRendererNC(hwnd, L"InactiveNavbarComposited::" L"PreviewPane", &g_previewPane);
+	registerRendererNC(hwnd, L"CommonItemsDialog", &g_commonItemsDialog);
 }
 
 //---------------------------------------------------------------------
