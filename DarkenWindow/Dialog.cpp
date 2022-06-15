@@ -18,8 +18,12 @@ int DialogRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 	MY_TRACE(_T("DialogRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
 
 	HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
-	if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
+	DWORD style = ::GetWindowLong(currentState->m_hwnd, GWL_STYLE);
+	if (instance == ::GetModuleHandle(_T("comdlg32.dll")) && style & WS_THICKFRAME)
 	{
+		// コンボボックス＆コンボリストボックス用。
+		// WS_THICKFRAME がない場合は色の設定コモンダイアログなので何もしない。
+
 		HTHEME theme = g_skin.getTheme(Dark::THEME_DIALOG);
 
 		COLORREF color = my::getBrushColor(brush);
@@ -71,7 +75,18 @@ BOOL DialogRenderer::FrameRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH b
 
 BOOL DialogRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT edge, UINT flags)
 {
-	MY_TRACE(_T("DialogRenderer::DrawEdge()\n"));
+	MY_TRACE(_T("DialogRenderer::DrawEdge(0x%08X, 0x%08X)\n"), edge, flags);
+
+	if (edge == EDGE_SUNKEN)
+	{
+		if (g_skin.onDrawThemeBackground(g_skin.getTheme(Dark::THEME_WINDOW), dc, Dark::WINDOW_SUNKENEDGE, 0, rc))
+		{
+			if (flags & BF_ADJUST)
+				::InflateRect(rc, -2, -2);
+
+			return TRUE;
+		}
+	}
 #if 0
 	{
 		HTHEME theme = g_skin.getTheme(Dark::THEME_DIALOG);
@@ -106,6 +121,8 @@ BOOL DialogRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT
 		HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
 		if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
 		{
+			// コンボボックス＆コンボリストボックス用。
+
 			HTHEME theme = g_skin.getTheme(Dark::THEME_DIALOG);
 
 			COLORREF bkColor = ::GetBkColor(dc);

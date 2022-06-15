@@ -29,6 +29,7 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 
 ## 更新履歴
 
+* 6.4.0 - 2022/06/15 色の設定コモンダイアログが正常に描画されなかった問題を修正
 * 6.3.0 - 2022/06/10 タブコントロールに対応
 * 6.2.2 - 2022/06/06 patch.aul 確認用メッセージボックスを修正
 * 6.2.1 - 2022/06/04 patch.aul 確認用メッセージボックスを修正
@@ -69,7 +70,7 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 ## 動作確認
 
 * (必須) AviUtl 1.10 & 拡張編集 0.92 http://spring-fragrance.mints.ne.jp/aviutl/
-* (必須) patch.aul r18 以上 https://scrapbox.io/ePi5131/patch.aul
+* (必須) patch.aul r18 以降 https://scrapbox.io/ePi5131/patch.aul
 
 ## クレジット
 

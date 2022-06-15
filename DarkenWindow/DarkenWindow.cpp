@@ -682,12 +682,29 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		{
 			MY_TRACE(_T("WM_NCRBUTTONUP, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
 
-			if (wParam != HTMENU)
-				break;
+			if (wParam == HTMENU)
+			{
+				showSkinSelector(hwnd);
 
-			showSkinSelector(hwnd);
+				return 0;
+			}
 
-			return 0;
+			break;
+		}
+	case WM_CONTEXTMENU:
+		{
+			MY_TRACE(_T("WM_CONTEXTMENU, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
+
+			UINT ht = ::SendMessage(hwnd, WM_NCHITTEST, 0, lParam);
+
+			if (ht == HTCAPTION && ::GetKeyState(VK_CONTROL) < 0 && ::GetKeyState(VK_LWIN) < 0)
+			{
+				showSkinSelector(hwnd);
+
+				return 0;
+			}
+
+			break;
 		}
 	}
 
