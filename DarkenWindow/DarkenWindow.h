@@ -29,6 +29,7 @@ DECLARE_HOOK_PROC(HICON, WINAPI, LoadIconW, (HINSTANCE instance, LPCWSTR iconNam
 DECLARE_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name, UINT type, int cx, int cy, UINT flags));
 DECLARE_HOOK_PROC(HANDLE, WINAPI, LoadImageW, (HINSTANCE instance, LPCWSTR name, UINT type, int cx, int cy, UINT flags));
 DECLARE_HOOK_PROC(BOOL, WINAPI, DrawIconEx, (HDC dc, int x, int y, HICON icon, int w, int h, UINT step, HBRUSH brush, UINT flags));
+DECLARE_HOOK_PROC(HMENU, WINAPI, LoadMenuA, (HINSTANCE instance, LPCSTR menuName));
 
 DECLARE_HOOK_PROC(HTHEME, WINAPI, OpenThemeData, (HWND hwnd, LPCWSTR classList));
 DECLARE_HOOK_PROC(HTHEME, WINAPI, OpenThemeDataForDpi, (HWND hwnd, LPCWSTR classList, UINT dpi));
@@ -36,10 +37,12 @@ DECLARE_HOOK_PROC(HTHEME, WINAPI, OpenThemeDataEx, (HWND hwnd, LPCWSTR classList
 DECLARE_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppName, LPCWSTR subIdList));
 
 //---------------------------------------------------------------------
-namespace Exedit {
+namespace ExEdit {
 //---------------------------------------------------------------------
 
 extern HFONT* g_font;
+
+void initExEdit();
 
 BOOL WINAPI drawRootText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR text, UINT c, CONST INT* dx);
 BOOL WINAPI drawRootEdge(HDC dc, LPRECT rc, UINT edge, UINT flags);
@@ -58,7 +61,7 @@ void drawLayerBottom(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
 void drawLayerSeparator(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
 
 //---------------------------------------------------------------------
-} // namespace Exedit
+} // namespace ExEdit
 //---------------------------------------------------------------------
 
 LRESULT WINAPI onNcPaint(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

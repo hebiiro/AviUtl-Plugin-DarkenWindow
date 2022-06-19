@@ -563,6 +563,16 @@ private:
 
 	HTHEME m_themes[THEME_MAXSIZE];
 
+	class XorPen
+	{
+	public:
+
+		int m_style = -1;
+		int m_width = -1;
+		COLORREF m_color = CLR_NONE;
+
+	} m_xorPen;
+
 	class Dwm
 	{
 	public:
@@ -577,6 +587,7 @@ private:
 		COLORREF m_inactiveTextColor;
 
 	} m_dwm;
+
 	EditIconMap m_editIconMap;
 	DrawIconDataMap m_drawIconDataMap;
 
@@ -595,7 +606,7 @@ public:
 	void init(HINSTANCE instance, HWND hwnd);
 	BOOL reloadSettings(BOOL force);
 	void reloadSettingsInternal(LPCWSTR fileName);
-	void reloadExeditSettings();
+	void reloadExEditSettings();
 	void reloadSkinSettings(LPCWSTR fileName);
 	void reloadSkin(LPCWSTR fileName);
 	void loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement);

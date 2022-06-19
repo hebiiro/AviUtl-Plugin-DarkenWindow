@@ -959,7 +959,7 @@ BOOL Skin::reloadSettings(BOOL force)
 
 	reloadSettingsInternal(fileName);
 	if (!force)
-		reloadExeditSettings();
+		reloadExEditSettings();
 
 	return TRUE;
 }
@@ -998,35 +998,62 @@ void Skin::reloadSettingsInternal(LPCWSTR fileName)
 	}
 }
 
-void Skin::reloadExeditSettings()
+void Skin::reloadExEditSettings()
 {
-	MY_TRACE(_T("Skin::reloadExeditSettings()\n"));
+	MY_TRACE(_T("Skin::reloadExEditSettings()\n"));
 
-	HMODULE exedit_auf = ::GetModuleHandle(_T("exedit.auf"));
+	DWORD exedit = (DWORD)::GetModuleHandle(_T("exedit.auf"));
+
+	{
+		int style = PS_SOLID;
+		int width = 0;
+		COLORREF color = RGB(0x00, 0xff, 0xff);
+
+		if (g_skin.m_xorPen.m_style != -1 &&
+			g_skin.m_xorPen.m_width != -1 &&
+			g_skin.m_xorPen.m_color != CLR_NONE)
+		{
+			style = g_skin.m_xorPen.m_style;
+			width = g_skin.m_xorPen.m_width;
+			color = g_skin.m_xorPen.m_color;
+		}
+
+		HPEN newPen = ::CreatePen(style, width, color);
+		HPEN oldPen = writeAbsoluteAddress(exedit + 0x1538B4, newPen);
+		::DeleteObject(oldPen);
+	}
 
 	{
 		HTHEME theme = getTheme(Dark::THEME_EXEDIT);
 		Dark::StatePtr state = getState(theme, Dark::EXEDIT_SELECTION, 0);
 		if (state && state->m_fillColor != CLR_NONE)
-			writeAbsoluteAddress((DWORD)exedit_auf + 0x0003807E, &state->m_fillColor);
+			writeAbsoluteAddress(exedit + 0x0003807E, &state->m_fillColor);
 	}
 	{
 		HTHEME theme = getTheme(Dark::THEME_EXEDIT);
 		Dark::StatePtr state = getState(theme, Dark::EXEDIT_SELECTIONEDGE, 0);
 		if (state && state->m_fillColor != CLR_NONE)
-			writeAbsoluteAddress((DWORD)exedit_auf + 0x00038076, &state->m_fillColor);
+			writeAbsoluteAddress(exedit + 0x00038076, &state->m_fillColor);
 	}
 	{
 		HTHEME theme = getTheme(Dark::THEME_EXEDIT);
 		Dark::StatePtr state = getState(theme, Dark::EXEDIT_SELECTIONBK, 0);
 		if (state && state->m_fillColor != CLR_NONE)
-			writeAbsoluteAddress((DWORD)exedit_auf + 0x00038087, &state->m_fillColor);
+			writeAbsoluteAddress(exedit + 0x00038087, &state->m_fillColor);
 	}
 }
 
 void Skin::reloadSkinSettings(LPCWSTR fileName)
 {
 	MY_TRACE(_T("Skin::reloadSkinSettings(%ws)\n"), fileName);
+
+	{
+		// スキンを変更したとき、前回の値を引き継がないようにデフォルト値に戻しておく。
+
+		m_xorPen.m_style = -1;
+		m_xorPen.m_width = -1;
+		m_xorPen.m_color = CLR_NONE;
+	}
 
 	m_fileUpdateCheckers.add(fileName);
 
@@ -1045,7 +1072,7 @@ void Skin::reloadSkinSettings(LPCWSTR fileName)
 			// スキンファイルを読み込む。
 
 			MSXML2::IXMLDOMNodeListPtr nodeList =
-				document->documentElement->getElementsByTagName(L"Skin");
+				document->documentElement->selectNodes(L"Skin");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1097,7 +1124,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 	// <Attributes> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Attributes");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Attributes");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1106,7 +1133,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawSingleRaisedEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawSingleRaisedEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawSingleRaisedEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1120,7 +1147,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawSingleSunkenEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawSingleSunkenEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawSingleSunkenEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1134,7 +1161,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawDoubleRaisedEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawDoubleRaisedEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawDoubleRaisedEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1150,7 +1177,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawDoubleSunkenEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawDoubleSunkenEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawDoubleSunkenEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1166,7 +1193,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawDoubleBumpEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawDoubleBumpEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawDoubleBumpEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1182,7 +1209,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		{
 			// <DrawDoubleEtchedEdge> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"DrawDoubleEtchedEdge");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"DrawDoubleEtchedEdge");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1196,9 +1223,24 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 		}
 
 		{
+			// <XorPen> を読み込む。
+
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"XorPen");
+			int c = nodeList->length;
+			for (int i = 0; i < c; i++)
+			{
+				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
+
+				getPrivateProfileInt(element, L"style", m_xorPen.m_style);
+				getPrivateProfileInt(element, L"width", m_xorPen.m_width);
+				getPrivateProfileNamedColor(element, L"color", m_xorPen.m_color, ColorSet::edgeColor);
+			}
+		}
+
+		{
 			// <Dwm> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"Dwm");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"Dwm");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1222,7 +1264,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 			// <EditIcons> を読み込む。
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"EditIcons");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"EditIcons");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1230,7 +1272,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 				// <EditIcon> を読み込む。
 
-				MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"EditIcon");
+				MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"EditIcon");
 				int c = nodeList->length;
 				for (int i = 0; i < c; i++)
 				{
@@ -1243,7 +1285,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 					// <ChangeColor> を読み込む。
 
-					MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"ChangeColor");
+					MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"ChangeColor");
 					int c = nodeList->length;
 					for (int i = 0; i < c; i++)
 					{
@@ -1267,7 +1309,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 			g_colorSetMap.clear();
 
-			MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"NamedColors");
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"NamedColors");
 			int c = nodeList->length;
 			for (int i = 0; i < c; i++)
 			{
@@ -1275,7 +1317,7 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 				// <NamedColor> を読み込む。
 
-				MSXML2::IXMLDOMNodeListPtr nodeList = element->getElementsByTagName(L"NamedColor");
+				MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"NamedColor");
 				int c = nodeList->length;
 				for (int i = 0; i < c; i++)
 				{
@@ -1314,7 +1356,7 @@ void Skin::loadFigures(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 	// <Figures> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Figures");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Figures");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1346,7 +1388,7 @@ void Skin::loadVSClasses(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 	// <VSClasses> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"VSClasses");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"VSClasses");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1362,7 +1404,7 @@ void Skin::loadVSClass(const MSXML2::IXMLDOMElementPtr& parentElement)
 
 	// <VSClass> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"VSClass");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"VSClass");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1385,7 +1427,7 @@ void Skin::loadName(const MSXML2::IXMLDOMElementPtr& parentElement, VSClassPtr& 
 
 	// <Name> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Name");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Name");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1429,7 +1471,7 @@ void Skin::loadPart(const MSXML2::IXMLDOMElementPtr& parentElement, const VSClas
 
 	// <Part> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Part");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Part");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1451,7 +1493,7 @@ void Skin::loadState(const MSXML2::IXMLDOMElementPtr& parentElement, const PartP
 
 	// <State> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"State");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"State");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1490,7 +1532,7 @@ void Skin::loadFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const Stat
 
 	// <Figure> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"Figure");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"Figure");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1510,7 +1552,7 @@ void Skin::loadIconFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const 
 
 	// <IconFigure> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"IconFigure");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"IconFigure");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{
@@ -1530,7 +1572,7 @@ void Skin::loadTextFigure(const MSXML2::IXMLDOMElementPtr& parentElement, const 
 
 	// <TextFigure> を読み込む。
 
-	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->getElementsByTagName(L"TextFigure");
+	MSXML2::IXMLDOMNodeListPtr nodeList = parentElement->selectNodes(L"TextFigure");
 	int c = nodeList->length;
 	for (int i = 0; i < c; i++)
 	{

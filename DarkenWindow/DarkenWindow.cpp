@@ -80,6 +80,7 @@ void initHook()
 	ATTACH_HOOK_PROC(LoadImageA);
 //	ATTACH_HOOK_PROC(LoadImageW);
 	ATTACH_HOOK_PROC(DrawIconEx);
+	ATTACH_HOOK_PROC(LoadMenuA);
 #if 0
 	ATTACH_HOOK_PROC(OpenThemeData);
 	ATTACH_HOOK_PROC(OpenThemeDataForDpi);
@@ -125,6 +126,7 @@ void termHook()
 	DETACH_HOOK_PROC2(LoadImageA);
 	DETACH_HOOK_PROC2(LoadImageW);
 	DETACH_HOOK_PROC2(DrawIconEx);
+	DETACH_HOOK_PROC2(LoadMenuA);
 
 	DETACH_HOOK_PROC2(OpenThemeData);
 	DETACH_HOOK_PROC2(OpenThemeDataForDpi);
@@ -452,52 +454,9 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			}
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
 			{
-				MY_TRACE(_T("拡張編集をフックします\n"));
-
 				g_skin.setDwm(hwnd, FALSE);
 
-				g_auin.initExEditAddress();
-				DWORD exedit = g_auin.GetExedit();
-				if (!exedit) break;
-
-				Exedit::g_font = (HFONT*)(exedit + 0x00167D84);
-
-				hookAbsoluteCall(exedit + 0x0003833E, Exedit::drawRootText);
-				hookAbsoluteCall(exedit + 0x0003836A, Exedit::drawRootEdge);
-
-				hookAbsoluteCall(exedit + 0x00037CFF, Exedit::drawLayerText);
-				hookAbsoluteCall(exedit + 0x00037D46, Exedit::drawLayerEdge);
-
-				hookCall(exedit + 0x000380DF, Exedit::drawTimelineLongGuage);
-				hookCall(exedit + 0x000381D7, Exedit::drawTimelineShortGuage);
-				hookCall(exedit + 0x000381A2, Exedit::drawTimelineTime);
-
-				hookAbsoluteCall(exedit + 0x00038538, Exedit::fillLayerBackground);
-				hookAbsoluteCall(exedit + 0x0003860E, Exedit::fillLayerBackground);
-				hookAbsoluteCall(exedit + 0x000386E4, Exedit::fillGroupBackground);
-
-				hookCall(exedit + 0x00038845, Exedit::drawLayerLeft);
-				hookCall(exedit + 0x000388AA, Exedit::drawLayerRight);
-				hookCall(exedit + 0x00038871, Exedit::drawLayerTop);
-				hookCall(exedit + 0x000388DA, Exedit::drawLayerBottom);
-				hookCall(exedit + 0x00037A1F, Exedit::drawLayerSeparator);
-#if 0
-				DetourTransactionBegin();
-				DetourUpdateThread(::GetCurrentThread());
-
-//				ATTACH_HOOK_PROC(exedit_00030500);
-//				ATTACH_HOOK_PROC(exedit_000305E0);
-
-				if (DetourTransactionCommit() == NO_ERROR)
-				{
-					MY_TRACE(_T("API フックに成功しました\n"));
-				}
-				else
-				{
-					MY_TRACE(_T("API フックに失敗しました\n"));
-				}
-#endif
-				g_skin.reloadExeditSettings();
+				g_skin.reloadExEditSettings();
 			}
 			else if (::GetWindowLong(hwnd, GWL_STYLE) & WS_CAPTION)
 			{
@@ -798,6 +757,20 @@ IMPLEMENT_HOOK_PROC(BOOL, WINAPI, DrawIconEx, (HDC dc, int x, int y, HICON icon,
 	return true_DrawIconEx(dc, x, y, icon, w, h, step, brush, flags);
 }
 
+IMPLEMENT_HOOK_PROC(HMENU, WINAPI, LoadMenuA, (HINSTANCE instance, LPCSTR menuName))
+{
+	MY_TRACE(_T("LoadMenuA(0x%08X, 0x%08X)\n"), instance, menuName);
+
+	if (::GetModuleHandle(_T("exedit.auf")))
+	{
+		DETACH_HOOK_PROC2(LoadMenuA);
+
+		ExEdit::initExEdit();
+	}
+
+	return true_LoadMenuA(instance, menuName);
+}
+
 //---------------------------------------------------------------------
 
 IMPLEMENT_HOOK_PROC(HTHEME, WINAPI, OpenThemeData, (HWND hwnd, LPCWSTR classList))
@@ -828,10 +801,42 @@ IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppN
 }
 
 //---------------------------------------------------------------------
-namespace Exedit {
+namespace ExEdit {
 //---------------------------------------------------------------------
 
 HFONT* g_font = 0;
+
+void initExEdit()
+{
+	MY_TRACE(_T("initExEdit()\n"));
+
+	MY_TRACE(_T("拡張編集をフックします\n"));
+
+	g_auin.initExEditAddress();
+	DWORD exedit = g_auin.GetExEdit();
+
+	ExEdit::g_font = (HFONT*)(exedit + 0x00167D84);
+
+	hookAbsoluteCall(exedit + 0x0003833E, ExEdit::drawRootText);
+	hookAbsoluteCall(exedit + 0x0003836A, ExEdit::drawRootEdge);
+
+	hookAbsoluteCall(exedit + 0x00037CFF, ExEdit::drawLayerText);
+	hookAbsoluteCall(exedit + 0x00037D46, ExEdit::drawLayerEdge);
+
+	hookCall(exedit + 0x000380DF, ExEdit::drawTimelineLongGuage);
+	hookCall(exedit + 0x000381D7, ExEdit::drawTimelineShortGuage);
+	hookCall(exedit + 0x000381A2, ExEdit::drawTimelineTime);
+
+	hookAbsoluteCall(exedit + 0x00038538, ExEdit::fillLayerBackground);
+	hookAbsoluteCall(exedit + 0x0003860E, ExEdit::fillLayerBackground);
+	hookAbsoluteCall(exedit + 0x000386E4, ExEdit::fillGroupBackground);
+
+	hookCall(exedit + 0x00038845, ExEdit::drawLayerLeft);
+	hookCall(exedit + 0x000388AA, ExEdit::drawLayerRight);
+	hookCall(exedit + 0x00038871, ExEdit::drawLayerTop);
+	hookCall(exedit + 0x000388DA, ExEdit::drawLayerBottom);
+	hookCall(exedit + 0x00037A1F, ExEdit::drawLayerSeparator);
+}
 
 BOOL WINAPI drawRootText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR text, UINT c, CONST INT* dx)
 {
@@ -1074,7 +1079,7 @@ void drawLayerSeparator(HDC dc, int mx, int my, int lx, int ly, HPEN pen)
 }
 
 //--------------------------------------------------------------------
-} // namespace Exedit
+} // namespace ExEdit
 //---------------------------------------------------------------------
 
 LRESULT WINAPI onNcPaint(WNDPROC wndProc, HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
