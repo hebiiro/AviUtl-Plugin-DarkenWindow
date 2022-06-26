@@ -863,7 +863,12 @@ void CALLBACK Skin::timerProc(HWND hwnd, UINT message, UINT_PTR timerId, DWORD t
 	Skin* skin = (Skin*)timerId;
 
 	if (skin->reloadSettings(FALSE))
+	{
+		::RedrawWindow(skin->m_hwnd, 0, 0,
+			RDW_ERASE | RDW_FRAME | RDW_INTERNALPAINT |
+			RDW_INVALIDATE | RDW_ALLCHILDREN);
 		::EnumWindows(enumWindowsProc, (LPARAM)skin);
+	}
 }
 
 BOOL CALLBACK Skin::enumWindowsProc(HWND hwnd, LPARAM lParam)
