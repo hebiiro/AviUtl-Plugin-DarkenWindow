@@ -618,15 +618,17 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		{
 			NMHDR* nm = (NMHDR*)lParam;
 
+			TCHAR className[MAX_PATH] = {};
+			::GetClassName(nm->hwndFrom, className, MAX_PATH);
+//			MY_TRACE_TSTR(className);
+
+			if (::lstrcmpi(className, WC_BUTTON) == 0)
+				return 0; // ボタンの場合は何もしない。
+
 			switch (nm->code)
 			{
 			case NM_CUSTOMDRAW:
 				{
-#if 0
-					TCHAR className[MAX_PATH] = {};
-					::GetClassName(nm->hwndFrom, className, MAX_PATH);
-					MY_TRACE_TSTR(className);
-#endif
 					Renderer* renderer = getRenderer(nm->hwndFrom);
 					if (renderer)
 						return renderer->CustomDraw(wndProc, hwnd, message, wParam, lParam);
