@@ -115,6 +115,11 @@ int ListViewRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH b
 		if (g_skin.onDrawThemeBackground(theme, dc, LVP_LISTITEM, LISS_HOT, rc))
 			return TRUE;
 	}
+	else if (color == ::GetSysColor(COLOR_3DFACE))
+	{
+		if (g_skin.onDrawThemeBackground(theme, dc, LVP_LISTITEM, LISS_SELECTEDNOTFOCUS, rc))
+			return TRUE;
+	}
 	else
 	{
 		if (g_skin.onDrawThemeBackground(theme, dc, LVP_LISTITEM, LISS_NORMAL, rc))
