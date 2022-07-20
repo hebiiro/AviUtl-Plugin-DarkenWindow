@@ -64,14 +64,14 @@ void initHook()
 //	ATTACH_HOOK_PROC(DrawThemeEdge);
 
 	ATTACH_HOOK_PROC(FillRect);
-	ATTACH_HOOK_PROC(DrawFrame);
-	ATTACH_HOOK_PROC(DrawFrameControl);
-	ATTACH_HOOK_PROC(FrameRect);
+//	ATTACH_HOOK_PROC(DrawFrame);
+//	ATTACH_HOOK_PROC(DrawFrameControl);
+//	ATTACH_HOOK_PROC(FrameRect);
 	ATTACH_HOOK_PROC(DrawEdge);
-	ATTACH_HOOK_PROC(DrawFocusRect);
-	ATTACH_HOOK_PROC(DrawStateW);
+//	ATTACH_HOOK_PROC(DrawFocusRect);
+//	ATTACH_HOOK_PROC(DrawStateW);
 	ATTACH_HOOK_PROC(ExtTextOutW);
-	ATTACH_HOOK_PROC(PatBlt);
+//	ATTACH_HOOK_PROC(PatBlt);
 
 	ATTACH_HOOK_PROC(CallWindowProcInternal);
 
@@ -153,7 +153,7 @@ BOOL WINAPI checkPatch()
 	MY_TRACE(_T("checkPatch()\n"));
 
 	// システム情報を取得する。
-	SYS_INFO si = {};
+	AviUtl::SysInfo si = {};
 	g_auin.get_sys_info(0, &si);
 
 	// バージョン文字列を取得する。

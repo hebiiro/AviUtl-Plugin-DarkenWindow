@@ -663,8 +663,8 @@ public:
 
 			IconFigurePtr figure(new T());
 			figure->load(element);
-			m_iconFigureMap[figure->getName()] = figure;
 			if (m_iconFigureMap.contains(figure->getName())) continue; // ‚·‚Å‚É“¯‚¶–¼‘O‚ªŽg‚í‚ê‚Ä‚¢‚éê‡‚Í’Ç‰Á‚µ‚È‚¢B
+			m_iconFigureMap[figure->getName()] = figure;
 //			MY_TRACE(_T("icon figure = %ws, %ws\n"), tagName, figure->getName());
 		}
 	}
