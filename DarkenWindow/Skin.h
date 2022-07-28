@@ -110,6 +110,11 @@ enum ROUND_MODE {
 	ROUND_MODE_ON,
 };
 
+enum STATIC_EDGE_MODE {
+	STATIC_EDGE_MODE_OFF,
+	STATIC_EDGE_MODE_ON,
+};
+
 //--------------------------------------------------------------------
 
 class Figure
@@ -594,6 +599,7 @@ private:
 	_bstr_t m_skinFileName = L"";
 	int m_shadowMode = SHADOW_MODE_ON;
 	int m_roundMode = ROUND_MODE_ON;
+	BOOL m_staticEdgeMode = STATIC_EDGE_MODE_OFF;
 
 public:
 
@@ -714,6 +720,9 @@ public:
 
 	int getRoundMode() const { return m_roundMode; }
 	void setRoundMode(int roundMode) { m_roundMode = roundMode; }
+
+	int getStaticEdgeMode() const { return m_staticEdgeMode; }
+	void setStaticEdgeMode(int staticEdgeMode) { m_staticEdgeMode = staticEdgeMode; }
 };
 
 //--------------------------------------------------------------------
