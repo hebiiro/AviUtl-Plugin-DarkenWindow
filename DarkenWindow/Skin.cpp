@@ -33,6 +33,17 @@ struct
 	{ ROUND_MODE_ON, L"ON" },
 };
 
+struct
+{
+	int value;
+	LPCWSTR label;
+
+} const g_staticEdgeModeLabel[] =
+{
+	{ STATIC_EDGE_MODE_OFF, L"OFF" },
+	{ STATIC_EDGE_MODE_ON, L"ON" },
+};
+
 //--------------------------------------------------------------------
 
 struct ColorSet
@@ -991,6 +1002,7 @@ void Skin::reloadSettingsInternal(LPCWSTR fileName)
 		getPrivateProfileString(element, L"skin", m_skinFileName);
 		getPrivateProfileLabel(element, L"shadowMode", m_shadowMode, g_shadowModeLabel);
 		getPrivateProfileLabel(element, L"roundMode", m_roundMode, g_roundModeLabel);
+		getPrivateProfileLabel(element, L"staticEdgeMode", m_staticEdgeMode, g_staticEdgeModeLabel);
 
 		_bstr_t skin;
 		getPrivateProfileFileName(element, L"skin", skin);
@@ -1008,6 +1020,11 @@ void Skin::reloadExEditSettings()
 	MY_TRACE(_T("Skin::reloadExEditSettings()\n"));
 
 	DWORD exedit = (DWORD)::GetModuleHandle(_T("exedit.auf"));
+
+	if (g_skin.m_staticEdgeMode == STATIC_EDGE_MODE_OFF)
+	{
+		writeAbsoluteAddress(exedit + 0x2ED42 + 1, (DWORD)0);
+	}
 
 	{
 		int style = PS_SOLID;
@@ -1618,6 +1635,7 @@ void Skin::saveSettingsInternal(LPCWSTR fileName)
 		setPrivateProfileString(element, L"skin", m_skinFileName);
 		setPrivateProfileLabel(element, L"shadowMode", m_shadowMode, g_shadowModeLabel);
 		setPrivateProfileLabel(element, L"roundMode", m_roundMode, g_roundModeLabel);
+		setPrivateProfileLabel(element, L"staticEdgeMode", m_staticEdgeMode, g_staticEdgeModeLabel);
 
 		saveXMLDocument(document, fileName, L"UTF-16");
 	}

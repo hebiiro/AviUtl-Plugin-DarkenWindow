@@ -315,6 +315,7 @@ void showSkinSelector(HWND hwnd)
 
 	const int ID_SHADOW_MODE = 20000;
 	const int ID_ROUND_MODE = 20001;
+	const int ID_STATIC_EDGE_MODE = 20002;
 
 	HMENU menu = ::CreatePopupMenu();
 
@@ -333,12 +334,16 @@ void showSkinSelector(HWND hwnd)
 	::AppendMenu(menu, MF_SEPARATOR, -1, 0);
 	::AppendMenu(menu, MF_STRING, ID_SHADOW_MODE, _T("影を付ける"));
 	::AppendMenu(menu, MF_STRING, ID_ROUND_MODE, _T("丸くする"));
+	::AppendMenu(menu, MF_STRING, ID_STATIC_EDGE_MODE, _T("ボタンにスタティックエッジを付ける"));
 
 	if (g_skin.getShadowMode() == Dark::SHADOW_MODE_ON)
 		::CheckMenuItem(menu, ID_SHADOW_MODE, MF_CHECKED);
 
 	if (g_skin.getRoundMode() == Dark::ROUND_MODE_ON)
 		::CheckMenuItem(menu, ID_ROUND_MODE, MF_CHECKED);
+
+	if (g_skin.getStaticEdgeMode() == Dark::STATIC_EDGE_MODE_ON)
+		::CheckMenuItem(menu, ID_STATIC_EDGE_MODE, MF_CHECKED);
 
 	POINT pt; ::GetCursorPos(&pt);
 	int id = ::TrackPopupMenu(menu, TPM_NONOTIFY | TPM_RETURNCMD, pt.x, pt.y, 0, hwnd, 0);
@@ -372,6 +377,17 @@ void showSkinSelector(HWND hwnd)
 			g_skin.setRoundMode(Dark::ROUND_MODE_ON);
 
 		g_skin.saveSettings();
+	}
+	else if (id == ID_STATIC_EDGE_MODE)
+	{
+		if (g_skin.getStaticEdgeMode() == Dark::STATIC_EDGE_MODE_ON)
+			g_skin.setStaticEdgeMode(Dark::STATIC_EDGE_MODE_OFF);
+		else
+			g_skin.setStaticEdgeMode(Dark::STATIC_EDGE_MODE_ON);
+
+		g_skin.saveSettings();
+
+		::MessageBox(hwnd, _T("このオプションは AviUtl を再起動したときに反映されます"), _T("DarkenWindow"), MB_OK);
 	}
 }
 
