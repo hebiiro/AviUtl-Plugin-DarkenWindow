@@ -36,6 +36,8 @@ DECLARE_HOOK_PROC(HTHEME, WINAPI, OpenThemeDataForDpi, (HWND hwnd, LPCWSTR class
 DECLARE_HOOK_PROC(HTHEME, WINAPI, OpenThemeDataEx, (HWND hwnd, LPCWSTR classList, DWORD flags));
 DECLARE_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppName, LPCWSTR subIdList));
 
+DECLARE_HOOK_PROC(BOOL, WINAPI, loudness_TextOutA, (HDC dc, int x, int y, LPCSTR text, int c));
+
 //---------------------------------------------------------------------
 namespace ExEdit {
 //---------------------------------------------------------------------

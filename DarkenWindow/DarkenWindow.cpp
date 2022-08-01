@@ -272,6 +272,27 @@ BOOL WINAPI init(HWND hwnd)
 	return TRUE;
 }
 
+// 主に他プラグインに関する初期化処理を行う。
+BOOL WINAPI postInit()
+{
+	MY_TRACE(_T("postInit()\n"));
+
+	{
+		// loudness.auf 内の ::TextOutA() をフックする。
+
+		HMODULE loudness = ::GetModuleHandle(_T("loudness.auf"));
+		MY_TRACE_HEX(loudness);
+
+		if (loudness)
+		{
+			true_loudness_TextOutA = hookImportFunc(loudness, "TextOutA", hook_loudness_TextOutA);
+			MY_TRACE_HEX(true_loudness_TextOutA);
+		}
+	}
+
+	return TRUE;
+}
+
 void showSkinSelector(HWND hwnd)
 {
 	MY_TRACE(_T("showSkinSelector(0x%08X)\n"), hwnd);
@@ -455,8 +476,11 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		}
 	case WM_CREATE:
 		{
-			if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
+			if (wndProc != (WNDPROC)::GetClassLongA(hwnd, GCL_WNDPROC) &&
+				wndProc != (WNDPROC)::GetClassLongW(hwnd, GCL_WNDPROC))
+			{
 				break;
+			}
 
 			TCHAR className[MAX_PATH] = {};
 			::GetClassName(hwnd, className, MAX_PATH);
@@ -470,13 +494,27 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 			}
 			else if (::lstrcmpi(className, _T("ExtendedFilterClass")) == 0)
 			{
+				postInit();
+
 				g_skin.setDwm(hwnd, FALSE);
 
 				g_skin.reloadExEditSettings();
 			}
-			else if (::GetWindowLong(hwnd, GWL_STYLE) & WS_CAPTION)
+			else if (getStyle(hwnd) & WS_CAPTION)
 			{
 				g_skin.setDwm(hwnd, FALSE);
+			}
+			else if (::lstrcmpi(className, WC_STATIC) == 0)
+			{
+				// ラウドネスメーター(全体) のスタティックテキストをちょっと変更する。
+
+				HWND parent = ::GetParent(hwnd);
+				TCHAR windowText[MAX_PATH] = {};
+				::GetWindowText(parent, windowText, MAX_PATH);
+//				MY_TRACE_TSTR(windowText);
+
+				if (::lstrcmp(windowText, _T("ラウドネスメーター(全体)")) == 0)
+					modifyStyle(hwnd, 0, SS_CENTERIMAGE);
 			}
 
 			break;
@@ -818,6 +856,15 @@ IMPLEMENT_HOOK_PROC(HRESULT, WINAPI, SetWindowTheme, (HWND hwnd, LPCWSTR subAppN
 	return true_SetWindowTheme(hwnd, subAppName, subIdList);
 }
 
+//---------------------------------------------------------------------
+
+IMPLEMENT_HOOK_PROC_NULL(BOOL, WINAPI, loudness_TextOutA, (HDC dc, int x, int y, LPCSTR text, int c))
+{
+	HTHEME theme = g_skin.getTheme(Dark::THEME_STATIC);
+
+	return g_skin.onExtTextOut(theme, dc, STAT_TEXT, 0, x, y, 0, 0, (_bstr_t)text, c, 0);
+//	return true_loudness_TextOutA(dc, x, y, text, c);
+}
 //---------------------------------------------------------------------
 namespace ExEdit {
 //---------------------------------------------------------------------
