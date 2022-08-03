@@ -422,7 +422,7 @@ EXTERN_C BOOL APIENTRY DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved
 		{
 			// ロケールを設定する。
 			// これをやらないと日本語テキストが文字化けするので最初に実行する。
-			_tsetlocale(LC_ALL, _T(""));
+			_tsetlocale(LC_CTYPE, _T(""));
 
 			MY_TRACE(_T("DLL_PROCESS_ATTACH\n"));
 
