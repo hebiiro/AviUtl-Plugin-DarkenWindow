@@ -30,6 +30,7 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 
 ## 更新履歴
 
+* 7.1.0 - 2022/08/12 「SushiLight」スキンを追加
 * 7.0.0 - 2022/08/06 「RoundLightGreen」スキンを追加
 * 6.9.0 - 2022/08/03 「AdobeDark」「ClassicStyle」スキンを追加
 * 6.8.0 - 2022/08/02 「loudness.auf」をテーマで描画するように修正
