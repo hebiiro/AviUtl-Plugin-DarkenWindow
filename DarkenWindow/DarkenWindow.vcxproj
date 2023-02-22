@@ -207,6 +207,7 @@
     <ClCompile Include="ComboBox.cpp" />
     <ClCompile Include="CommandModule.cpp" />
     <ClCompile Include="CommonItemsDialog.cpp" />
+    <ClCompile Include="DarkenWindow_ExEdit.cpp" />
     <ClCompile Include="Dialog.cpp" />
     <ClCompile Include="Edit.cpp" />
     <ClCompile Include="Exedit.cpp" />

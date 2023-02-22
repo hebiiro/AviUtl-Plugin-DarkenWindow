@@ -139,6 +139,49 @@ EXEDIT_ICON_SP          ICON                    "res\\EXEDIT_ICON_SP.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Dialog
+//
+
+GET_LAYER_NAME DIALOGEX 0, 0, 125, 38
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "レイヤー名"
+FONT 9, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    EDITTEXT        171,4,4,116,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "OK",1,4,20,40,14,BS_CENTER
+    PUSHBUTTON      "キャンセル",2,48,20,40,14,BS_CENTER
+    PUSHBUTTON      "色分け",IDC_CHOOSE_COLOR,92,20,28,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+GET_LAYER_NAME AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    "GET_LAYER_NAME", DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 
