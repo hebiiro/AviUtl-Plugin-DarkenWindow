@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="pch.h" />
     <ClInclude Include="DarkenWindow.h" />
     <ClInclude Include="MyDraw.h" />
     <ClInclude Include="ClassicHook.h" />
@@ -34,9 +33,11 @@
     <ClInclude Include="..\..\Common\WinUtility.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp" />
     <ClCompile Include="DarkenWindow.cpp" />
     <ClCompile Include="Menu.cpp">
       <Filter>Controls</Filter>
@@ -111,6 +112,10 @@
     <ClCompile Include="Tab.cpp">
       <Filter>Controls</Filter>
     </ClCompile>
+    <ClCompile Include="DarkenWindow_ExEdit.cpp" />
+    <ClCompile Include="pch.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="DarkenWindow.def" />
@@ -124,6 +129,9 @@
     </Filter>
     <Filter Include="Resource">
       <UniqueIdentifier>{e292d573-19b5-4295-9d39-a04b2289c653}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{2863ff98-c33f-4f95-a3df-d63cd7d0a1bd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

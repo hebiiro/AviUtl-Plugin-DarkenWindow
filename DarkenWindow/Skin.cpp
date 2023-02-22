@@ -755,6 +755,11 @@ void DrawIcon::draw(HDC dc, LPRECT rc)
 
 //--------------------------------------------------------------------
 
+COLORREF ExEditGroup::m_color = CLR_NONE;
+float ExEditGroup::m_alpha = 0.0f;
+
+//--------------------------------------------------------------------
+
 State::State()
 {
 	m_fillColor = CLR_NONE;
@@ -1242,6 +1247,20 @@ void Skin::loadAttributes(const MSXML2::IXMLDOMElementPtr& parentElement)
 				getPrivateProfileNamedColor(element, L"innerBottomRightColor", DrawDoubleEtchedEdge::m_innerBottomRightColor, ColorSet::edgeColor);
 				getPrivateProfileNamedColor(element, L"outerTopLeftColor", DrawDoubleEtchedEdge::m_outerTopLeftColor, ColorSet::edgeColor);
 				getPrivateProfileNamedColor(element, L"outerBottomRightColor", DrawDoubleEtchedEdge::m_outerBottomRightColor, ColorSet::edgeColor);
+			}
+		}
+
+		{
+			// <ExEditGroup> ‚ð“Ç‚Ýž‚ÞB
+
+			MSXML2::IXMLDOMNodeListPtr nodeList = element->selectNodes(L"ExEditGroup");
+			int c = nodeList->length;
+			for (int i = 0; i < c; i++)
+			{
+				MSXML2::IXMLDOMElementPtr element = nodeList->item[i];
+
+				getPrivateProfileNamedColor(element, L"color", ExEditGroup::m_color, ColorSet::fillColor);
+				getPrivateProfileReal(element, L"alpha", ExEditGroup::m_alpha);
 			}
 		}
 
@@ -1749,8 +1768,8 @@ int Skin::getPartId(LPCWSTR id)
 	IF_RETURN(EXEDIT_ROOT);
 	IF_RETURN(EXEDIT_LAYER);
 	IF_RETURN(EXEDIT_LAYEREDGE);
-	IF_RETURN(EXEDIT_LONGGUAGE);
-	IF_RETURN(EXEDIT_SHORTGUAGE);
+	IF_RETURN(EXEDIT_LONGSCALE);
+	IF_RETURN(EXEDIT_SHORTSCALE);
 	IF_RETURN(EXEDIT_LAYERBACKGROUND);
 	IF_RETURN(EXEDIT_GROUPBACKGROUND);
 	IF_RETURN(EXEDIT_SELECTION);

@@ -60,8 +60,8 @@ enum CUSTOM_PARTS {
 	EXEDIT_ROOT,
 	EXEDIT_LAYER,
 	EXEDIT_LAYEREDGE,
-	EXEDIT_LONGGUAGE,
-	EXEDIT_SHORTGUAGE,
+	EXEDIT_LONGSCALE,
+	EXEDIT_SHORTSCALE,
 	EXEDIT_LAYERBACKGROUND,
 	EXEDIT_GROUPBACKGROUND,
 	EXEDIT_SELECTION,
@@ -433,6 +433,16 @@ public:
 
 class DrawShadowIcon : public IconFigure
 {
+};
+
+//--------------------------------------------------------------------
+
+class ExEditGroup
+{
+public:
+
+	static COLORREF m_color;
+	static float m_alpha;
 };
 
 //--------------------------------------------------------------------

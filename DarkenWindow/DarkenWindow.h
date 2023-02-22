@@ -43,6 +43,8 @@ namespace ExEdit {
 //---------------------------------------------------------------------
 
 extern HFONT* g_font;
+extern int g_drawingLayerIndex;
+extern int (*CallShowColorDialog)(DWORD u1, COLORREF* color, DWORD u3);
 
 void initExEdit();
 
@@ -50,8 +52,8 @@ BOOL WINAPI drawRootText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR 
 BOOL WINAPI drawRootEdge(HDC dc, LPRECT rc, UINT edge, UINT flags);
 BOOL WINAPI drawLayerText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR text, UINT c, CONST INT* dx);
 BOOL WINAPI drawLayerEdge(HDC dc, LPRECT rc, UINT edge, UINT flags);
-void drawTimelineLongGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
-void drawTimelineShortGuage(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+void drawTimelineLongScale(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+void drawTimelineShortScale(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
 void drawTimelineTime(HDC dc, LPCSTR text, int x, int y, int w, int h, int scroll_x);
 int WINAPI fillLayerBackground(HDC dc, LPCRECT rc, HBRUSH brush);
 int WINAPI fillGroupBackground(HDC dc, LPCRECT rc, HBRUSH brush);
@@ -61,6 +63,10 @@ void drawLayerRight(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
 void drawLayerTop(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
 void drawLayerBottom(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
 void drawLayerSeparator(HDC dc, int mx, int my, int lx, int ly, HPEN pen);
+
+DECLARE_HOOK_PROC(void, CDECL, drawLayerBackground, (HDC dc, int layerIndex, DWORD a3, DWORD a4, DWORD a5, DWORD a6, DWORD a7));
+DECLARE_HOOK_PROC(INT_PTR, CALLBACK, LayerNameDialogProc, (HWND hdlg, UINT message, WPARAM wParam, LPARAM lParam));
+DECLARE_HOOK_PROC(INT_PTR, CDECL, ShowLayerNameDialog, (HINSTANCE instance, LPCSTR templateName, HWND parent, DLGPROC dialogProc));
 
 //---------------------------------------------------------------------
 } // namespace ExEdit
