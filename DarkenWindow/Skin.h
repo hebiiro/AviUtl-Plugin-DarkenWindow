@@ -609,7 +609,9 @@ private:
 	_bstr_t m_skinFileName = L"";
 	int m_shadowMode = SHADOW_MODE_ON;
 	int m_roundMode = ROUND_MODE_ON;
-	BOOL m_staticEdgeMode = STATIC_EDGE_MODE_OFF;
+	int m_staticEdgeMode = STATIC_EDGE_MODE_OFF;
+	BOOL m_useLayerColor = TRUE;
+	BOOL m_useLayerColorEx = FALSE;
 
 public:
 
@@ -733,6 +735,12 @@ public:
 
 	int getStaticEdgeMode() const { return m_staticEdgeMode; }
 	void setStaticEdgeMode(int staticEdgeMode) { m_staticEdgeMode = staticEdgeMode; }
+
+	int getUseLayerColor() const { return m_useLayerColor; }
+	void setUseLayerColor(int useLayerColor) { m_useLayerColor = useLayerColor; }
+
+	int getUseLayerColorEx() const { return m_useLayerColorEx; }
+	void setUseLayerColorEx(int useLayerColorEx) { m_useLayerColorEx = useLayerColorEx; }
 };
 
 //--------------------------------------------------------------------

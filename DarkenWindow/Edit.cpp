@@ -111,7 +111,7 @@ BOOL EditRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT o
 		HTHEME theme = g_skin.getTheme(Dark::THEME_EDIT);
 
 		// WM_CTLCOLOR で設定された stateId を取得する。
-		int stateId = (int)::GetProp(currentState->m_hwnd, _T("DarkenWindow.State"));
+		int stateId = (int)(uintptr_t)::GetProp(currentState->m_hwnd, _T("DarkenWindow.State"));
 
 		COLORREF color = ::GetBkColor(dc);
 		COLORREF hilightColor = ::GetSysColor(COLOR_HIGHLIGHT);

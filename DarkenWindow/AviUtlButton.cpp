@@ -47,7 +47,7 @@ BOOL AviUtlButtonRenderer::DrawEdge(State* currentState, HDC dc, LPRECT rc, UINT
 //	MY_TRACE(_T("AviUtlButtonRenderer::DrawEdge()\n"));
 
 	HWND hwnd = currentState->m_hwnd;
-	HICON icon = (HICON)::GetWindowLong(hwnd, 0);
+	HICON icon = (HICON)::GetWindowLongPtr(hwnd, 0);
 	int x = rc->left;
 	int y = rc->top;
 	int w = rc->right - rc->left;

@@ -25,6 +25,23 @@ COLORREF getColorFromLayerName(LPCSTR name)
 	return RGB(GetBValue(color), GetGValue(color), GetRValue(color));
 }
 
+COLORREF getColorFromLayerIndex(int index)
+{
+	for (int i = index; i >= 0; i--)
+	{
+		ExEdit::LayerSetting* layer = g_auin.GetLayerSetting(i);
+		LPCSTR name = layer->name;
+		if (!name) continue; // レイヤー名が無効だった。
+		LPCSTR sep = strchr(name, '#');
+		if (!sep) continue; // セパレータがなかった。
+		if (!sep[1]) return CLR_NONE; // セパレータ以降が空文字列ならデフォルトカラーを使用する。
+		COLORREF color = strtoul(sep + 1, 0, 16);
+		return RGB(GetBValue(color), GetGValue(color), GetRValue(color));
+	}
+
+	return CLR_NONE;
+}
+
 COLORREF getLayerBackgroundColor()
 {
 	ExEdit::LayerSetting* layer = g_auin.GetLayerSetting(g_drawingLayerIndex);
@@ -33,12 +50,19 @@ COLORREF getLayerBackgroundColor()
 	int stateId = 0;
 	if (!(layer->flag & ExEdit::LayerSetting::Flag::UnDisp))
 	{
-		// ユーザーカラーを取得する。
-		COLORREF userColor = getColorFromLayerName(layer->name);
+		if (g_skin.getUseLayerColor())
+		{
+			// ユーザーカラーを取得する。
+			COLORREF userColor = CLR_NONE;
+			if (g_skin.getUseLayerColorEx())
+				userColor = getColorFromLayerIndex(g_drawingLayerIndex);
+			else
+				userColor = getColorFromLayerName(layer->name);
 
-		// ユーザーカラーが有効なら使用する。
-		if (userColor != CLR_NONE)
-			return userColor;
+			// ユーザーカラーが有効なら使用する。
+			if (userColor != CLR_NONE)
+				return userColor;
+		}
 
 		stateId = Dark::EXEDIT_LAYER_ACTIVE;
 	}
@@ -94,7 +118,7 @@ void initExEdit()
 	MY_TRACE(_T("拡張編集をフックします\n"));
 
 	g_auin.initExEditAddress();
-	DWORD exedit = g_auin.GetExEdit();
+	uintptr_t exedit = g_auin.GetExEdit();
 
 	ExEdit::g_font = (HFONT*)(exedit + 0x00167D84);
 
@@ -121,22 +145,6 @@ void initExEdit()
 	castAddress(ExEdit::CallShowColorDialog, exedit + 0x0004D2A0);
 	true_ShowLayerNameDialog = hookCall(exedit + 0x426D2, hook_ShowLayerNameDialog);
 
-/*
-$+426C6   |.  68 B0255C20    PUSH 205C25B0                            ; /Arg4 = exedit_auf.205C25B0, Entry point, DLGPROC dlgProc
-$+426CB   |.  52             PUSH EDX                                 ; |Arg3, HWND parent
-$+426CC   |.  68 6C526420    PUSH OFFSET 2064526C                     ; |Arg2 = ASCII "GET_LAYER_NAME"
-$+426D1   |.  50             PUSH EAX                                 ; |Arg1, HINSTANCE instance
-$+426D2   |.  E8 29E1FDFF    CALL ShowDialog                          ; \exedit_auf.ShowDialog, レイヤー名の変更
-	ShowDialog をフックして独自のダイアログを表示する。
-
-$+366E    |.  6A 02          PUSH 2                                   ; /Arg3 = 2
-$+3670    |.  68 F81E6620    PUSH OFFSET 20661EF8                     ; |Arg2 = COLORREF* (入出力)
-$+3675    |.  53             PUSH EBX                                 ; |Arg1 = 0
-$+3676    |.  E8 259C0400    CALL CallShowDialog                      ; \exedit_auf.CallShowColorDialog
-
-$+4D2A0   /$  8B4424 0C      MOV EAX,DWORD PTR SS:[ESP+0C]            ; exedit_auf.CallShowColorDialog(guessed Arg1,Arg2,Arg3)
-	独自のダイアログ内でカラー選択ダイアログを出す場合は CallShowColorDialog() を使用する。
-*/
 	DetourTransactionBegin();
 	DetourUpdateThread(::GetCurrentThread());
 
@@ -205,7 +213,7 @@ BOOL WINAPI drawLayerText(HDC dc, int x, int y, UINT options, LPCRECT rc, LPCSTR
 	{
 		LPCWSTR sep = wcschr(text2, L'#');
 		if (sep)
-			c2 = sep - text2;
+			c2 = (UINT)(sep - text2);
 	}
 
 	if (g_skin.drawText(dc, theme, Dark::EXEDIT_LAYER, stateId, (LPRECT)rc, text2, c2, DT_CENTER | DT_VCENTER | DT_SINGLELINE))

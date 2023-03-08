@@ -35,7 +35,7 @@ LRESULT ExeditRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UINT 
 {
 //	MY_TRACE(_T("ExeditRenderer::CallWindowProcInternal(0x%08X, 0x%08X, 0x%08X, 0x%08X)\n"), hwnd, message, wParam, lParam);
 #if 1
-	if (wndProc != (WNDPROC)::GetClassLong(hwnd, GCL_WNDPROC))
+	if (wndProc != (WNDPROC)::GetClassLongPtr(hwnd, GCLP_WNDPROC))
 		return true_CallWindowProcInternal(wndProc, hwnd, message, wParam, lParam);
 
 	switch (message)

@@ -17,7 +17,7 @@ int DialogRenderer::FillRect(State* currentState, HDC dc, LPCRECT rc, HBRUSH bru
 {
 	MY_TRACE(_T("DialogRenderer::FillRect(%d, %d, %d, %d)\n"), rc->left, rc->top, rc->right, rc->bottom);
 
-	HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
+	HINSTANCE instance = (HINSTANCE)::GetWindowLongPtr(currentState->m_hwnd, GWLP_HINSTANCE);
 	DWORD style = ::GetWindowLong(currentState->m_hwnd, GWL_STYLE);
 	if (instance == ::GetModuleHandle(_T("comdlg32.dll")) && style & WS_THICKFRAME)
 	{
@@ -118,7 +118,7 @@ BOOL DialogRenderer::ExtTextOutW(State* currentState, HDC dc, int x, int y, UINT
 
 	if (options == ETO_OPAQUE)
 	{
-		HINSTANCE instance = (HINSTANCE)::GetWindowLong(currentState->m_hwnd, GWL_HINSTANCE);
+		HINSTANCE instance = (HINSTANCE)::GetWindowLongPtr(currentState->m_hwnd, GWLP_HINSTANCE);
 		if (instance == ::GetModuleHandle(_T("comdlg32.dll")))
 		{
 			// コンボボックス＆コンボリストボックス用。

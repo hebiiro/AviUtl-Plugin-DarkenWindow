@@ -63,7 +63,7 @@ LRESULT TrackBarRenderer::CallWindowProcInternal(WNDPROC wndProc, HWND hwnd, UIN
 
 			// コモンコントロールをバージョン 6 にすると、WM_LBUTTONDOWN で
 			// SB_THUMBTRACK が送られてこないので手動で送る。
-			int pos = ::SendMessage(hwnd, TBM_GETPOS, 0, 0);
+			int pos = (int)::SendMessage(hwnd, TBM_GETPOS, 0, 0);
 			::SendMessage(::GetParent(hwnd), WM_HSCROLL, MAKEWPARAM(SB_THUMBTRACK, pos), (LPARAM)hwnd);
 
 			return result;

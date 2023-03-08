@@ -1008,6 +1008,8 @@ void Skin::reloadSettingsInternal(LPCWSTR fileName)
 		getPrivateProfileLabel(element, L"shadowMode", m_shadowMode, g_shadowModeLabel);
 		getPrivateProfileLabel(element, L"roundMode", m_roundMode, g_roundModeLabel);
 		getPrivateProfileLabel(element, L"staticEdgeMode", m_staticEdgeMode, g_staticEdgeModeLabel);
+		getPrivateProfileBool(element, L"useLayerColor", m_useLayerColor);
+		getPrivateProfileBool(element, L"useLayerColorEx", m_useLayerColorEx);
 
 		_bstr_t skin;
 		getPrivateProfileFileName(element, L"skin", skin);
@@ -1024,12 +1026,12 @@ void Skin::reloadExEditSettings()
 {
 	MY_TRACE(_T("Skin::reloadExEditSettings()\n"));
 
-	DWORD exedit = (DWORD)::GetModuleHandle(_T("exedit.auf"));
+	uintptr_t exedit = (uintptr_t)::GetModuleHandle(_T("exedit.auf"));
 
 	if (g_skin.m_staticEdgeMode == STATIC_EDGE_MODE_OFF)
 	{
 		// ボタンの拡張スタイル (WS_EX_STATICEDGE) を消す。
-		writeAbsoluteAddress(exedit + 0x2ED42 + 1, (DWORD)0);
+		writeAbsoluteAddress(exedit + 0x2ED42 + 1, (uintptr_t)0);
 	}
 
 	{
@@ -1656,6 +1658,8 @@ void Skin::saveSettingsInternal(LPCWSTR fileName)
 		setPrivateProfileLabel(element, L"shadowMode", m_shadowMode, g_shadowModeLabel);
 		setPrivateProfileLabel(element, L"roundMode", m_roundMode, g_roundModeLabel);
 		setPrivateProfileLabel(element, L"staticEdgeMode", m_staticEdgeMode, g_staticEdgeModeLabel);
+		setPrivateProfileBool(element, L"useLayerColor", m_useLayerColor);
+		setPrivateProfileBool(element, L"useLayerColorEx", m_useLayerColorEx);
 
 		saveXMLDocument(document, fileName, L"UTF-16");
 	}

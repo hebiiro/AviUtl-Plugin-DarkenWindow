@@ -45,11 +45,11 @@ void initHook()
 	GET_HOOK_PROC(user32, DrawFrame);
 
 	// 2B = 7671339B - 76713370
-	DWORD address1 = ::CallWindowProcW(getCallWindowProcInternal, 0, 0, 0, 0) - 0x2B;
+	uintptr_t address1 = ::CallWindowProcW(getCallWindowProcInternal, 0, 0, 0, 0) - 0x2B;
 	BYTE code[1] = {};
 	::ReadProcessMemory(::GetCurrentProcess(), (LPCVOID)address1, code, sizeof(code), 0);
 	if (code[0] == 0xCC) address1 += 0x01;
-	DWORD address2 = (DWORD)user32 + 0x00043370;
+	uintptr_t address2 = (uintptr_t)user32 + 0x00043370;
 	true_CallWindowProcInternal = (Type_CallWindowProcInternal)address1;
 
 	DetourTransactionBegin();
@@ -337,6 +337,7 @@ void showSkinSelector(HWND hwnd)
 	const int ID_SHADOW_MODE = 20000;
 	const int ID_ROUND_MODE = 20001;
 	const int ID_STATIC_EDGE_MODE = 20002;
+	const int ID_USE_LAYER_COLOR_EX = 20003;
 
 	HMENU menu = ::CreatePopupMenu();
 
@@ -356,6 +357,7 @@ void showSkinSelector(HWND hwnd)
 	::AppendMenu(menu, MF_STRING, ID_SHADOW_MODE, _T("影を付ける"));
 	::AppendMenu(menu, MF_STRING, ID_ROUND_MODE, _T("丸くする"));
 	::AppendMenu(menu, MF_STRING, ID_STATIC_EDGE_MODE, _T("ボタンにスタティックエッジを付ける"));
+	::AppendMenu(menu, MF_STRING, ID_USE_LAYER_COLOR_EX, _T("複数行の色分け"));
 
 	if (g_skin.getShadowMode() == Dark::SHADOW_MODE_ON)
 		::CheckMenuItem(menu, ID_SHADOW_MODE, MF_CHECKED);
@@ -365,6 +367,9 @@ void showSkinSelector(HWND hwnd)
 
 	if (g_skin.getStaticEdgeMode() == Dark::STATIC_EDGE_MODE_ON)
 		::CheckMenuItem(menu, ID_STATIC_EDGE_MODE, MF_CHECKED);
+
+	if (g_skin.getUseLayerColorEx())
+		::CheckMenuItem(menu, ID_USE_LAYER_COLOR_EX, MF_CHECKED);
 
 	POINT pt; ::GetCursorPos(&pt);
 	int id = ::TrackPopupMenu(menu, TPM_NONOTIFY | TPM_RETURNCMD, pt.x, pt.y, 0, hwnd, 0);
@@ -409,6 +414,14 @@ void showSkinSelector(HWND hwnd)
 		g_skin.saveSettings();
 
 		::MessageBox(hwnd, _T("このオプションは AviUtl を再起動したときに反映されます"), _T("DarkenWindow"), MB_OK);
+	}
+	else if (id == ID_USE_LAYER_COLOR_EX)
+	{
+		g_skin.setUseLayerColorEx(!g_skin.getUseLayerColorEx());
+
+		g_skin.saveSettings();
+
+		::InvalidateRect(g_auin.GetExEditWindow(), 0, TRUE);
 	}
 }
 
@@ -476,8 +489,8 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		}
 	case WM_CREATE:
 		{
-			if (wndProc != (WNDPROC)::GetClassLongA(hwnd, GCL_WNDPROC) &&
-				wndProc != (WNDPROC)::GetClassLongW(hwnd, GCL_WNDPROC))
+			if (wndProc != (WNDPROC)::GetClassLongPtrA(hwnd, GCLP_WNDPROC) &&
+				wndProc != (WNDPROC)::GetClassLongPtrW(hwnd, GCLP_WNDPROC))
 			{
 				break;
 			}
@@ -540,8 +553,8 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 
 			if (message == WM_CTLCOLOREDIT || message == WM_CTLCOLORLISTBOX)
 			{
-				if (wndProc != (WNDPROC)::GetClassLongA(hwnd, GCL_WNDPROC) &&
-					wndProc != (WNDPROC)::GetClassLongW(hwnd, GCL_WNDPROC) &&
+				if (wndProc != (WNDPROC)::GetClassLongPtrA(hwnd, GCLP_WNDPROC) &&
+					wndProc != (WNDPROC)::GetClassLongPtrW(hwnd, GCLP_WNDPROC) &&
 					wndProc != ::DefDlgProcA &&
 					wndProc != ::DefDlgProcW)
 				{
@@ -710,7 +723,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 		{
 			MY_TRACE(_T("WM_CONTEXTMENU, 0x%08X, 0x%08X, 0x%08X, 0x%08X\n"), hwnd, message, wParam, lParam);
 
-			UINT ht = ::SendMessage(hwnd, WM_NCHITTEST, 0, lParam);
+			UINT ht = (UINT)::SendMessage(hwnd, WM_NCHITTEST, 0, lParam);
 
 			if (ht == HTCAPTION && ::GetKeyState(VK_CONTROL) < 0 && ::GetKeyState(VK_LWIN) < 0)
 			{
@@ -740,7 +753,7 @@ IMPLEMENT_HOOK_PROC_NULL(LRESULT, WINAPI, CallWindowProcInternal, (WNDPROC wndPr
 
 IMPLEMENT_HOOK_PROC(HICON, WINAPI, LoadIconA, (HINSTANCE instance, LPCSTR iconName))
 {
-	if ((DWORD)iconName <= 0x0000FFFF || ::IsBadReadPtr(iconName, 1))
+	if ((uintptr_t)iconName <= 0x0000FFFF || ::IsBadReadPtr(iconName, 1))
 		MY_TRACE(_T("LoadIconA(0x%08X, %d)\n"), instance, iconName);
 	else
 		MY_TRACE(_T("LoadIconA(0x%08X, %hs)\n"), instance, iconName);
@@ -750,7 +763,7 @@ IMPLEMENT_HOOK_PROC(HICON, WINAPI, LoadIconA, (HINSTANCE instance, LPCSTR iconNa
 
 IMPLEMENT_HOOK_PROC(HICON, WINAPI, LoadIconW, (HINSTANCE instance, LPCWSTR iconName))
 {
-	if ((DWORD)iconName <= 0x0000FFFF || ::IsBadReadPtr(iconName, 1))
+	if ((uintptr_t)iconName <= 0x0000FFFF || ::IsBadReadPtr(iconName, 1))
 		MY_TRACE(_T("LoadIconW(0x%08X, %d)\n"), instance, iconName);
 	else
 		MY_TRACE(_T("LoadIconW(0x%08X, %ws)\n"), instance, iconName);
@@ -760,7 +773,7 @@ IMPLEMENT_HOOK_PROC(HICON, WINAPI, LoadIconW, (HINSTANCE instance, LPCWSTR iconN
 
 IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name, UINT type, int cx, int cy, UINT flags))
 {
-	if ((DWORD)name <= 0x0000FFFF || ::IsBadReadPtr(name, 1))
+	if ((uintptr_t)name <= 0x0000FFFF || ::IsBadReadPtr(name, 1))
 	{
 		MY_TRACE(_T("LoadImageA(0x%08X, %d)\n"), instance, name);
 	}
@@ -799,7 +812,7 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name
 
 IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageW, (HINSTANCE instance, LPCWSTR name, UINT type, int cx, int cy, UINT flags))
 {
-	if ((DWORD)name <= 0x0000FFFF || ::IsBadReadPtr(name, 1))
+	if ((uintptr_t)name <= 0x0000FFFF || ::IsBadReadPtr(name, 1))
 		MY_TRACE(_T("LoadImageW(0x%08X, %d)\n"), instance, name);
 	else
 		MY_TRACE(_T("LoadImageW(0x%08X, %ws)\n"), instance, name);
