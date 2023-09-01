@@ -18,6 +18,46 @@ void ___outputLog(LPCTSTR text, LPCTSTR output)
 AviUtlInternal g_auin;
 HINSTANCE g_instance = 0;
 
+inline static struct {
+	ACTCTX ac = { sizeof(ac) };
+	HANDLE hac = INVALID_HANDLE_VALUE;
+	ULONG_PTR cookie = 0;
+
+	//
+	// アクティブ化コンテキストを作成します。
+	//
+	BOOL init() {
+		// 初期化済みかどうかフラグをチェックします。
+		static BOOL isInited = FALSE;
+		if (isInited) return FALSE;
+		isInited = TRUE;
+
+		// ファイル名を取得します。
+		TCHAR fileName[MAX_PATH] = {};
+		::GetModuleFileName(g_instance, fileName, std::size(fileName));
+		::PathRemoveFileSpec(fileName);
+		::PathAppend(fileName, _T("cc6.manifest"));
+		MY_TRACE_TSTR(fileName);
+
+		// アクティブ化コンテキストを作成します。
+		ac.lpSource = fileName;
+		hac = ::CreateActCtx(&ac);
+		BOOL result = ::ActivateActCtx(hac, &cookie);
+		MY_TRACE_INT(result);
+
+		return result;
+	}
+
+	//
+	// アクティブ化コンテキストを削除します。
+	//
+	BOOL exit() {
+		if (cookie) ::DeactivateActCtx(0, cookie), cookie = 0;
+		if (hac != INVALID_HANDLE_VALUE) ::ReleaseActCtx(hac), hac = INVALID_HANDLE_VALUE;
+		return TRUE;
+	}
+} actctx;
+
 //---------------------------------------------------------------------
 #if 1
 __declspec(naked) LRESULT CALLBACK getCallWindowProcInternal(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -784,6 +824,11 @@ IMPLEMENT_HOOK_PROC(HANDLE, WINAPI, LoadImageA, (HINSTANCE instance, LPCSTR name
 		if (instance == ::GetModuleHandle(0) && ::StrStrIA(name, "ICON_"))
 		{
 			MY_TRACE(_T("AviUtl のアイコンを書き換えます %hs, 0x%08X\n"), name, flags);
+
+			// マニフェストを切り替えます。
+			// なるべく早いタイミングで実行しないといけないので、
+			// ここで処理しています。
+			actctx.init();
 
 			char name2[MAX_PATH] = {};
 			::StringCbCopyA(name2, sizeof(name2), "AVIUTL_");

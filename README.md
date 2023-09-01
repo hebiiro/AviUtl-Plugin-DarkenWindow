@@ -8,13 +8,9 @@ AviUtl の見た目をダークモードにします。
 ## 導入方法
 
 1. 以下のファイルとフォルダを AviUtl の Plugins フォルダに配置します。
+	* cc6.manifest
 	* DarkenWindow.aul
 	* DarkenWindow (フォルダ)
-2. aviutl_dark.exe を作成します。手順は [Wiki](https://github.com/hebiiro/AviUtl-Plugin-DarkenWindow/wiki/aviutl_dark.exe-%E3%81%AE%E4%BD%9C%E6%88%90%E6%96%B9%E6%B3%95) にまとめてあります。
-
-## 使用方法
-
-1. aviutl_dark.exe を起動します。
 
 ### スキンセレクタ
 
@@ -23,6 +19,7 @@ AviUtl の見た目をダークモードにします。
 * 「影を付ける」のチェックを外すとテキストの影が強制的にオフになります。
 * 「丸くする」のチェックを外すと丸角矩形の描画が強制的にオフになります。
 * 「ボタンにスタティックエッジを付ける」のチェックを外すと設定ダイアログのボタンの周りにエッジが付かなくなります。
+* 「複数行の色分け」にチェックを入れるとレイヤーのカラー指定が複数行に適用されるようになります。
 
 ### レイヤーの色分け
 
@@ -34,6 +31,7 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 
 ## 更新履歴
 
+* 8.0.0 - 2023/09/01 aviutl_dark.exe を作らなくてもいいように変更
 * 7.3.0 - 2023/03/08 複数行をまとめて色分けできる機能を追加
 * 7.2.0 - 2023/02/22 レイヤーの色分けができる機能を追加
 * 7.1.1 - 2022/09/28 Win11 22H2 でメニューが正常に描画されない問題を修正
@@ -101,7 +99,7 @@ DarkenWindow フォルダ内の xml ファイルをテキストエディタで�
 * Common Library https://github.com/hebiiro/Common-Library
 
 ## 作成者情報
- 
+
 * 作成者 - 蛇色 (へびいろ)
 * GitHub - https://github.com/hebiiro
 * Twitter - https://twitter.com/io_hebiiro
