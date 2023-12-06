@@ -982,6 +982,9 @@ BOOL Skin::reloadSettings(BOOL force)
 	if (!force)
 		reloadExEditSettings();
 
+	// スキンが更新されたことを判別できるように、IDも更新(インクリメント)します。
+	m_currentId++;
+
 	return TRUE;
 }
 
@@ -2873,6 +2876,28 @@ HICON Skin::editIcon(HICON originalIcon, LPCWSTR iconName)
 	::DeleteObject(ii.hbmMask);
 
 	return icon;
+}
+
+//--------------------------------------------------------------------
+
+//
+// エクスポート関数です。
+// 現在のスキンのIDを返します。
+//
+UINT WINAPI dark_getCurrentId()
+{
+	return g_skin.getCurrentId();
+}
+
+//
+// エクスポート関数です。
+// 指定された名前のカラーセットを返します。
+//
+ColorSet* WINAPI dark_getNamedColor(LPCWSTR name)
+{
+	auto it = g_colorSetMap.find(name);
+	if (it == g_colorSetMap.end()) return 0;
+	return &it->second;
 }
 
 //--------------------------------------------------------------------

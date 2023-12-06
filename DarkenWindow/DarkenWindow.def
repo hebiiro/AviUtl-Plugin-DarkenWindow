@@ -1,2 +1,4 @@
 EXPORTS
 	DarkenWindow_init
+	dark_getCurrentId
+	dark_getNamedColor

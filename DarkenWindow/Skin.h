@@ -612,6 +612,7 @@ private:
 	int m_staticEdgeMode = STATIC_EDGE_MODE_OFF;
 	BOOL m_useLayerColor = TRUE;
 	BOOL m_useLayerColorEx = FALSE;
+	UINT m_currentId = 0;
 
 public:
 
@@ -741,6 +742,8 @@ public:
 
 	int getUseLayerColorEx() const { return m_useLayerColorEx; }
 	void setUseLayerColorEx(int useLayerColorEx) { m_useLayerColorEx = useLayerColorEx; }
+
+	UINT getCurrentId() const { return m_currentId; }
 };
 
 //--------------------------------------------------------------------

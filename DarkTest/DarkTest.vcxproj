@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{772bc0b9-7ca2-4ef5-9439-91d4f823156e}</ProjectGuid>
-    <RootNamespace>DarkenWindow</RootNamespace>
+    <ProjectGuid>{7A39DC9E-CE79-4685-B4A6-3974E49DA613}</ProjectGuid>
+    <RootNamespace>DarkTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -105,7 +105,7 @@
       <AdditionalLibraryDirectories>../../</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\MySpace\AviUtl\aviutl110_test\Plugins\$(TargetName).aul"</Command>
+      <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\MySpace\AviUtl\AviUtl110_test\Plugins\$(TargetName).auf"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,13 +125,13 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>$(TargetName).def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>../../</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\MySpace\AviUtl\aviutl110_test\Plugins\$(TargetName).aul"</Command>
+      <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\MySpace\AviUtl\AviUtl110_test\Plugins\$(TargetName).auf"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -153,7 +153,7 @@
       <AdditionalLibraryDirectories>../../</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\AviUtl110_test\Plugins\$(TargetName).aul"</Command>
+      <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\AviUtl110_test\Plugins\$(TargetName).auf"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -173,79 +173,30 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <ModuleDefinitionFile>$(TargetName).def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>../../</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\AviUtl110_test\Plugins\$(TargetName).aul"</Command>
+      <Command>copy /B /Y "$(TargetDir)$(TargetFileName)" "C:\AviUtl110_test\Plugins\$(TargetName).auf"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Common\AviUtlInternal.h" />
-    <ClInclude Include="..\..\Common\Dialog.h" />
-    <ClInclude Include="..\..\Common\FileUpdateChecker.h" />
-    <ClInclude Include="..\..\Common\Hook.h" />
-    <ClInclude Include="..\..\Common\MSXML.h" />
-    <ClInclude Include="..\..\Common\Profile.h" />
-    <ClInclude Include="..\..\Common\Tracer.h" />
-    <ClInclude Include="..\..\Common\WinUtility.h" />
-    <ClInclude Include="ClassicHook.h" />
-    <ClInclude Include="MyDraw.h" />
+    <ClInclude Include="dark.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="DarkenWindow.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="Skin.h" />
-    <ClInclude Include="ThemeHook.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AviUtl.cpp" />
-    <ClCompile Include="AviUtlButton.cpp" />
-    <ClCompile Include="Button.cpp" />
-    <ClCompile Include="ClassicHook.cpp" />
-    <ClCompile Include="ComboBox.cpp" />
-    <ClCompile Include="CommandModule.cpp" />
-    <ClCompile Include="CommonItemsDialog.cpp" />
-    <ClCompile Include="DarkenWindow_ExEdit.cpp" />
-    <ClCompile Include="Dialog.cpp" />
-    <ClCompile Include="Edit.cpp" />
-    <ClCompile Include="Exedit.cpp" />
-    <ClCompile Include="DarkenWindow.cpp" />
-    <ClCompile Include="Header.cpp" />
-    <ClCompile Include="ListBox.cpp" />
-    <ClCompile Include="ListView.cpp" />
-    <ClCompile Include="Menu.cpp" />
-    <ClCompile Include="MyDraw.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="PreviewPane.cpp" />
-    <ClCompile Include="ScrollBar.cpp" />
-    <ClCompile Include="Skin.cpp" />
-    <ClCompile Include="Spin.cpp" />
-    <ClCompile Include="Static.cpp" />
-    <ClCompile Include="Tab.cpp" />
-    <ClCompile Include="ThemeHook.cpp" />
-    <ClCompile Include="ToolBar.cpp" />
-    <ClCompile Include="ToolTip.cpp" />
-    <ClCompile Include="TrackBar.cpp" />
-    <ClCompile Include="TreeView.cpp" />
-    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DarkenWindow.def" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="DarkenWindow.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DarkTest\DarkTest.vcxproj">
-      <Project>{7a39dc9e-ce79-4685-b4a6-3974e49da613}</Project>
-    </ProjectReference>
+    <None Include="DarkTest.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
